@@ -1,0 +1,5 @@
+{
+  "expectedErrors": [
+    "Type 'Stuff' does not contain a member named 'member'"
+  ]
+}

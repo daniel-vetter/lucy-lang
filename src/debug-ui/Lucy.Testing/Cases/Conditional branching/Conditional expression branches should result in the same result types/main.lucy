@@ -1,0 +1,1 @@
+var t: String = true ? 1 : ""

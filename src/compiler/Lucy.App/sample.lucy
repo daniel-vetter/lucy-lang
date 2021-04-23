@@ -1,0 +1,10 @@
+﻿extern cdecl "msvcrt.dll" fun printf(): void
+extern stdcall "kernel32.dll" "ExitProcess" fun exitProcess(exitCode: uint): void
+
+fun main(): void 
+{
+	printf("Hello World")
+	printf("Hello %s", "Daniel")
+	printf("Das ist eine %d", 4)
+	exitProcess(0)
+}

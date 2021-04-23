@@ -1,0 +1,11 @@
+extern fun write(value: Any): Void
+
+data TestRecord {
+    member1: String
+}
+
+var record: TestRecord = {
+    member1: "Hello World"
+}
+
+write(record.member1)

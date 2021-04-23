@@ -1,0 +1,25 @@
+extern fun write(value: Any): Void
+
+data Record<T> {
+    value1: String,
+    value2: T
+}
+
+fun showValues<T>(record: Record<T>): Void {
+    write("Value 1: \"")
+    write(record.value1)
+    write("\"")
+
+    write(", ")
+
+    write("Value 2: \"")
+    write(record.value2)
+    write("\"")
+}
+
+var testRecord: Record<Number> = {
+    value1: "Value 1",
+    value2: 2
+}
+
+showValues(testRecord)

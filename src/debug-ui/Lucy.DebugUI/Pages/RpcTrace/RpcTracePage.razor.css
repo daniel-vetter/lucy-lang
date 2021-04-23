@@ -1,0 +1,25 @@
+﻿.container {
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+}
+
+.header {
+    padding: 0.2rem;
+    background: rgba(0, 0, 0, 0.05);
+}
+
+.main {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+}
+
+.event-list {
+    overflow-y: auto;
+}
+
+.status {
+    padding: 0.2rem;
+    background: rgba(0, 0, 0, 0.05);
+}

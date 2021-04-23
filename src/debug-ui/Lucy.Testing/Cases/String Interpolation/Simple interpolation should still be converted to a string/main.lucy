@@ -1,0 +1,4 @@
+extern fun write(value: Any): Void
+
+var num = 1
+var str: String = "$num"

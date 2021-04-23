@@ -1,0 +1,4 @@
+fun test(n: Number): Void {
+}
+
+test("")

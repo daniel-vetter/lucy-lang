@@ -1,0 +1,10 @@
+extern fun write(value: Any): Void
+
+var sum = 0
+foreach n in 0..999 {
+    if (n % 3 == 0 or n % 5 == 0) {
+        sum = sum + n
+    }
+}
+
+write(sum)

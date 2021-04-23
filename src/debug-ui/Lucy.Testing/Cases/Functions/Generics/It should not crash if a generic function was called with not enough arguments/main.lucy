@@ -1,0 +1,5 @@
+fun test<T>(p1: T, p2: String): Void {
+
+}
+
+test("")

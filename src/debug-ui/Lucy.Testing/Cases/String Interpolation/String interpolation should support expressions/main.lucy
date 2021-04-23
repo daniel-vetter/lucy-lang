@@ -1,0 +1,4 @@
+extern fun write(value: Any): Void
+
+var n = 1
+write("1 + 1 = $(n + 1)")

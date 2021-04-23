@@ -1,0 +1,5 @@
+{
+  "expectedErrors": [
+    "A type named 'T' is already declared"
+  ]
+}

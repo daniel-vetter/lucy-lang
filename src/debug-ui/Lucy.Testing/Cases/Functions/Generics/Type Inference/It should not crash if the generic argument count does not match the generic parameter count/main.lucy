@@ -1,0 +1,13 @@
+fun test<T>(input: Record<T1, T2>): Record<T1, T2> {
+    return input
+}
+
+data Record<T> {
+    value: T
+}
+
+var record: Record<Number> = {
+    value: 0
+}
+
+var result: Record<Number> = test(record)

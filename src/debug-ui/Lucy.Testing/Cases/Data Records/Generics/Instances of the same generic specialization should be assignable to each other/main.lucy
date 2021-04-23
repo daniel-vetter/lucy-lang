@@ -1,0 +1,4 @@
+data List<T> {}
+
+var l1: List<Number> = {}
+var l2: List<Number> = l1

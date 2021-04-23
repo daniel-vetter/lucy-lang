@@ -1,0 +1,11 @@
+extern fun write(value: Any): Void
+
+print(0, 1)
+
+fun print(first: Number, second: Number): Void {
+    write("$first\n")
+
+    if first < 100 {
+        print(second, first + second)
+    }
+}

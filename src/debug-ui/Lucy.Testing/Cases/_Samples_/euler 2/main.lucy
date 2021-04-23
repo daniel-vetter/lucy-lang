@@ -1,0 +1,19 @@
+extern fun write(value: Any): Void
+
+var first = 0
+var second = 1
+var evenSum = 0
+var sum = 0
+
+while sum < 4000000 {
+    
+    if sum % 2 == 0 {
+        evenSum = evenSum + sum
+    }
+
+    sum = first + second
+    first = second
+    second = sum
+}
+
+write(evenSum)

@@ -1,0 +1,4 @@
+data TestRecord {
+    member1: String,
+    member2: String
+}

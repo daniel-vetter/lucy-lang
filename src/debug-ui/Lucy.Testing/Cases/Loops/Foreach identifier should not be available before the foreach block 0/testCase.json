@@ -1,0 +1,5 @@
+{
+  "expectedErrors": [
+    "A variable named 'index' was not declared"
+  ]
+}

@@ -1,0 +1,15 @@
+data Record<T> {
+    value: T
+}
+
+fun test<T>(input: Record<Record<T>>): Void {
+
+}
+
+var t: Record<Record<String>> = {
+    value: {
+        value: ""
+    }
+}
+
+test<String>(t)

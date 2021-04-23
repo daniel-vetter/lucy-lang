@@ -1,0 +1,5 @@
+{
+  "expectedErrors": [
+    "Argument 1: expected type 'String' but got type 'Number'"
+  ]
+}

@@ -1,0 +1,4 @@
+data List<T> {
+}
+
+var t: List<String, Number> = {}

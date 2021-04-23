@@ -1,0 +1,27 @@
+{
+    "scopeName": "source.lucy",
+    "patterns": [
+        {
+            "name": "keyword.other",
+            "match": "\\b(fun|extern|and|or,true|false|var|null|in)\\b"
+        },
+        {
+            "name": "keyword.control",
+            "match": "\\b(if|else|while|break|continue|foreach|return)\\b"
+        },
+        {
+            "name": "string.quoted.double",
+            "begin": "\"",
+            "end": "\""
+        },
+        {
+            "name": "comment.line.double-slash",
+            "begin": "//",
+            "end": "$"
+        },
+        {
+            "name": "constant.numeric.decimal",
+            "match": "\\d(\\.?\\d*)"
+        }
+    ]
+}

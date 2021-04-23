@@ -1,0 +1,5 @@
+{
+  "expectedErrors": [
+    "A function named 'test' was not declared"
+  ]
+}

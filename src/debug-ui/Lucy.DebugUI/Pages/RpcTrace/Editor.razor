@@ -1,0 +1,121 @@
+﻿@using Microsoft.JSInterop
+@using System.Collections.Immutable
+
+@inject IJSRuntime JSRuntime
+
+<div @ref=_element style="width: 100%; height: 100%"></div>
+
+@code {
+    ElementReference _element;
+    IJSObjectReference? _module;
+    bool _isInitialized = false;
+
+    private List<Job> _jobsToDo = new List<Job>();
+
+    [Parameter] public string Content { get; set; } = "";
+    [Parameter] public EventCallback OnCtrlEnterPressed { get; set; }
+    [Parameter] public EventCallback OnEscapePressed { get; set; }
+
+    public Editor()
+    {
+    }
+
+    [JSInvokable("OnCtrlEnterPressed")]
+    public async Task OnCtrlEnterPressedHandler()
+    {
+        await InvokeAsync(async () =>
+        {
+            await OnCtrlEnterPressed.InvokeAsync();
+            StateHasChanged();
+        });
+    }
+
+    [JSInvokable("OnEscapePressed")]
+    public async Task OnEscapePressedHandler()
+    {
+        await InvokeAsync(async () =>
+        {
+            await OnEscapePressed.InvokeAsync();
+            StateHasChanged();
+        });
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _module = await JSRuntime.InvokeAsync<IJSObjectReference>("import", "./js/editor.js").AsTask();
+            await _module.InvokeVoidAsync("createEditor", DotNetObjectReference.Create(this), _element, Content);
+            _isInitialized = true;
+
+            foreach (var job in _jobsToDo)
+                await QueueOrDo(job);
+            _jobsToDo.Clear();
+        }
+        await base.OnAfterRenderAsync(firstRender);
+    }
+
+    public async Task SetText(string text)
+    {
+        await QueueOrDo(new SetTextJob(text));
+    }
+
+    public async Task<string> GetText()
+    {
+        if (_isInitialized)
+        {
+            if (_module == null)
+                throw new Exception(nameof(_isInitialized) + " is true but " + nameof(_module) + " is not set");
+            return await _module!.InvokeAsync<string>("getText", _element);
+        }
+        else
+        {
+            return _jobsToDo.OfType<SetTextJob>().LastOrDefault()?.Text ?? "";
+        }
+    }
+
+    public async Task SetCursorPosition(int line, int column)
+    {
+        await QueueOrDo(new SetCursorPositionJob(line, column));
+    }
+
+    public async Task Focus()
+    {
+        await QueueOrDo(new FocusJob());
+
+    }
+
+    private async Task QueueOrDo(Job job)
+    {
+        if (!_isInitialized)
+        {
+            _jobsToDo.Add(job);
+            return;
+        }
+
+        if (_module == null)
+            throw new Exception(nameof(_isInitialized) + " is true but " + nameof(_module) + " is not set");
+
+        if (job is SetTextJob stj)
+        {
+            await _module.InvokeVoidAsync("setText", _element, stj.Text);
+        }
+
+        if (job is SetCursorPositionJob scpj)
+        {
+            await _module.InvokeVoidAsync("setCursorPosition", _element, scpj.Line, scpj.Column);
+        }
+
+        if (job is FocusJob)
+        {
+            await _module.InvokeVoidAsync("focusEditor", _element);
+        }
+    }
+
+    public record MonacoMarker(int starLineNumber, int startColumn, string message);
+
+    private abstract record Job;
+    private record SetTextJob(string Text) : Job;
+    private record FocusJob() : Job;
+    private record SetCursorPositionJob(int Line, int Column) : Job;
+}

@@ -1,0 +1,5 @@
+fun test<T>(p: T): T {
+    return p
+}
+
+var t: String = test<String>("")

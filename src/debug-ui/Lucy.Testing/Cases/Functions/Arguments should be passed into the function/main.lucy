@@ -1,0 +1,7 @@
+extern fun write(value: Any): Void
+
+fun testFunction(p1: String): Void {
+    write(p1)
+}
+
+testFunction("Hello World")

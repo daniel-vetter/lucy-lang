@@ -1,0 +1,9 @@
+extern fun write(value: Any): Void
+
+fun rec(i: Number): Void {
+    write(i)
+    if i < 10 {
+        rec(i + 1)
+    }
+}
+rec(0)

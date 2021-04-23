@@ -1,0 +1,20 @@
+{
+  "expectedErrors": [
+    "Operator '+' can not be applied to operands of type 'String' and 'Number'",
+    "Operator '-' can not be applied to operands of type 'String' and 'Number'",
+    "Operator '*' can not be applied to operands of type 'String' and 'Number'",
+    "Operator '/' can not be applied to operands of type 'String' and 'Number'",
+    "Operator '%' can not be applied to operands of type 'String' and 'Number'",
+    "Operator '+' can not be applied to operands of type 'String' and 'String'",
+    "Operator '-' can not be applied to operands of type 'String' and 'String'",
+    "Operator '*' can not be applied to operands of type 'String' and 'String'",
+    "Operator '/' can not be applied to operands of type 'String' and 'String'",
+    "Operator '%' can not be applied to operands of type 'String' and 'String'",
+    "Operator '+' can not be applied to operands of type 'Number' and 'String'",
+    "Operator '-' can not be applied to operands of type 'Number' and 'String'",
+    "Operator '*' can not be applied to operands of type 'Number' and 'String'",
+    "Operator '/' can not be applied to operands of type 'Number' and 'String'",
+    "Operator '%' can not be applied to operands of type 'Number' and 'String'",
+    "Operator '+' can not be applied to operands of type 'SomeType' and 'Number'"
+  ]
+}

@@ -1,0 +1,7 @@
+data TestRecord {
+    member: String
+}
+
+var t: TestRecord = {
+    member: 0
+}

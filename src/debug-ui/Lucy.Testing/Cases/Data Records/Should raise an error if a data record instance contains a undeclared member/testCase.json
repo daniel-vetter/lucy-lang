@@ -1,0 +1,5 @@
+{
+  "expectedErrors": [
+    "Member 'unknown_member' was not declared on type 'Stuff'"
+  ]
+}

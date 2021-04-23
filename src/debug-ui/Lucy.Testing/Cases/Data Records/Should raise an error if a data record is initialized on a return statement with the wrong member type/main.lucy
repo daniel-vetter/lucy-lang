@@ -1,0 +1,9 @@
+data TestRecord {
+    member: String
+}
+
+fun Test(): TestRecord {
+    return {
+        member: 0
+    }
+}

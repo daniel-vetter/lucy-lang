@@ -1,0 +1,67 @@
+﻿@page "/syntaxtree"
+@page "/"
+@using System.Collections.Immutable
+@using System.IO;
+@using Lucy.DebugUI.Services
+
+<div style="display: flex" class="fullSize">
+    <div style="flex: 1">
+        <TreeView RootNodes="_fileNodes"></TreeView>
+    </div>
+    <div style="flex: 2; background: #1E1E1E">
+        <div>@_currentFileName</div>
+        <SyntaxTreeVisualizer RootNode="_rootNode"></SyntaxTreeVisualizer>
+    </div>
+</div>
+
+
+@code {
+
+    ImmutableArray<ITreeViewNode> _fileNodes = ImmutableArray<ITreeViewNode>.Empty;
+    SyntaxNode? _rootNode;
+    private string _currentFileName = "";
+
+    protected override Task OnInitializedAsync()
+    {
+        var rootDir = "C:\\temp\\dump";
+        var files = Directory.GetFiles(rootDir, "*.json", System.IO.SearchOption.AllDirectories);
+        var nodes = new List<ITreeViewNode>();
+        foreach (var file in files)
+        {
+            var workspacePath = file.Substring(rootDir.Length + 1);
+            CreateNodesFor(workspacePath);
+        }
+        _fileNodes = nodes.ToImmutableArray();
+
+        void CreateNodesFor(string path)
+        {
+            TreeViewNode? currentParent = null;
+            var parts = path.Split("\\");
+            for (int i = 0; i < parts.Length; i++)
+            {
+                var node = new TreeViewNode(parts[i]);
+                if (currentParent == null)
+                    nodes.Add(node);
+                else
+                    currentParent.ChildNodes.Add(node);
+
+                if (i == parts.Length - 1)
+                {
+                    node.Elements.First().Text = Path.ChangeExtension(node.Elements.First().Text, ".lucy");
+                    node.Elements.First().OnClick = async () => { await ShowTree(Path.Combine(rootDir, path)); };
+                }
+
+                currentParent = node;
+            }
+        }
+
+        return base.OnInitializedAsync();
+    }
+
+    public async Task ShowTree(string jsonFilePath)
+    {
+        _currentFileName = Path.ChangeExtension(jsonFilePath, ".lucy");
+        _rootNode = await SyntaxTreeLoader.Load(jsonFilePath);
+        StateHasChanged();
+    }
+}

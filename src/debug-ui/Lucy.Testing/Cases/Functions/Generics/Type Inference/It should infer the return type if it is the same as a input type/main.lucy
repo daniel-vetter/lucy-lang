@@ -1,0 +1,6 @@
+fun test<T>(p: T): T {
+    return p
+}
+
+var s: String = test("")
+var n: Number = test(0)

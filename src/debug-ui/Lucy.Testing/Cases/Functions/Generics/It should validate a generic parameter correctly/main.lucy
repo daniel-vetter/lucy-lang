@@ -1,0 +1,5 @@
+fun test<T>(p: T): T {
+    return p
+}
+
+test<String>(0)

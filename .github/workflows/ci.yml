@@ -1,0 +1,16 @@
+name: CI
+
+on: [push]
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest 
+    steps:
+    - uses: actions/checkout@v1
+    - name: Build
+      env:
+        DOCKER_IMAGE: dvetter/language-experiment
+        DOCKERHUB_PASSWORD: ${{ secrets.dockerhub_password }}
+        DOCKERHUB_USERNAME: ${{ secrets.dockerhub_username }}
+      run: bash ./build.sh

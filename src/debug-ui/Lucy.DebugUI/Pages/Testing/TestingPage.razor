@@ -1,0 +1,126 @@
+﻿@page "/testing"
+@using Lucy.Testing
+@using TreeBuilding;
+@using System.Collections.Immutable;
+@implements IDisposable
+
+<div style="display: flex; flex-direction: column" class="fullSize">
+    <div>
+        <button class="run" @onclick="OnStart">Run</button> @_currentStatus<br />
+    </div>
+
+    <div style="display: flex" class="fullSize">
+        <div style="flex: 1; overflow: auto">
+            <TreeView @ref="_treeView" RootNodes="_builder.RootNodes"></TreeView>
+        </div>
+        <div style="flex: 1; white-space: pre; overflow: auto; padding: 1rem">
+            @if (_currentTestCase != null)
+            {
+                
+                @_currentTestCase.Name <span class="clickable" @onclick="OnOpenFolderClicked">[Open folder]</span>
+                <br />
+                <br />
+                @foreach(var result in _currentResults)
+                {
+                    @result.Name
+                    <hr />
+                    if (result.Error == null)
+                    {
+                        <span style="color: green">ok</span>
+                    }
+                    else
+                    {
+                        <div style="white-space: pre">@result.Error</div>
+                    }
+                    <br /><br />
+                }
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+
+    private string _currentStatus = "Idle";
+    private TreeBuilder _builder = null!;
+    private string? _error;
+    private TreeView _treeView = null!;
+    private IDisposable _sub = null!;
+    private TestCase? _currentTestCase = null;
+    private ImmutableArray<TestResult> _currentResults = ImmutableArray<TestResult>.Empty;
+
+    public void Dispose()
+    {
+        _sub.Dispose();
+    }
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        _builder = new TreeBuilder((tc, r) => OnTestSelected(tc, r));
+        _sub = TestRunner.OnProgress(OnProgressUpdate);
+    }
+
+    public void OnStart()
+    {
+        TestRunner.Run();
+    }
+
+    private Task OnTestSelected(TestCase testCase, ImmutableArray<TestResult> results)
+    {
+        InvokeAsync(() =>
+        {
+            _currentTestCase = testCase;
+            _currentResults = results;
+            StateHasChanged();
+        });
+
+        return Task.CompletedTask;
+    }
+
+    private void OnOpenFolderClicked()
+    {
+        if (_currentTestCase != null)
+            System.Diagnostics.Process.Start("explorer.exe", _currentTestCase.Directory);
+    }
+
+    private void OnProgressUpdate(TestProgress progress)
+    {
+        InvokeAsync((Action)(() =>
+        {
+            _builder.Process(progress);
+            _treeView?.Update();
+
+
+            if (progress is TestRunStarted)
+            {
+                _currentStatus = "Started";
+            }
+
+            if (progress is CompilingCompiler)
+            {
+                _currentStatus = "Compiling lucy compiler";
+            }
+
+            if (progress is DiscoveringTests)
+            {
+                _currentStatus = "Discovering tests";
+            }
+
+            if (progress is RunningTests r)
+            {
+                _currentStatus = "Running";
+            }
+
+            if (progress is TestRunCompleted c)
+            {
+                _currentStatus = c.Error == null ? "Success" : "Error: " + c.Error;
+            }
+
+            StateHasChanged();
+        }));
+    }
+
+
+}
+

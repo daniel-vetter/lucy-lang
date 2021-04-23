@@ -1,0 +1,5 @@
+fun testFunction(): Void {
+    return
+    "Hello World"
+}
+testFunction()

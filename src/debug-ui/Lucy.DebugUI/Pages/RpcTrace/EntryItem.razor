@@ -1,0 +1,35 @@
+﻿@using Model;
+
+@if (DisplayedEntry is RequestResponseEntry rre)
+{
+
+    <div @onclick="@(() => OnEntryClicked())" class="entry request-response @(rre.Result?.Success == true ? "success" : "") @(rre.Result?.Success == false ? "error" : "") @(Selected ? "selected" : "")" style="display: flex">
+        <span style="flex: 1">@(DisplayedEntry.Direction == Direction.Incomming ? ">>" : "<<") @DisplayedEntry.Method</span>
+        <span>@(rre.Result != null ? (rre.Result.Timestamp - rre.Timestamp).TotalMilliseconds.ToString() + " ms" : "")</span>
+    </div>
+}
+
+@if (DisplayedEntry is NotificationEntry ne)
+{
+    <div @onclick="@(() => OnEntryClicked())" class="entry request-response notification @(Selected ? "selected" : "")" style="display: flex">
+        <span style="flex: 1">@(DisplayedEntry.Direction == Direction.Incomming ? ">>" : "<<") @DisplayedEntry.Method</span>
+    </div>
+}
+
+@code {
+
+    [Parameter]
+    public Entry? DisplayedEntry { get; set; }
+
+    [Parameter]
+    public bool Selected { get; set; }
+
+    [Parameter]
+    public EventCallback<Entry> OnClick { get; set; }
+
+    private async Task OnEntryClicked()
+    {
+        await OnClick.InvokeAsync(DisplayedEntry);
+    }
+
+}

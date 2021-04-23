@@ -1,0 +1,58 @@
+{
+	"name": "lucy-language-extension",
+	"description": "Lucy Language Extension",
+	"author": "Microsoft Corporation",
+	"license": "MIT",
+	"version": "1.0.0",
+	"publisher": "daniel-vetter",
+	"repository": {},
+	"categories": [],
+	"keywords": [
+		"multi-root ready"
+	],
+	"engines": {
+		"vscode": "^1.33.0"
+	},
+	"activationEvents": [
+		"onLanguage:lucy"
+	],
+	"main": "./out/extension",
+	"contributes": {
+		"languages": [
+			{
+				"id": "lucy",
+				"extensions": [
+					".lucy"
+				],
+				"aliases": [
+					"Lucy"
+				],
+				"configuration": "./language-configuration.json"
+			}
+		],
+		"grammars": [
+			{
+			  "language": "lucy",
+			  "scopeName": "source.lucy",
+			  "path": "./lucy.tmLanguage.json"
+			}
+		  ]
+	},
+	"scripts": {
+		"vscode:prepublish": "npm run compile",
+		"compile": "tsc -b",
+		"watch": "tsc -b -w"
+	},
+	"dependencies": {
+		"vscode-languageclient": "^5.2.1"
+	},
+	"devDependencies": {
+		"@types/vscode": "^1.32.0",
+		"@types/mocha": "^5.2.0",
+		"@types/node": "^12.12.0",
+		"@typescript-eslint/eslint-plugin": "^3.0.2",
+		"@typescript-eslint/parser": "^3.0.2",
+		"eslint": "^7.1.0",
+		"typescript": "^4.0.2"
+	}
+}

@@ -1,0 +1,11 @@
+﻿.run {
+    color: white;
+    background-color: green;
+    margin: 1rem;
+    border: 0;
+    padding: 1rem;
+}
+
+    .run:focus {
+        outline: none
+    }

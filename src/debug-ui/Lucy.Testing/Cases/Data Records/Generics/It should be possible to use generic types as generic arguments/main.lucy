@@ -1,0 +1,11 @@
+data List<T> {
+    member: Record<T> 
+}
+
+data Record<T> {
+    value: T
+}
+
+var t: List<Number> = {
+    member: { value: 2 }
+}

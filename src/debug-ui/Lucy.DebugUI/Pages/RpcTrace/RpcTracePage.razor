@@ -1,0 +1,235 @@
+﻿@page "/rpctrace"
+@using Services
+@using System.ComponentModel.DataAnnotations;
+@using Microsoft.Extensions.Logging
+@using Newtonsoft.Json;
+@using Newtonsoft.Json.Linq;
+@using Model;
+@inject NavigationManager NavigationManager
+@inject ILogger<Index> Logger
+@implements IDisposable
+
+<div class="container" style="display: flex; flex-direction: column">
+    <div class="header">
+
+        <EditForm Model="@_configModel" OnValidSubmit="@OnConfigConfirmed">
+            <span>Path to trace file:</span>
+            <InputText id="path" @bind-Value="_configModel.Path" />
+            <button type="submit">Submit</button>
+        </EditForm>
+
+    </div>
+    <div class="main" style="display: flex">
+
+        <div class="event-list" style="flex: 1">
+            @for (var i = _entries.Count - 1; i >= 0; i--)
+            {
+            <div>
+                <EntryItem DisplayedEntry="@_entries[i]" Selected="@(_selected == _entries[i])" OnClick="OnEntryClicked"></EntryItem>
+            </div>
+            }
+        </div>
+        <div style="flex: 1">
+            <Editor @ref="_editorLeft"></Editor>
+        </div>
+        <div style="flex: 1">
+            <Editor @ref="_editorRight"></Editor>
+        </div>
+    </div>
+    <div class="status" style="display: flex">
+        <div style="flex: 0.8">
+            @_status
+            @if (_error != null)
+            {
+                <text> @_error</text>
+            }
+        </div>
+        <div style="flex: 0.2; text-align: right">
+            Events: @_eventCount
+            @if (_malformedEventCount != 0)
+            {
+                <span style="color: red"> Malformed: @_malformedEventCount</span>
+            }
+        </div>
+    </div>
+
+</div>
+
+@code {
+
+    ConfigModel _configModel = new ConfigModel();
+    IDisposable? _subscription;
+    string? _error = null;
+    string? _status = null;
+    Entry? _selected = null;
+
+    int _eventCount = 0;
+    int _malformedEventCount = 0;
+
+    Editor _editorLeft = null!;
+    Editor _editorRight = null!;
+
+    List<Entry> _entries = new List<Entry>();
+
+    protected async override Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        _configModel.Path = await Watcher.ReadLastUsedPath();
+
+        if (!string.IsNullOrWhiteSpace(_configModel.Path))
+            OnConfigConfirmed();
+    }
+
+    public void OnConfigConfirmed()
+    {
+        if (_subscription != null)
+        {
+            _subscription.Dispose();
+            _subscription = null;
+        }
+
+        _subscription = Watcher.Start(_configModel.Path).Subscribe(OnIncommingMessage, OnError);
+    }
+
+    private async Task OnEntryClicked(Entry entry)
+    {
+        await _editorLeft.SetText(entry.Message);
+
+        if (entry is RequestResponseEntry rre && rre.Result != null)
+            await _editorRight.SetText(rre.Result.Message);
+        else
+            await _editorRight.SetText("");
+    }
+
+    private void OnIncommingMessage(Message m)
+    {
+        InvokeAsync(() =>
+        {
+            if (m is FileDoesNotExistMessage)
+            {
+                _status = "Trace file does currently not exists. Waiting for file to appear...";
+            }
+
+            if (m is ResetMessage)
+            {
+                _status = "Reading messages...";
+                _eventCount = 0;
+                _malformedEventCount = 0;
+                _selected = null;
+                _entries.Clear();
+            }
+
+            if (m is TraceEventMessage traceEvent)
+            {
+                _eventCount++;
+                try
+                {
+                    var obj = Newtonsoft.Json.Linq.JObject.Parse(traceEvent.Value);
+                    var type = obj.GetValue("type")?.ToString();
+                    var id = obj.Value<JObject>("message").Value<long?>("id");
+                    var methodName = obj.Value<JObject>("message").Value<string?>("method") ?? "";
+                    var timestamp = DateTimeOffset.FromUnixTimeMilliseconds(obj.Value<long>("timestamp"));
+                    var errorCode = obj.Value<JObject>("message")?.Value<JObject>("error")?.Value<long?>("code");
+                    var errorMessage = obj.Value<JObject>("message")?.Value<JObject>("error")?.Value<string?>("message");
+                    var message = obj.Value<JObject>("message").ToString();
+
+                    if (type == "recv-request")
+                    {
+                        var entry = new RequestResponseEntry();
+                        entry.Direction = Direction.Incomming;
+                        entry.Timestamp = timestamp;
+                        entry.Method = methodName;
+                        entry.Id = id ?? throw new Exception("Missing id");
+                        entry.Message = message;
+                        _entries.Add(entry);
+                    }
+
+                    if (type == "send-request")
+                    {
+                        var entry = new RequestResponseEntry();
+                        entry.Direction = Direction.Outgoing;
+                        entry.Timestamp = timestamp;
+                        entry.Method = methodName;
+                        entry.Id = id ?? throw new Exception("Missing id");
+                        entry.Message = message;
+                        _entries.Add(entry);
+                    }
+
+                    if (type == "send-response")
+                    {
+                        var entry = _entries.OfType<RequestResponseEntry>().FirstOrDefault(x => x.Id == id && x.Direction == Direction.Incomming);
+                        if (entry != null)
+                        {
+                            entry.Result = new RequestResponse
+                            {
+                                Timestamp = timestamp,
+                                Success = !errorCode.HasValue,
+                                Message = message
+                            };
+                        }
+                    }
+
+                    if (type == "recv-response")
+                    {
+                        var entry = _entries.OfType<RequestResponseEntry>().FirstOrDefault(x => x.Id == id && x.Direction == Direction.Outgoing);
+                        if (entry != null)
+                        {
+                            entry.Result = new RequestResponse
+                            {
+                                Timestamp = timestamp,
+                                Success = !errorCode.HasValue,
+                                Message = message
+                            };
+                        }
+                    }
+
+                    if (type == "send-notification")
+                    {
+                        var entry = new NotificationEntry();
+                        entry.Direction = Direction.Outgoing;
+                        entry.Timestamp = timestamp;
+                        entry.Method = methodName;
+                        entry.Message = message;
+                        _entries.Add(entry);
+                    }
+
+                    if (type == "recv-notification")
+                    {
+                        var entry = new NotificationEntry();
+                        entry.Direction = Direction.Incomming;
+                        entry.Timestamp = timestamp;
+                        entry.Method = methodName;
+                        entry.Message = message;
+                        _entries.Add(entry);
+                    }
+                }
+                catch
+                {
+                    _malformedEventCount++;
+                    return;
+                }
+            }
+
+            StateHasChanged();
+        });
+    }
+
+    private void OnError(Exception e)
+    {
+        _error = e.Message;
+        InvokeAsync(() => { StateHasChanged(); });
+    }
+
+    public class ConfigModel
+    {
+        [Required]
+        public string Path { get; set; }
+    }
+
+    public void Dispose()
+    {
+        _subscription?.Dispose();
+    }
+
+    
+}

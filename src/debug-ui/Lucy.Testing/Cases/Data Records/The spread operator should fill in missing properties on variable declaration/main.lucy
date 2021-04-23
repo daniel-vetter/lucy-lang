@@ -1,0 +1,11 @@
+data User {
+    firstName: String,
+    lastName: String
+}
+
+var me: User = {
+    firstName: "firstName",
+    lastName: "lastName"
+}
+
+var you: User = { ...me, firstName: "otherFirstName"}

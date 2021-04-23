@@ -1,0 +1,9 @@
+data Record<T> {
+    prop: T
+}
+
+fun test<T>(p: Record<T>): T {
+    return p.prop
+}
+
+test("")

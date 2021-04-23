@@ -1,0 +1,5 @@
+{
+  "expectedErrors": [
+    "A function named 't' is already declared"
+  ]
+}

@@ -1,0 +1,4 @@
+data Stuff {
+    member: String,
+    member: String
+}

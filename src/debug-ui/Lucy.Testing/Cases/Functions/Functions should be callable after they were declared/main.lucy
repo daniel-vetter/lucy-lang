@@ -1,0 +1,7 @@
+extern fun write(value: Any): Void
+
+fun test(): Void {
+    write("Test")
+}
+
+test()

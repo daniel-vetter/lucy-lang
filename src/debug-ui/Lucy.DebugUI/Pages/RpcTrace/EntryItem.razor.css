@@ -1,0 +1,27 @@
+﻿.entry {
+    background: rgba(0, 0, 0, 0.02);
+    border: 1px solid rgba(0, 0, 0, .2);
+    padding: 0.2rem;
+    margin: 0.2rem;
+    cursor: pointer;
+}
+
+    .entry:hover {
+        border: 1px solid white;
+    }
+
+    .entry.selected {
+        border: 1px solid white;
+    }
+
+.success {
+    background: rgba(128, 255, 128, 0.2);
+}
+
+.error {
+    background: rgba(255, 0, 0, 0.2);
+}
+
+.notification {
+    background: rgba(128, 128, 255, 0.2);
+}

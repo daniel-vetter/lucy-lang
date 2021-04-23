@@ -1,0 +1,3 @@
+extern fun write(value: Any): Void
+
+write(2 >= 1)

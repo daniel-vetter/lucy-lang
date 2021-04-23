@@ -1,0 +1,5 @@
+{
+  "expectedErrors": [
+    "A type named 'TestRecord' is already declared"
+  ]
+}

@@ -1,0 +1,5 @@
+fun outer(): Void {
+    fun inner(): String {
+        return 1
+    }
+}

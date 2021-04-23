@@ -1,0 +1,21 @@
+{
+	"version": "0.2.0",
+	// List of configurations. Add new configurations or edit existing ones.
+	"configurations": [
+		{
+			"type": "extensionHost",
+			"request": "launch",
+			"name": "Launch Client",
+			"runtimeExecutable": "${execPath}",
+			"args": ["--extensionDevelopmentPath=${workspaceRoot}" ],
+			"stopOnEntry": false,
+			"sourceMaps": true,
+			"outFiles": ["${workspaceRoot}/out/**/*.js"],
+			"preLaunchTask": "npm: watch",
+			"env": {
+				"LUCY_LANGUAGE_SERVER_RPC_TRACE_FILE": "./rpc-trace.log",
+				"LUCY_LANGUAGE_SERVER_EXPORT": "C:\\temp\\dump"
+			}
+		}
+	]
+}

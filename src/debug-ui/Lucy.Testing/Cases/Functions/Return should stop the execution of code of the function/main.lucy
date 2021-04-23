@@ -1,0 +1,8 @@
+extern fun write(value: Any): Void
+
+fun testFunction(): String {
+    return "Hello World"
+    write("thisSouldNotBeExecuted")
+}
+
+write(testFunction())

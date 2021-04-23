@@ -1,0 +1,7 @@
+fun test(p: Record<String>): String {
+    return p.stuff
+}
+
+data Record<T> {
+    stuff: T
+}

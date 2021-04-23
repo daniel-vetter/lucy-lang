@@ -1,0 +1,5 @@
+{
+  "expectedErrors": [
+    "Function requires 1 arguments but was called with 0"
+  ]
+}

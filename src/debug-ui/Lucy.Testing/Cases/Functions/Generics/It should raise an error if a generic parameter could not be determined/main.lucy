@@ -1,0 +1,5 @@
+fun test<T>(v: Number): Number {
+    return v
+}
+
+var t = test(2)

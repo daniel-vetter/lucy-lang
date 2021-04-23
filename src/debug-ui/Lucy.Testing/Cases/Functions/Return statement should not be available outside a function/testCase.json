@@ -1,0 +1,5 @@
+{
+  "expectedErrors": [
+    "Return statement can not be used outside a function"
+  ]
+}

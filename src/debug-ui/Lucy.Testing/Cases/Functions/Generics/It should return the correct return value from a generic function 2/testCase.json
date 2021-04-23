@@ -1,0 +1,5 @@
+{
+  "expectedErrors": [
+    "Can not initialize a variable of type 'Number' with a value of type 'String'"
+  ]
+}

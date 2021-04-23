@@ -1,0 +1,7 @@
+fun test(): String {
+    if true {
+        return ""
+    } else {
+        return ""
+    }
+}

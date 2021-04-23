@@ -1,0 +1,7 @@
+data List<T> {
+    member: T
+}
+
+var t: List<String> = {
+    member: ""
+}

@@ -1,0 +1,75 @@
+extern fun write(value: Any): Void
+extern fun readLine(): String
+extern fun time(): Number
+extern fun floor(value: Number): Number
+
+
+data Board {
+    box1: Number, box2: Number, box3: Number,
+    box4: Number, box5: Number, box6: Number,
+    box7: Number, box8: Number, box9: Number
+}
+
+fun checkForWin(board: Board): Number {
+    if board.box1 == board.box2 and board.box2 == board.box3 { return board.box1 }
+    if board.box4 == board.box5 and board.box5 == board.box6 { return board.box4 }
+    if board.box7 == board.box8 and board.box8 == board.box9 { return board.box7 }
+
+    if board.box1 == board.box4 and board.box4 == board.box7 { return board.box1 }
+    if board.box2 == board.box5 and board.box5 == board.box8 { return board.box2 }
+    if board.box3 == board.box6 and board.box6 == board.box9 { return board.box3 }
+
+    if board.box1 == board.box5 and board.box5 == board.box9 { return board.box1 }
+    if board.box3 == board.box5 and board.box5 == board.box7 { return board.box3 }
+
+    return -1
+}
+
+fun makeMove(board: Board, position: Number, player: Number): Board {
+    if position == 1 { return { ...board, box1: position } }
+    if position == 2 { return { ...board, box2: position } }
+    if position == 3 { return { ...board, box3: position } }
+    if position == 4 { return { ...board, box4: position } }
+    if position == 5 { return { ...board, box5: position } }
+    if position == 6 { return { ...board, box6: position } }
+    if position == 7 { return { ...board, box7: position } }
+    if position == 8 { return { ...board, box8: position } }
+    if position == 9 { return { ...board, box9: position } }
+
+    return board
+}
+
+fun showBoard(board: Board): Void {
+
+    fun g(player: Number, line: Number): String {
+        if player == 0 { return "             " }
+
+        if player == 1 and line == 0 { return "  X       X  " }
+        if player == 1 and line == 1 { return "    X   X    " }
+        if player == 1 and line == 2 { return "      X      " }
+        if player == 1 and line == 3 { return "    X   X    " }
+        if player == 1 and line == 4 { return "  X       X  " }
+
+        if player == 2 and line == 0 { return "    O O O    " }
+        if player == 2 and line == 1 { return "   O     O   " }
+        if player == 2 and line == 2 { return "  O       O  " }
+        if player == 2 and line == 3 { return "   O     O   " }
+        if player == 2 and line == 4 { return "    O O O    " }
+
+        return ""
+    }
+
+    foreach i in 0..4 { write("$(g(board.box1, i))|$(g(board.box2, i))|$(g(board.box3, i))\n") }
+    write("-----------------------------------------\n")
+    foreach i in 0..4 { write("$(g(board.box4, i))|$(g(board.box5, i))|$(g(board.box6, i))\n") }
+    write("-----------------------------------------\n")
+    foreach i in 0..4 { write("$(g(board.box7, i))|$(g(board.box8, i))|$(g(board.box9, i))\n") }
+}
+
+var board: Board = {
+   box1: 1, box2: 0, box3: 0,
+   box4: 0, box5: 2, box6: 0,
+   box7: 0, box8: 0, box9: 1
+}
+
+showBoard(board)

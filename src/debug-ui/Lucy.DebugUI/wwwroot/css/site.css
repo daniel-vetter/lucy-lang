@@ -1,0 +1,53 @@
+html, body {
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+    padding: 0;
+    margin: 0;
+    font-family: "Segoe UI";
+    font-size: 14px;
+    font-family: Consolas, "Courier New", monospace;
+    background: #252526;
+    color: rgb(204, 204, 204);
+}
+
+.fullSize {
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+}
+
+a {
+    color: rgb(204, 204, 204);
+}
+
+#blazor-error-ui {
+    background: lightyellow;
+    bottom: 0;
+    box-shadow: 0 -1px 2px rgba(0, 0, 0, 0.2);
+    display: none;
+    left: 0;
+    padding: 0.6rem 1.25rem 0.7rem 1.25rem;
+    position: fixed;
+    width: 100%;
+    z-index: 1000;
+}
+
+#blazor-error-ui .dismiss {
+    cursor: pointer;
+    position: absolute;
+    right: 0.75rem;
+    top: 0.5rem;
+}
+
+@font-face {
+    font-family: 'codicon';
+    src: url('codicon.ttf');
+}
+
+.clickable:hover {
+    filter: invert();
+    background: rgb(50, 50, 50);
+    cursor: pointer;
+}

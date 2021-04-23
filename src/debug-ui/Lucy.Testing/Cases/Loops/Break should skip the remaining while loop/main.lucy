@@ -1,0 +1,10 @@
+extern fun write(value: Any): Void
+
+var index = 1
+while index <= 6 {
+    write(index)
+    index = index + 1
+    if index > 3 {
+        break
+    }
+}

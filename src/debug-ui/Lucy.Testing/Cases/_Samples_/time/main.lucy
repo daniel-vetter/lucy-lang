@@ -1,0 +1,20 @@
+extern fun write(value: Any): Void
+extern fun time(): Number
+extern fun floor(value: Number): Number
+
+var s = time()
+var z = floor(s / 86400) + 719468
+var era = floor((z >= 0 ? z : z - 146096) / 146097)
+var doe = (z - era * 146097)
+var yoe = floor((doe - floor(doe/1460) + floor(doe/36524) - floor(doe/146096)) / 365)
+var y = yoe + era * 400
+var doy = doe - (365*yoe + floor(yoe/4) - floor(yoe/100))
+var mp = floor((5*doy + 2)/153)
+var d = doy - floor((153*mp+2)/5) + 1
+var m = mp + (mp < 10 ? 3 : -9)
+y = y +(m <= 2 ? 1 : 0)
+
+var dStr = d < 10 ? "0$d" : "$d"
+var mStr = m < 10 ? "0$m" : "$m"
+
+write("Current date: $y-$mStr-$dStr")

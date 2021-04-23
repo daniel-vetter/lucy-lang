@@ -1,0 +1,6 @@
+var t = test()
+
+fun test(): String {
+    return "String"
+}
+

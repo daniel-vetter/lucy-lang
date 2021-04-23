@@ -1,0 +1,12 @@
+﻿<div style="display: flex; flex-direction: column; user-select: none">
+    @foreach(var row in _rowViewModels)
+    {
+        <div style="display: flex; flex-direction: row; align-items: center">
+            @foreach (var element in row.RowElements)
+            {
+                <div style=@element.Style class=@element.Classes @onclick=@(async () => await element.OnClick())>@element.Text</div>
+            }
+        </div>
+    }
+</div>
+

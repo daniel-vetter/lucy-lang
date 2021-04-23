@@ -1,0 +1,3 @@
+data Record<T> {}
+
+var t: Record<> = {}

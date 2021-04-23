@@ -1,0 +1,5 @@
+{
+  "expectedErrors": [
+    "Function 'test' can not return a value of type 'Number' because its return value is specified as 'String'"
+  ]
+}

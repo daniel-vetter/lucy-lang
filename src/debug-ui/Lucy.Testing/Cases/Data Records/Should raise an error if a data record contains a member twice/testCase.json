@@ -1,0 +1,5 @@
+{
+  "expectedErrors": [
+    "The member 'member' was already declared"
+  ]
+}

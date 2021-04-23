@@ -1,0 +1,5 @@
+{
+  "expectedErrors": [
+    "A variable named 't' was not declared"
+  ]
+}

@@ -1,0 +1,13 @@
+data User {
+    firstName: String,
+    lastName: String
+}
+
+var me: User = {
+    firstName: "firstName",
+    lastName: "lastName"
+}
+
+fun change(user: User): User {
+    return { ...user, firstName: "otherFirstName"}
+}

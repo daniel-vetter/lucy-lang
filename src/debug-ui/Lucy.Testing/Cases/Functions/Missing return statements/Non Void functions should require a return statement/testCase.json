@@ -1,0 +1,5 @@
+{
+  "expectedErrors": [
+    "Not all code branches of the function 'test' return a value"
+  ]
+}

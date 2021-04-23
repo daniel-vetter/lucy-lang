@@ -1,0 +1,6 @@
+data Stuff {
+}
+
+var t: Stuff = {
+    unknown_member: 0
+}

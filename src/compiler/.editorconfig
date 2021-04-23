@@ -1,0 +1,15 @@
+﻿[*.cs]
+
+# VSTHRD200: Use "Async" suffix for async methods
+dotnet_diagnostic.VSTHRD200.severity = none
+
+# private field should start with _
+dotnet_naming_symbols.private_field.applicable_kinds = field
+dotnet_diagnostic.IDE1006.severity = none
+
+dotnet_naming_rule.member_should_begin_with_underscore.severity = error
+dotnet_naming_rule.member_should_begin_with_underscore.symbols = private_field
+dotnet_naming_rule.member_should_begin_with_underscore.style = begin_with_underscore
+
+dotnet_naming_style.begin_with_underscore.required_prefix = _
+dotnet_naming_style.begin_with_underscore.capitalization = camel_case

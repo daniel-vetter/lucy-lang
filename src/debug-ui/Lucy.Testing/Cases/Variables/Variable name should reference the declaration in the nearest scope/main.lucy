@@ -1,0 +1,9 @@
+extern fun write(value: Any): Void
+
+var t = 1
+write(t)
+{
+    var t = 2
+    write(t)
+}
+write(t)

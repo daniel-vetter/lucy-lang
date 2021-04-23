@@ -1,0 +1,5 @@
+{
+  "expectedErrors": [
+    "Can not assign 'Void' to a variable"
+  ]
+}

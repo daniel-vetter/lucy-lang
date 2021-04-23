@@ -1,0 +1,5 @@
+{
+  "expectedErrors": [
+    "The type argument 'T' for the function 'test' cannot be inferred from the usage. Try specifying the type argument explicitly."
+  ]
+}

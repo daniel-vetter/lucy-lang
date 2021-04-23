@@ -1,0 +1,17 @@
+extern fun write(value: Any): Void
+
+data NestedTestRecord {
+    member: String
+}
+
+data TestRecord {
+    child: NestedTestRecord
+}
+
+var record: TestRecord = {
+    child: {
+        member: "Hello World"
+    }
+}
+
+write(record.child.member)

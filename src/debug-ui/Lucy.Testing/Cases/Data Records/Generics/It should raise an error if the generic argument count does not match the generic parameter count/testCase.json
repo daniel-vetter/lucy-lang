@@ -1,0 +1,5 @@
+{
+  "expectedErrors": [
+    "Type 'List' expects 1 generic arguments but got 2"
+  ]
+}

@@ -1,0 +1,9 @@
+data User {
+    name: String
+}
+
+fun stuff(): User {
+    return {
+        name: "Me"
+    }
+}

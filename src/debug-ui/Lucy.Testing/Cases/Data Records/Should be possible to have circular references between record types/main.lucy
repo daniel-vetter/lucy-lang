@@ -1,0 +1,7 @@
+data R1<T> {
+    p: R2<Number>
+}
+
+data R2<T> {
+    p: R1<String>
+}

@@ -1,0 +1,5 @@
+{
+  "expectedErrors": [
+    "Both branches of a conditional expression should return the same type (Currently 'Number' and 'String')"
+  ]
+}

@@ -1,0 +1,6 @@
+extern fun write(value: Any): Void
+
+write(index)
+
+foreach index in 0..2 {
+}

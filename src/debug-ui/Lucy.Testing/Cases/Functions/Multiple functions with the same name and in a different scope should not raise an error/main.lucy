@@ -1,0 +1,5 @@
+fun otherScope(): Void {
+    fun t(): Void {}
+}
+
+fun t(): Void {}

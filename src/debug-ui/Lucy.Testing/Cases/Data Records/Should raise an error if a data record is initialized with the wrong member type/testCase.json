@@ -1,0 +1,5 @@
+{
+  "expectedErrors": [
+    "Member 'member' should be of type 'String' but is of type 'Number'"
+  ]
+}

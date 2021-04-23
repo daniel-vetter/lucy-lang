@@ -1,0 +1,10 @@
+{
+	"typescript.tsc.autoDetect": "off",
+	"typescript.preferences.quoteStyle": "double",
+	"typescript.tsdk": "node_modules\\typescript\\lib",
+	"files.exclude": {
+		"out": true,
+		"node_modules": true
+	},
+	"lucy.trace.server": "verbose"
+}

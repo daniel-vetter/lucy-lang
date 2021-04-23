@@ -1,0 +1,5 @@
+{
+  "expectedErrors": [
+    "Can not assign a value of type 'Number' to a variable of type 'String'"
+  ]
+}

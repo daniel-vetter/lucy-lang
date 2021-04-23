@@ -1,0 +1,8 @@
+extern fun write(value: Any): Void
+
+foreach index in 1..6 {
+    write(index)
+    if index >= 3 {
+        break
+    }
+}

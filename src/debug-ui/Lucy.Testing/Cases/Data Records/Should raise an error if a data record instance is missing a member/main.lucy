@@ -1,0 +1,5 @@
+data Stuff {
+    member: String
+}
+
+var t: Stuff = {}
