@@ -5,8 +5,6 @@ VisualStudioVersion = 16.0.30804.86
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Lucy.Core", "Lucy.Core\Lucy.Core.csproj", "{D046973F-2027-462E-9572-80A24E28250E}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Lucy.LanguageTests", "Lucy.LanguageTests\Lucy.LanguageTests.csproj", "{37250B33-4C1E-4E40-A1A7-560F97BFCCD8}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Lucy.App", "Lucy.App\Lucy.App.csproj", "{6C514194-70A3-45FD-8C32-FDA31C7748ED}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{5DEB5AC0-91DB-49ED-BFA1-C2D78013A28C}"
@@ -30,10 +28,6 @@ Global
 		{D046973F-2027-462E-9572-80A24E28250E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D046973F-2027-462E-9572-80A24E28250E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D046973F-2027-462E-9572-80A24E28250E}.Release|Any CPU.Build.0 = Release|Any CPU
-		{37250B33-4C1E-4E40-A1A7-560F97BFCCD8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{37250B33-4C1E-4E40-A1A7-560F97BFCCD8}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{37250B33-4C1E-4E40-A1A7-560F97BFCCD8}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{37250B33-4C1E-4E40-A1A7-560F97BFCCD8}.Release|Any CPU.Build.0 = Release|Any CPU
 		{6C514194-70A3-45FD-8C32-FDA31C7748ED}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{6C514194-70A3-45FD-8C32-FDA31C7748ED}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6C514194-70A3-45FD-8C32-FDA31C7748ED}.Release|Any CPU.ActiveCfg = Release|Any CPU
