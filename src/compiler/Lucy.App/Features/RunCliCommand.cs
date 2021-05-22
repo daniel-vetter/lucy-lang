@@ -1,9 +1,9 @@
 ﻿using Lucy.App.Infrastructure.Cli;
 using Lucy.App.Infrastructure.Output;
 using Lucy.Common.ServiceDiscovery;
+using Lucy.Core.Compiler;
 using Lucy.Core.Model;
 using Lucy.Core.ProjectManagement;
-using Spectre.Console;
 using System;
 using System.Collections.Generic;
 using System.CommandLine;
@@ -32,7 +32,7 @@ namespace Lucy.App.Features
             builder.AddCommand(cmd);
         }
 
-        private async Task Run(FileInfo? inputFile)
+        private async Task<int> Run(FileInfo? inputFile)
         {
             if (inputFile == null)
                 throw new CliException("No input file was provided.");
@@ -55,11 +55,17 @@ namespace Lucy.App.Features
                 Console.WriteLine(doc.Path);
                 foreach (var issue in doc.SyntaxTree?.Issues ?? new List<Issue>())
                     Console.WriteLine("    " + issue.Message);
-                //foreach (var issue in doc.SemanticTree?.MappingIssues ?? new List<Issue>())
-                    //Console.WriteLine("    " + issue.Message);
-                //foreach (var issue in doc.SemanticTree?.AnalysisIssues ?? new List<Issue>())
-                  //  Console.WriteLine("    " + issue.Message);
             }
+
+            var tempFileName = Path.ChangeExtension(Path.GetTempFileName(), "exe");
+            await WinCompiler.Compile(workspaceProcessor, tempFileName);
+
+            var p = new System.Diagnostics.Process();
+            p.StartInfo.FileName = tempFileName;
+            p.Start();
+            await p.WaitForExitAsync();
+            File.Delete(tempFileName);
+            return p.ExitCode;
         }
     }
 }
