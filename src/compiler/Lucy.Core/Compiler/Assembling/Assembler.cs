@@ -1,9 +1,12 @@
 ﻿using Disassembler.Assembling.Infrastructure;
 using Disassembler.Assembling.Model;
 using Disassembler.Infrastructure.Memory;
+using Lucy.Core.Compiler.Assembling.Infrastructure;
+using Lucy.Core.Compiler.TreeToAssemblerConverting;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Linq;
 using System.Runtime.Serialization;
 using System.Text;
 
@@ -11,40 +14,65 @@ namespace Disassembler.Assembling
 {
     public class Assembler
     {
-        private readonly List<Operation> _ops = new();
+        private readonly List<AssemblerStatement> _statements = new();
 
         public Assembler(OperandSize defaultOperandSize)
         {
             DefaultOperandSize = defaultOperandSize;
         }
 
-        public void Add(Operation operation) => _ops.Add(operation);
+        public void AddOperation(Operation operation) => _statements.Add(operation);
+        public void AddEmptyLine(string? comment) => _statements.Add(new EmptyLine(comment));
+        public void AddSpacer()
+        {
+            if (_statements.Count == 0)
+                return;
+
+            if (_statements[_statements.Count - 1] is EmptyLine el && el.Comment == null)
+                return;
+
+            _statements.Add(new EmptyLine(null));
+        }
+
+        public void AddLabel(object key, string? comment = null)
+        {
+            _statements.Add(new Label(key, comment));
+        }
 
         public AssemblerResult Process()
         {
             var memoryBlock = new MemoryBlock();
             var writer = new MachineCodeWriter(DefaultOperandSize, memoryBlock);
 
-            foreach (var op in _ops)
+            foreach (var op in _statements.OfType<Operation>())
                 op.Write(writer);
 
             var issues = writer.Issues;
-            if (_ops.Count == 0)
+            if (_statements.Count == 0)
                 issues = issues.Add(new AssemblerIssue(AssemblerIssueSeverity.Warning, "Operation list is empty"));
 
             memoryBlock.Address = 0;
             return new AssemblerResult(memoryBlock, issues);
         }
 
+        public string CreateAssemblerCode()
+        {
+            var writer = new AssemblyWriter();
+            foreach (var statement in _statements)
+                statement.Write(writer);
+
+            return writer.ToString();
+        }
+
         public override string ToString()
         {
-            var sb = new StringBuilder();
-            foreach (var op in _ops)
+            var sb = new StringBuilder(); 
+            foreach (var op in _statements)
                 sb.AppendLine(op.ToString());
             return sb.ToString();
         }
 
-        public ImmutableArray<Operation> Operations => _ops.ToImmutableArray();
+        public ImmutableArray<AssemblerStatement> Statements => _statements.ToImmutableArray();
 
         public OperandSize DefaultOperandSize { get; }
     }

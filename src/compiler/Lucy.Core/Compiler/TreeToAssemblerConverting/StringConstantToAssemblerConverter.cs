@@ -15,9 +15,15 @@ namespace Lucy.Core.Compiler.TreeToAssemblerConverting
             var entry = new StringDataEntry(ctx.Data.EntryCount);
 
             ctx.Data.Add(bytes, new AddressExport(entry));
-            ctx.Assembler.Add(new Mov(Register.EAX, new Immediate(OperandSize.S32, 0, new AddressImport(entry, AddressType.AbsoluteVirtualAddress))));
+            ctx.Assembler.AddOperation(new Mov(Register.EAX, new Immediate(OperandSize.S32, 0, new AddressImport(entry, AddressType.AbsoluteVirtualAddress))));
         }
 
-        private record StringDataEntry(int Index);
+        private record StringDataEntry(int Index)
+        {
+            public override string ToString()
+            {
+                return $"data_string_{Index}";
+            }
+        }
     }
 }

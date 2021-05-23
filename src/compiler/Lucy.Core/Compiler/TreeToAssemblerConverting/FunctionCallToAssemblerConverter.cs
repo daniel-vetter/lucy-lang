@@ -15,7 +15,7 @@ namespace Lucy.Core.Compiler.TreeToAssemblerConverting
             {
                 var arg = fc.ArgumentList[i];
                 TreeToAssemblerConverter.Run(arg, ctx);
-                ctx.Assembler.Add(new Push(Register.EAX));
+                ctx.Assembler.AddOperation(new Push(Register.EAX));
             }
 
             var functionInfo = fc.GetFunctionInfo();
@@ -25,7 +25,7 @@ namespace Lucy.Core.Compiler.TreeToAssemblerConverting
             if (functionInfo.Extern == null)
                 throw new Exception("Only extern functions are currently supported.");
 
-            ctx.Assembler.Add(new Call(new Memory(OperandSize.S32, 0, new AddressImport(new ImportAddressTableEntry(functionInfo.Extern.LibraryName, functionInfo.Extern.FunctionName), AddressType.AbsoluteVirtualAddress))));
+            ctx.Assembler.AddOperation(new Call(new Memory(OperandSize.S32, 0, new AddressImport(new ImportAddressTableEntry(functionInfo.Extern.LibraryName, functionInfo.Extern.FunctionName), AddressType.AbsoluteVirtualAddress))));
         }
     }
 }

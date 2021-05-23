@@ -1,5 +1,6 @@
 ﻿using Disassembler.Assembling.Infrastructure;
 using Disassembler.Assembling.Model;
+using Lucy.Core.Compiler.Assembling.Infrastructure;
 using System;
 
 namespace Disassembler.Assembling.Operations
@@ -9,9 +10,12 @@ namespace Disassembler.Assembling.Operations
     /// </summary>
     public record Jnz(Immediate Offset) : Operation
     {
-        public override string ToString()
+        public override void Write(AssemblyWriter w)
         {
-            return $"jnz {Offset}";
+            w.WritePadding();
+            w.WriteOperation("jnz", Offset);
+            w.WriteComment(Comment);
+            w.WriteNewLine();
         }
 
         public override void Write(MachineCodeWriter w)

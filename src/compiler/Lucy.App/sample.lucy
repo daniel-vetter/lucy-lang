@@ -8,3 +8,8 @@ fun main(): void
 	printf("Das ist eine %d", 4)
 	exitProcess(0)
 }
+
+fun doStuff(): void 
+{
+	exitProcess(1)
+}

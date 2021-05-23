@@ -26,6 +26,7 @@ namespace Lucy.Core.Compiler
                 TreeToAssemblerConverter.Run(doc.SyntaxTree, ctx);
             }
 
+            Console.WriteLine(ctx.Assembler.CreateAssemblerCode());
             var asmResult = ctx.Assembler.Process();
             if (asmResult.Issues.Any())
                 throw new Exception($"Assembler reported issues: {Environment.NewLine}{string.Join(Environment.NewLine, asmResult.Issues.Select(x => x.Severity + ": " + x.Message))}");

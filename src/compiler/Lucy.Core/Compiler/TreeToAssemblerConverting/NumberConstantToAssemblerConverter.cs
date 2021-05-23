@@ -8,7 +8,7 @@ namespace Lucy.Core.Compiler.TreeToAssemblerConverting
     {
         internal static void Run(NumberConstantExpressionSyntaxNode nc, AsmConvertContext ctx)
         {
-            ctx.Assembler.Add(new Mov(Register.EAX, new Immediate(OperandSize.S32, (uint)nc.Value)));
+            ctx.Assembler.AddOperation(new Mov(Register.EAX, new Immediate(OperandSize.S32, (uint)nc.Value)));
         }
     }
 }

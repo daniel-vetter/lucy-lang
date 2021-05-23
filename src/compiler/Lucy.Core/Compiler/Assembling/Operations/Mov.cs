@@ -1,12 +1,19 @@
 ﻿using Disassembler.Assembling.Infrastructure;
 using Disassembler.Assembling.Model;
+using Lucy.Core.Compiler.Assembling.Infrastructure;
 
 namespace Disassembler.Assembling.Operations
 {
     public record Mov(Operand Target, Operand Source) : Operation
     {
-        public override string ToString() => $"mov {Target},{Source}";
-
+        public override void Write(AssemblyWriter w)
+        {
+            w.WritePadding();
+            w.WriteOperation("mov", Target, Source);
+            w.WriteComment(Comment);
+            w.WriteNewLine();
+        }
+        
         public override void Write(MachineCodeWriter w)
         {
             var op1IsValid = w.ValidateOperand(Source);
