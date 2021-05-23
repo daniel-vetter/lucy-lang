@@ -9,7 +9,7 @@ namespace Disassembler.ContainerFormats.PE
 {
     public class ImportTableSection : ISection
     {
-        private readonly List<ImportTableEntry> _entries = new();
+        private readonly HashSet<ImportTableEntry> _entries = new();
 
         public SectionData CreateData(bool is64Bit)
         {

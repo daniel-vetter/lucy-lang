@@ -28,8 +28,12 @@ namespace Disassembler.Assembling
             foreach (var op in _ops)
                 op.Write(writer);
 
+            var issues = writer.Issues;
+            if (_ops.Count == 0)
+                issues = issues.Add(new AssemblerIssue(AssemblerIssueSeverity.Warning, "Operation list is empty"));
+
             memoryBlock.Address = 0;
-            return new AssemblerResult(memoryBlock, writer.Issues);
+            return new AssemblerResult(memoryBlock, issues);
         }
 
         public override string ToString()
