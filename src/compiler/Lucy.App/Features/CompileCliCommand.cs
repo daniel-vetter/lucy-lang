@@ -62,7 +62,7 @@ namespace Lucy.App.Features
                   //  Console.WriteLine("    " + issue.Message);
             }
 
-            await WinCompiler.Compile(workspaceProcessor, "out.exe");
+            await WinExecutableEmitter.Compile(workspaceProcessor, "out.exe");
         }
     }
 }
