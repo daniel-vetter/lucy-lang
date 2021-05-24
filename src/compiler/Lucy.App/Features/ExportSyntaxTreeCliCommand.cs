@@ -36,22 +36,6 @@ namespace Lucy.App.Features
                 throw new CliException($"Could not determin directory of input file \"{inputFile}\".");
 
             var workspace = await Workspace.CreateFromPath(inputFile.DirectoryName);
-            var workspaceProcessor = new WorkspaceProcessor(workspace);
-
-            var fullOutputPath = Path.GetFullPath(outputDirectory);
-
-            if (!Directory.Exists(fullOutputPath))
-                Directory.CreateDirectory(fullOutputPath);
-
-            foreach(var document in workspace.Documents)
-            {
-                /*
-                var parsedResult = workspaceProcessor.Documents.Single(x => x.Path == document.Path);
-                var targetPath = Path.ChangeExtension(Path.Combine(fullOutputPath, document.Path.Substring(1)), ".json");
-                var json = SyntaxTreeToExportJsonConverer.Convert(parsedResult.ParserResult.RootNode);
-                await File.WriteAllTextAsync(targetPath, json.ToString());
-                */
-            }
         }
     }
 }

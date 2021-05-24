@@ -44,25 +44,12 @@ namespace Lucy.App.Features
                 throw new CliException($"Could not determin directory of input file \"{inputFile}\".");
 
             var workspace = await Workspace.CreateFromPath(inputFile.DirectoryName);
-            var workspaceProcessor = new WorkspaceProcessor(workspace);
-
+            
             var mainFile = workspace.Get("/" + inputFile.Name);
             if (mainFile == null)
                 throw new CliException($"Could not find main script /\"{inputFile.DirectoryName}\" in parsed workspace.");
 
-
-            foreach (var doc in workspaceProcessor.Documents)
-            {
-                Console.WriteLine(doc.Path);
-                foreach (var issue in doc.SyntaxTree?.Issues ?? new List<Issue>())
-                    Console.WriteLine("    " + issue.Message);
-                //foreach (var issue in doc.SemanticTree?.MappingIssues ?? new List<Issue>())
-                  //  Console.WriteLine("    " + issue.Message);
-                //foreach (var issue in doc.SemanticTree?.AnalysisIssues ?? new List<Issue>())
-                  //  Console.WriteLine("    " + issue.Message);
-            }
-
-            await WinExecutableEmitter.Compile(workspaceProcessor, "out.exe");
+            await WinExecutableEmitter.Compile(workspace, "out.exe");
         }
     }
 }

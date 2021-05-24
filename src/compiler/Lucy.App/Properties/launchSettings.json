@@ -2,7 +2,7 @@
   "profiles": {
     "Lucy2.App": {
       "commandName": "Project",
-      "commandLineArgs": "run sample.lucy",
+      "commandLineArgs": "run",
       "environmentVariables": {
         "LUCY_RPC_TRACE_FILE": "C:\\temp\\rpc.log"
       }

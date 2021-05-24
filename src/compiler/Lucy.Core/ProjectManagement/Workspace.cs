@@ -1,16 +1,29 @@
-﻿using Lucy.Core.Model;
-using System;
+﻿using Lucy.Core.Parser;
+using Lucy.Core.Parser.Nodes;
+using Lucy.Core.SemanticAnalysis;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace Lucy.Core.ProjectManagement
 {
+    public class WorkspaceDocument
+    {
+        public WorkspaceDocument(string path, string content)
+        {
+            Path = path;
+            Content = content;
+        }
+
+        public string Path { get; }
+        public string Content { get; private set; }
+        public DocumentSyntaxNode? SyntaxTree { get; set; }
+    }
+
     public class Workspace
     {
-        Dictionary<string, TextDocument> _documents = new Dictionary<string, TextDocument>();
+        Dictionary<string, WorkspaceDocument> _documents = new Dictionary<string, WorkspaceDocument>();
 
         public static async Task<Workspace> CreateFromPath(string path)
         {
@@ -25,65 +38,34 @@ namespace Lucy.Core.ProjectManagement
             foreach (var file in await Task.WhenAll(tasks))
             {
                 var subPath = file.Path.Substring(path.Length).Replace("\\", "/");
-                ws.AddDocument(new TextDocument(subPath, file.Content));
+                ws.AddDocument(subPath, file.Content);
             }
             return ws;
         }
 
-        public void AddDocument(TextDocument document)
+        public void Process()
         {
-            _documents.Add(document.Path, document);
+            foreach(var doc in Documents)
+            {
+                if (doc.SyntaxTree == null)
+                    doc.SyntaxTree = DocumentSyntaxNode.ReadDocumentSyntaxNode(new Code(doc.Content));
+            }
+
+            SemanticAnalyzer.Run(this);
         }
 
-        public void AddOrUpdateDocument(TextDocument document)
-        {
-            _documents[document.Path] = document;
-        }
+        public void AddDocument(string path, string content) => _documents.Add(path, new WorkspaceDocument(path, content));
+        public void AddOrUpdateDocument(string path, string content) => _documents[path] = new WorkspaceDocument(path, content);
+        public void RemoveDocument(string path) => _documents.Remove(path);
+        public bool ContainsFile(string path) => _documents.ContainsKey(path);
 
-        public void RemoveDocument(string path)
-        {
-            _documents.Remove(path);
-        }
-
-        public void ReplaceDocument(TextDocument document)
-        {
-            if (!_documents.ContainsKey(document.Path))
-                throw new Exception("Workspace does not contain a document with path: " + document.Path);
-            _documents[document.Path] = document;
-        }
-
-        public void Change(string path, Range1D range, string content)
-        {
-            if (!_documents.TryGetValue(path, out var document))
-                throw new Exception("Workspace does not contain a document with path: " + path);
-            _documents[path] = document.Change(range, content);
-        }
-
-        public void Change(string path, Range2D range, string content)
-        {
-            if (!_documents.TryGetValue(path, out var document))
-                throw new Exception("Workspace does not contain a document with path: " + path);
-            _documents[path] = document.Change(range, content);
-        }
-
-        public bool ContainsFile(string path)
-        {
-            return _documents.ContainsKey(path);
-        }
-
-        public TextDocument? Get(string path)
+        public WorkspaceDocument? Get(string path)
         {
             if (_documents.TryGetValue(path, out var document))
                 return document;
             return null;
         }
 
-        public ImmutableArray<TextDocument> Documents
-        {
-            get
-            {
-                return _documents.Values.ToImmutableArray();
-            }
-        }
+        public IEnumerable<WorkspaceDocument> Documents => _documents.Values;
     }
 }

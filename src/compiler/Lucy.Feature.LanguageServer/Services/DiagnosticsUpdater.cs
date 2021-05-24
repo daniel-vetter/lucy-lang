@@ -17,7 +17,7 @@ namespace Lucy.Feature.LanguageServer.Services
             _rpcMapper = rpcMapper;
         }
 
-        internal async Task Update(WorkspaceProcessor workspaceProcessor)
+        internal async Task Update(Workspace workspace)
         {
             /*
             foreach (var addedOrUpdated in workspaceProcessor.Documents)

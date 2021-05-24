@@ -1,15 +1,23 @@
-﻿using Lucy.Core.Model.Syntax;
+﻿using Lucy.Core.ProjectManagement;
+using System;
 
 namespace Lucy.Core.SemanticAnalysis
 {
     public class SemanticAnalyzer
     {
-        public static void Run(SyntaxNode node)
+        public static void Run(Workspace workspace)
         {
-            ParentAssigner.Run(node);
-            ScopeAssigner.Run(node);
-            TypeDiscovery.Run(node);
-            FunctionSymbolResolver.Run(node);
+            foreach(var document in workspace.Documents)
+            {
+                var rootNode = document.SyntaxTree;
+                if (rootNode == null)
+                    throw new Exception($"Could not find a syntax tree for workspace document  '{document.Path}'.");
+
+                ParentAssigner.Run(rootNode);
+                ScopeAssigner.Run(rootNode);
+                TypeDiscovery.Run(rootNode);
+                FunctionSymbolResolver.Run(rootNode);
+            }
         }
     }
 }

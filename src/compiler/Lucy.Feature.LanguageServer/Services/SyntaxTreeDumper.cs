@@ -7,7 +7,7 @@ namespace Lucy.Feature.LanguageServer.Services
     [Service]
     public class SyntaxTreeDumper
     {
-        internal Task Update(WorkspaceProcessor workspaceProcessor)
+        internal Task Update(Workspace workspace)
         {
             /*
             var dir = Environment.GetEnvironmentVariable("LUCY_LANGUAGE_SERVER_EXPORT");

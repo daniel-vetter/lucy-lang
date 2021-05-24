@@ -10,7 +10,7 @@ namespace Lucy.Core.Compiler
 {
     public class WinExecutableEmitter
     {
-        public static async Task Compile(WorkspaceProcessor processedWorkspace, string outFile)
+        public static async Task Compile(Workspace workspace, string outFile)
         {
             var ctx = new AsmConvertContext(
                 new AssemblyBuilder(OperandSize.S32),
@@ -18,10 +18,10 @@ namespace Lucy.Core.Compiler
                 new DataSection()
             );
 
-            foreach(var doc in processedWorkspace.Documents)
+            foreach(var doc in workspace.Documents)
             {
                 if (doc.SyntaxTree == null)
-                    throw new Exception("Document did not contain a syntax tree.");
+                    throw new Exception($"Could not find a syntax tree for workspace document '{doc.Path}'.");
 
                 TreeToAssemblerConverter.Run(doc.SyntaxTree, ctx);
             }

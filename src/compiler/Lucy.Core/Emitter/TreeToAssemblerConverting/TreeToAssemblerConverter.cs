@@ -35,7 +35,7 @@ namespace Lucy.Core.Compiler.TreeToAssemblerConverting
 
     public class AsmConvertContext
     {
-        public AsmConvertContext(Lucy.Assembler.AssemblyBuilder assembler, ImportTableSection importTable, DataSection data)
+        public AsmConvertContext(AssemblyBuilder assembler, ImportTableSection importTable, DataSection data)
         {
             Assembler = assembler;
             ImportTable = importTable;
