@@ -17,7 +17,7 @@ namespace Lucy.Core.SemanticAnalysis
             }
 
             foreach (var child in node.GetChildNodes())
-                Run(child.Node);
+                Run(child);
         }
     }
 

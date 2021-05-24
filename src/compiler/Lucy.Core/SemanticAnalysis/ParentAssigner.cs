@@ -9,8 +9,8 @@ namespace Lucy.Core.SemanticAnalysis
         {
             foreach(var child in node.GetChildNodes())
             {
-                child.Node.SetAnnotation(new ParentNodeAnnotation(node));
-                Run(child.Node);
+                child.SetAnnotation(new ParentNodeAnnotation(node));
+                Run(child);
             }
         }
     }

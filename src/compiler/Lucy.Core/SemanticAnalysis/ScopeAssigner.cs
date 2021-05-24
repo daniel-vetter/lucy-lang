@@ -18,7 +18,7 @@ namespace Lucy.Core.SemanticAnalysis
             node.SetAnnotation(parentScope);
 
             foreach (var child in node.GetChildNodes())
-                Annotate(child.Node, parentScope);
+                Annotate(child, parentScope);
         }
     }
 

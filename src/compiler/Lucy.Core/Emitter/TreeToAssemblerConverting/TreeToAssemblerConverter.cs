@@ -27,7 +27,7 @@ namespace Lucy.Core.Compiler.TreeToAssemblerConverting
                     break;
                 default:
                     foreach (var child in node.GetChildNodes())
-                        Run(child.Node, ctx);
+                        Run(child, ctx);
                     break;
             }
         }
