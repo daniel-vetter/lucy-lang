@@ -1,12 +1,10 @@
 ﻿using Lucy.App.Infrastructure.Cli;
 using Lucy.Common.ServiceDiscovery;
 using Lucy.Core.ProjectManagement;
-using Lucy.Feature.LanguageServer.Services;
 using System.CommandLine;
 using System.CommandLine.Builder;
 using System.CommandLine.Invocation;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace Lucy.App.Features

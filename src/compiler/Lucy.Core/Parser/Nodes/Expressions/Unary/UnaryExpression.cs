@@ -1,5 +1,4 @@
-﻿using Lucy.Core.Model.Syntax;
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
 
 namespace Lucy.Core.Parser.Nodes.Expressions.Unary
 {

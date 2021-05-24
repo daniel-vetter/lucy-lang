@@ -1,9 +1,6 @@
-﻿using Lucy.Core.Model;
-using Lucy.Core.Parser;
+﻿using Lucy.Core.Parser;
 using Lucy.Core.SemanticAnalysis;
-using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Lucy.Core.ProjectManagement
 {

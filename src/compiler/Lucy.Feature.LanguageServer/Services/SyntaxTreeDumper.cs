@@ -1,9 +1,6 @@
-﻿using System;
-using System.IO;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Lucy.Common.ServiceDiscovery;
 using Lucy.Core.ProjectManagement;
-using Newtonsoft.Json;
 
 namespace Lucy.Feature.LanguageServer.Services
 {

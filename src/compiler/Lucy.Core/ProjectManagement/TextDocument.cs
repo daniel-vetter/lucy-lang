@@ -1,5 +1,4 @@
 ﻿using Lucy.Core.Model;
-using Lucy.Core.Model.Syntax;
 
 namespace Lucy.Core.ProjectManagement
 {

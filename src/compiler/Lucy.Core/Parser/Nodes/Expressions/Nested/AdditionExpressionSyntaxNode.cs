@@ -1,5 +1,4 @@
-﻿using Lucy.Core.Model.Syntax;
-using Lucy.Core.Parser.Nodes.Token;
+﻿using Lucy.Core.Parser.Nodes.Token;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Lucy.Core.Parser.Nodes.Expressions.Nested

@@ -1,7 +1,5 @@
 ﻿using Lucy.Core.Helper;
 using Lucy.Core.Model.Syntax;
-using Lucy.Core.Parser.Nodes.Token;
-using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 

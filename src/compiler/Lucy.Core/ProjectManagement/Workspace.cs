@@ -1,5 +1,4 @@
 ﻿using Lucy.Core.Model;
-using Lucy.Core.Model.Syntax;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;

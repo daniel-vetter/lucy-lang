@@ -1,11 +1,7 @@
-﻿
-using System.Linq;
-using Lucy.Infrastructure.RpcServer;
+﻿using Lucy.Infrastructure.RpcServer;
 using Lucy.Feature.LanguageServer.Models;
 using Lucy.Common.ServiceDiscovery;
-using Lucy.Core.Helper;
 using Lucy.Feature.LanguageServer.Services;
-using Lucy.Core;
 using Lucy.Core.Model.Syntax;
 
 namespace Lucy.Feature.LanguageServer.RpcController

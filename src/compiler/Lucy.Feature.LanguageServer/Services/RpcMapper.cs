@@ -1,7 +1,6 @@
 ﻿using System;
 using Lucy.Feature.LanguageServer.Models;
 using Lucy.Common.ServiceDiscovery;
-using Lucy.Core.Model.Syntax;
 using Lucy.Core.Model;
 
 namespace Lucy.Feature.LanguageServer.Services

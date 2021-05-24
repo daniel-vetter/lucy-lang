@@ -1,5 +1,4 @@
 ﻿using System.CommandLine.Builder;
-using Lucy.App.Infrastructure.Output;
 using Spectre.Console;
 
 namespace Lucy.App.Infrastructure.Cli

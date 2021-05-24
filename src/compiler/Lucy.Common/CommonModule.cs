@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Lucy.Common
+﻿namespace Lucy.Common
 {
     public static class CommonModule
     {

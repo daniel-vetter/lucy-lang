@@ -1,7 +1,6 @@
 ﻿using System.Threading.Tasks;
 using Lucy.Feature.LanguageServer.Models;
 using Lucy.Common.ServiceDiscovery;
-using System.Collections.Generic;
 using Lucy.Core.ProjectManagement;
 
 namespace Lucy.Feature.LanguageServer.Services
