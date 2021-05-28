@@ -29,7 +29,7 @@ namespace Lucy.Assembler.ContainerFormats.PE
             //Import Directory Table Strings
             for (int i = 0; i < directories.Length; i++)
             {
-                m.AddAnnotation(new AddressExport("DirectoryNamesOffsets_" + i));
+                m.WriteAnnotation(new AddressExport("DirectoryNamesOffsets_" + i));
                 m.WriteNullTerminatedString(directories[i].DirectoryName, Encoding.ASCII);
             }
 
@@ -40,7 +40,7 @@ namespace Lucy.Assembler.ContainerFormats.PE
             //Import Lookup Table
             for (int i = 0; i < directories.Length; i++)
             {
-                m.AddAnnotation(new AddressExport("ImportLookupTableOffsets_" + i));
+                m.WriteAnnotation(new AddressExport("ImportLookupTableOffsets_" + i));
                 for (int j = 0; j < directories[i].Lookups.Length; j++)
                 {
                     m.WriteUInt32(0, new AddressImport($"HintNameOffset_{i}_{j}", AddressType.RelativeVirtualAddress));
@@ -51,7 +51,7 @@ namespace Lucy.Assembler.ContainerFormats.PE
             //Import Address Table
             for (int i = 0; i < directories.Length; i++)
             {
-                m.AddAnnotation(new AddressExport("ImportAddressTableOffsets_" + i));
+                m.WriteAnnotation(new AddressExport("ImportAddressTableOffsets_" + i));
                 for (int j = 0; j < directories[i].Lookups.Length; j++)
                 {
                     if (is64Bit)
@@ -60,7 +60,7 @@ namespace Lucy.Assembler.ContainerFormats.PE
                     }
                     else
                     {
-                        m.AddAnnotation(new AddressExport(new ImportAddressTableEntry(directories[i].DirectoryName, directories[i].Lookups[j].Lookup)));
+                        m.WriteAnnotation(new AddressExport(new ImportAddressTableEntry(directories[i].DirectoryName, directories[i].Lookups[j].Lookup)));
                         m.WriteUInt32(0, new AddressImport($"HintNameOffset_{i}_{j}", AddressType.RelativeVirtualAddress));
                     }
                 }
@@ -76,7 +76,7 @@ namespace Lucy.Assembler.ContainerFormats.PE
             {
                 for (int j = 0; j < directories[i].Lookups.Length; j++)
                 {
-                    m.AddAnnotation(new AddressExport($"HintNameOffset_{i}_{j}"));
+                    m.WriteAnnotation(new AddressExport($"HintNameOffset_{i}_{j}"));
                     m.WriteUInt16(0);
                     var symbolName = directories[i].Lookups[j].Lookup;
                     if (symbolName == null)

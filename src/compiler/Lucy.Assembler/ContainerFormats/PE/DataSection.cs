@@ -18,7 +18,7 @@ namespace Lucy.Assembler.ContainerFormats.PE
             var m = new MemoryBlock();
             for (int i = 0; i < _bytes.Count; i++)
             {
-                m.AddAnnotation("rdata_" + i);
+                m.WriteAnnotation("rdata_" + i);
                 m.WriteBytes(_bytes[i]);
             }
             foreach (var annotation in _annotations)

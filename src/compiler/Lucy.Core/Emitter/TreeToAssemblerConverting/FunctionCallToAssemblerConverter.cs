@@ -9,7 +9,7 @@ namespace Lucy.Core.Compiler.TreeToAssemblerConverting
 {
     internal class FunctionCallToAssemblerConverter
     {
-        internal static void Run(FunctionCallExpressionSyntaxNode fc, AsmConvertContext ctx)
+        internal static void Run(FunctionCallExpressionSyntaxNode fc, WinExecutableEmitterContext ctx)
         {
             for (int i = fc.ArgumentList.Count - 1; i >= 0; i--)
             {

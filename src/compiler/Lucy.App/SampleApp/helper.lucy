@@ -1,0 +1,5 @@
+﻿extern stdcall "kernel32.dll" "ExitProcess" fun exitProcess(exitCode: uint): void
+
+fun helperFunction(): void {
+	exitProcess(0)
+}

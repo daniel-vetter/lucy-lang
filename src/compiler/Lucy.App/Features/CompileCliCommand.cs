@@ -49,7 +49,7 @@ namespace Lucy.App.Features
             if (mainFile == null)
                 throw new CliException($"Could not find main script /\"{inputFile.DirectoryName}\" in parsed workspace.");
 
-            await WinExecutableEmitter.Compile(workspace, "out.exe");
+            await WinExecutableEmitter.Emit(workspace, "out.exe");
         }
     }
 }

@@ -81,6 +81,11 @@ namespace Lucy.Assembler.Infrastructure
             return true;
         }
 
+        public void WriteAnnotaton(object key)
+        {
+            _m.WriteAnnotation(key);
+        }
+
         public void WriteOperandSizePrefixIfRequired(IOperand op)
         {
             if (op.Size == OperandSize.S8)
@@ -95,7 +100,7 @@ namespace Lucy.Assembler.Infrastructure
         public void WriteByte(byte @byte, object? annotation = null)
         {
             if (annotation != null)
-                _m.AddAnnotation(annotation);
+                _m.WriteAnnotation(annotation);
             _m.WriteUInt8(@byte);
         }
 
@@ -104,21 +109,21 @@ namespace Lucy.Assembler.Infrastructure
             if (@byte > byte.MaxValue)
                 throw new ArgumentOutOfRangeException(nameof(@byte));
             if (annotation != null)
-                _m.AddAnnotation(annotation);
+                _m.WriteAnnotation(annotation);
             _m.WriteUInt8((byte)@byte);
         }
 
         public void WriteUInt32(uint value, object? annotation = null)
         {
             if (annotation != null)
-                _m.AddAnnotation(annotation);
+                _m.WriteAnnotation(annotation);
             _m.WriteUInt32(value);
         }
 
         public void WriteInt32(int value, object? annotation = null)
         {
             if (annotation != null)
-                _m.AddAnnotation(annotation);
+                _m.WriteAnnotation(annotation);
             _m.WriteInt32(value);
         }
 
@@ -144,7 +149,7 @@ namespace Lucy.Assembler.Infrastructure
         public void WriteUInt16(ushort value, object? annotation = null)
         {
             if (annotation != null)
-                _m.AddAnnotation(annotation);
+                _m.WriteAnnotation(annotation);
             _m.WriteUInt16(value);
         }
 
@@ -153,14 +158,14 @@ namespace Lucy.Assembler.Infrastructure
             if (value > ushort.MaxValue)
                 throw new ArgumentOutOfRangeException(nameof(value));
             if (annotation != null)
-                _m.AddAnnotation(annotation);
+                _m.WriteAnnotation(annotation);
             _m.WriteUInt16((ushort)value);
         }
 
         internal void WriteInt16(short value, object? annotation = null)
         {
             if (annotation != null)
-                _m.AddAnnotation(annotation);
+                _m.WriteAnnotation(annotation);
             _m.WriteInt16(value);
         }
 
@@ -260,7 +265,7 @@ namespace Lucy.Assembler.Infrastructure
         private void AddAnnotation(object? annotation)
         {
             if (annotation != null)
-                _m.AddAnnotation(annotation);
+                _m.WriteAnnotation(annotation);
         }
 
         private bool Encode32(Memory m, byte registerOrOpcodeExtension)

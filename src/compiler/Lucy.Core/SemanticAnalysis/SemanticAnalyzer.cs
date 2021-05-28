@@ -16,6 +16,7 @@ namespace Lucy.Core.SemanticAnalysis
                 ParentAssigner.Run(rootNode);
                 ScopeAssigner.Run(rootNode);
                 TypeDiscovery.Run(rootNode);
+                EntryPointFinder.Run(rootNode);
                 FunctionSymbolResolver.Run(rootNode);
             }
         }

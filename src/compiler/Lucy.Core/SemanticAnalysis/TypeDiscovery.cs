@@ -37,6 +37,7 @@ namespace Lucy.Core.SemanticAnalysis
 
         public FunctionDeclarationStatementSyntaxNode Declaration { get; }
         public FunctionInfoExtern? Extern { get; }
+        public bool IsEntryPoint { get; set; }
     }
 
     public record FunctionInfoExtern(string LibraryName, string FunctionName);

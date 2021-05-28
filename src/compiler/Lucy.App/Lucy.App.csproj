@@ -23,7 +23,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="sample.lucy">
+    <None Update="SampleApp\helper.lucy">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="SampleApp\main.lucy">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

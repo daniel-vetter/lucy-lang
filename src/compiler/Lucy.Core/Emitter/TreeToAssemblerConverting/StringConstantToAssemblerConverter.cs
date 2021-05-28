@@ -9,7 +9,7 @@ namespace Lucy.Core.Compiler.TreeToAssemblerConverting
 {
     internal class StringConstantToAssemblerConverter
     {
-        internal static void Run(StringConstantExpressionSyntaxNode sc, AsmConvertContext ctx)
+        internal static void Run(StringConstantExpressionSyntaxNode sc, WinExecutableEmitterContext ctx)
         {
             var bytes = Encoding.UTF8.GetBytes(sc.Value).Concat(new byte[] { 0x00 }).ToArray();
             var entry = new StringDataEntry(ctx.Data.EntryCount);

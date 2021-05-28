@@ -190,7 +190,7 @@ namespace Lucy.Assembler.ContainerFormats.PE
             m.WriteUInt32(512);                     //CodeSectionSize
             m.WriteUInt32(1024);                    //InitializedDataSize
             m.WriteUInt32(0);                       //UninitializedDataSize
-            m.WriteUInt32(4096 * 3);                    //EntryPointAddress //TODO
+            m.WriteUInt32(0, new AddressImport(new EntryPoint(), AddressType.RelativeVirtualAddress));
             m.WriteUInt32(4096 * 3);                    //CodeBase
             if (!Is64Bit)
                 m.WriteUInt32(8192);                //Database
@@ -277,9 +277,9 @@ namespace Lucy.Assembler.ContainerFormats.PE
         public override string ToString()
         {
             if (Type == AddressType.AbsoluteVirtualAddress)
-                return $"VA:" + Key;
+                return $"VA(" + Key + ")";
             if (Type == AddressType.RelativeVirtualAddress)
-                return $"RVA:" + Key;
+                return $"RVA(" + Key + ")";
 
             throw new NotSupportedException("Unsupported address type: " + Type);
         }

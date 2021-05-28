@@ -27,7 +27,9 @@ namespace Lucy.App.Features
             workspace.Process();
 
             var tempFileName = Path.ChangeExtension(Path.GetTempFileName(), "exe");
-            await WinExecutableEmitter.Compile(workspace, tempFileName);
+            tempFileName = "C:\\temp\\out.exe";
+            Console.WriteLine(WinExecutableEmitter.GetAssemblyCode(workspace));
+            await WinExecutableEmitter.Emit(workspace, tempFileName);
 
             var p = new System.Diagnostics.Process();
             p.StartInfo.FileName = tempFileName;

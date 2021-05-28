@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Linq;
 using System.Runtime.Serialization;
 using System.Text;
 
@@ -40,8 +39,14 @@ namespace Lucy.Assembler
             var memoryBlock = new MemoryBlock();
             var writer = new MachineCodeWriter(DefaultOperandSize, memoryBlock);
 
-            foreach (var op in _statements.OfType<Operation>())
-                op.Write(writer);
+            foreach (var statement in _statements)
+            {
+                if (statement is Operation op)
+                    op.Write(writer);
+                else if (statement is Label lb)
+                    writer.WriteAnnotaton(lb.Key);
+            }
+                
 
             var issues = writer.Issues;
             if (_statements.Count == 0)
@@ -111,4 +116,6 @@ namespace Lucy.Assembler
         {
         }
     }
+
+    public record EntryPoint();
 }

@@ -20,7 +20,7 @@ namespace Lucy.Assembler.ContainerFormats.PE
     {
         public override string ToString()
         {
-            return $"{DirectoryName}!{LookupName}";
+            return $"{DirectoryName}!{LookupName})";
         }
     }
 }

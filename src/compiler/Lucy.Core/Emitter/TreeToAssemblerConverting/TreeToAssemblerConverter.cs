@@ -9,7 +9,7 @@ namespace Lucy.Core.Compiler.TreeToAssemblerConverting
 {
     public static class TreeToAssemblerConverter
     {
-        public static void Run(SyntaxNode node, AsmConvertContext ctx)
+        public static void Run(SyntaxNode node, WinExecutableEmitterContext ctx)
         {
             switch (node)
             {
@@ -33,9 +33,9 @@ namespace Lucy.Core.Compiler.TreeToAssemblerConverting
         }
     }
 
-    public class AsmConvertContext
+    public class WinExecutableEmitterContext
     {
-        public AsmConvertContext(AssemblyBuilder assembler, ImportTableSection importTable, DataSection data)
+        public WinExecutableEmitterContext(AssemblyBuilder assembler, ImportTableSection importTable, DataSection data)
         {
             Assembler = assembler;
             ImportTable = importTable;

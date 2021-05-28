@@ -58,7 +58,7 @@ namespace Lucy.Assembler
             }
         }
 
-        public void AddAnnotation(object key)
+        public void WriteAnnotation(object key)
         {
             AddAnnotation(Address, key);
         }
@@ -78,25 +78,25 @@ namespace Lucy.Assembler
 
         public void WriteUInt8(byte value, object annotation)
         {
-            AddAnnotation(annotation);
+            WriteAnnotation(annotation);
             WriteUInt8(value);
         }
 
         public void WriteUInt16(ushort value, object annotation)
         {
-            AddAnnotation(annotation);
+            WriteAnnotation(annotation);
             WriteUInt16(value);
         }
 
         public void WriteUInt32(uint value, object annotation)
         {
-            AddAnnotation(annotation);
+            WriteAnnotation(annotation);
             WriteUInt32(value);
         }
 
         public void WriteUInt64(ulong value, object annotation)
         {
-            AddAnnotation(annotation);
+            WriteAnnotation(annotation);
             WriteUInt64(value);
         }
 
