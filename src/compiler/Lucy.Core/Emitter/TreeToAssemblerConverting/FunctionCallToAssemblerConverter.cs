@@ -22,10 +22,20 @@ namespace Lucy.Core.Compiler.TreeToAssemblerConverting
             if (functionInfo == null)
                 throw new Exception("No function info found.");
 
+            Call? call = null;
             if (functionInfo.Extern == null)
-                throw new Exception("Only extern functions are currently supported.");
+            {
+                //TODO: Should just use call rel32
+                ctx.Assembler.AddOperation(new Mov(Register.EAX, new Immediate(OperandSize.S32, 0, new AddressImport(new EmitterFunctionId(functionInfo.Id), AddressType.AbsoluteVirtualAddress))));
+                call = new Call(Register.EAX);
+            }
+            else
+            {
+                call = new Call(new Memory(OperandSize.S32, 0, new AddressImport(new ImportAddressTableEntry(functionInfo.Extern.LibraryName, functionInfo.Extern.FunctionName), AddressType.AbsoluteVirtualAddress)));
+                
+            }
 
-            ctx.Assembler.AddOperation(new Call(new Memory(OperandSize.S32, 0, new AddressImport(new ImportAddressTableEntry(functionInfo.Extern.LibraryName, functionInfo.Extern.FunctionName), AddressType.AbsoluteVirtualAddress))));
+            ctx.Assembler.AddOperation(call);
         }
     }
 }

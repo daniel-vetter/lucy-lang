@@ -18,6 +18,8 @@ namespace Lucy.Core.Compiler
             if (asmResult.Issues.Any())
                 throw new Exception($"Assembler reported issues: {Environment.NewLine}{string.Join(Environment.NewLine, asmResult.Issues.Select(x => x.Severity + ": " + x.Message))}");
 
+            Console.WriteLine(ctx.Assembler.CreateAssemblerCode());
+
             var peBuilder = new PortableExecutableBuilder();
             peBuilder.AddSection(ctx.Data);
             peBuilder.AddSection(ctx.ImportTable);

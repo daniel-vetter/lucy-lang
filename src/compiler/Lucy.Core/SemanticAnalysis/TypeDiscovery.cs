@@ -1,6 +1,7 @@
 ﻿using Lucy.Core.Helper;
 using Lucy.Core.Model.Syntax;
 using Lucy.Core.Parser.Nodes.Statements.FunctionDeclaration;
+using System;
 
 namespace Lucy.Core.SemanticAnalysis
 {
@@ -11,7 +12,7 @@ namespace Lucy.Core.SemanticAnalysis
         {
             if (node is FunctionDeclarationStatementSyntaxNode functionDeclarationStatementSyntaxNode)
             {
-                var functionInfo = new FunctionInfo(functionDeclarationStatementSyntaxNode);
+                var functionInfo = new FunctionInfo(Guid.NewGuid().ToString(), functionDeclarationStatementSyntaxNode);
                 node.SetAnnotation(functionInfo);
                 node.GetScope().AddSymbol(functionInfo);
             }
@@ -28,13 +29,15 @@ namespace Lucy.Core.SemanticAnalysis
 
     public class FunctionInfo : Symbol
     {
-        public FunctionInfo(FunctionDeclarationStatementSyntaxNode declaration) : base(declaration.FunctionName.Value)
+        public FunctionInfo(string id, FunctionDeclarationStatementSyntaxNode declaration) : base(declaration.FunctionName.Value)
         {
+            Id = id;
             Declaration = declaration;
             if (declaration.ExternLibraryName != null)
                 Extern = new FunctionInfoExtern(declaration.ExternLibraryName.Value, declaration.ExternFunctionName?.Value ?? declaration.FunctionName.Value);
         }
 
+        public string Id { get; }
         public FunctionDeclarationStatementSyntaxNode Declaration { get; }
         public FunctionInfoExtern? Extern { get; }
         public bool IsEntryPoint { get; set; }

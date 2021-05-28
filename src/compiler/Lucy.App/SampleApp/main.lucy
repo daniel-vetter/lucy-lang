@@ -3,13 +3,11 @@ extern stdcall "kernel32.dll" "ExitProcess" fun exitProcess(exitCode: uint): voi
 
 fun main(): void 
 {
-	printf("Hello World")
-	printf("Hello %s", "Daniel")
-	printf("Das ist eine %d", 4)
-	exitProcess(0)
+	doStuff()
 }
 
 fun doStuff(): void 
 {
-	exitProcess(1)
+	printf("Hello")
+	exitProcess(0)
 }

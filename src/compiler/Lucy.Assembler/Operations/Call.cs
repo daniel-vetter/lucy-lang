@@ -15,6 +15,12 @@ namespace Lucy.Assembler.Operations
                 return;
             }
 
+            /*
+            if (Operand.IsImmediate32(out var imm32))
+            {
+                return;
+            }
+            */
             w.ReportError("Invalid combination of opcode and operand size.");
         }
 

@@ -28,14 +28,14 @@ namespace Lucy.App.Features
 
             var tempFileName = Path.ChangeExtension(Path.GetTempFileName(), "exe");
             tempFileName = "C:\\temp\\out.exe";
-            Console.WriteLine(WinExecutableEmitter.GetAssemblyCode(workspace));
+
             await WinExecutableEmitter.Emit(workspace, tempFileName);
 
             var p = new System.Diagnostics.Process();
             p.StartInfo.FileName = tempFileName;
             p.Start();
             await p.WaitForExitAsync();
-            File.Delete(tempFileName);
+            //File.Delete(tempFileName);
             return p.ExitCode;
         }
     }
