@@ -9,22 +9,15 @@ namespace Lucy.Assembler.ContainerFormats.PE
         private readonly List<Annotation> _annotations = new();
         private uint _address = 0;
 
-        public DataSection()
-        {
-        }
-
         public SectionData CreateData(bool is64Bit)
         {
             var m = new MemoryBlock();
             for (int i = 0; i < _bytes.Count; i++)
-            {
-                m.WriteAnnotation("rdata_" + i);
                 m.WriteBytes(_bytes[i]);
-            }
+
             foreach (var annotation in _annotations)
-            {
                 m.AddAnnotation(annotation.Address, annotation.Value);
-            }
+
             return new SectionData(".rdata", m, SectionFlags.IMAGE_SCN_CNT_INITIALIZED_DATA | SectionFlags.IMAGE_SCN_MEM_READ);
         }
 

@@ -18,18 +18,18 @@ namespace Lucy.Assembler.ContainerFormats.PE
             var directories = _entries.GroupBy(x => x.Directory).Select(x => new { DirectoryName = x.Key, Lookups = x.ToArray() }).ToArray();
             for (int i = 0; i < directories.Length; i++)
             {
-                m.WriteUInt32(0, new AddressImport("ImportLookupTableOffsets_" + i, AddressType.RelativeVirtualAddress));
+                m.WriteUInt32(0, new AddressImport(new ImportLookupTableOffset(i), AddressType.RelativeVirtualAddress));
                 m.WriteUInt32(0);
                 m.WriteUInt32(0);
-                m.WriteUInt32(0, new AddressImport("DirectoryNamesOffsets_" + i, AddressType.RelativeVirtualAddress));
-                m.WriteUInt32(0, new AddressImport("ImportAddressTableOffsets_" + i, AddressType.RelativeVirtualAddress));
+                m.WriteUInt32(0, new AddressImport(new DirectoryNamesOffset(i), AddressType.RelativeVirtualAddress));
+                m.WriteUInt32(0, new AddressImport(new ImportAddressTableOffsetAnnotation(i), AddressType.RelativeVirtualAddress));
             }
             m.WriteBytes(new byte[20]);
 
             //Import Directory Table Strings
             for (int i = 0; i < directories.Length; i++)
             {
-                m.WriteAnnotation(new AddressExport("DirectoryNamesOffsets_" + i));
+                m.WriteAnnotation(new DirectoryNamesOffset(i));
                 m.WriteNullTerminatedString(directories[i].DirectoryName, Encoding.ASCII);
             }
 
@@ -40,18 +40,16 @@ namespace Lucy.Assembler.ContainerFormats.PE
             //Import Lookup Table
             for (int i = 0; i < directories.Length; i++)
             {
-                m.WriteAnnotation(new AddressExport("ImportLookupTableOffsets_" + i));
+                m.WriteAnnotation(new ImportLookupTableOffset(i));
                 for (int j = 0; j < directories[i].Lookups.Length; j++)
-                {
-                    m.WriteUInt32(0, new AddressImport($"HintNameOffset_{i}_{j}", AddressType.RelativeVirtualAddress));
-                }
+                    m.WriteUInt32(0, new AddressImport(new HintNameOffsetAnnotation(i, j), AddressType.RelativeVirtualAddress));
                 m.WriteUInt32(0);
             }
 
             //Import Address Table
             for (int i = 0; i < directories.Length; i++)
             {
-                m.WriteAnnotation(new AddressExport("ImportAddressTableOffsets_" + i));
+                m.WriteAnnotation(new ImportAddressTableOffsetAnnotation(i));
                 for (int j = 0; j < directories[i].Lookups.Length; j++)
                 {
                     if (is64Bit)
@@ -60,8 +58,8 @@ namespace Lucy.Assembler.ContainerFormats.PE
                     }
                     else
                     {
-                        m.WriteAnnotation(new AddressExport(new ImportAddressTableEntry(directories[i].DirectoryName, directories[i].Lookups[j].Lookup)));
-                        m.WriteUInt32(0, new AddressImport($"HintNameOffset_{i}_{j}", AddressType.RelativeVirtualAddress));
+                        m.WriteAnnotation(new ImportAddressTableEntry(directories[i].DirectoryName, directories[i].Lookups[j].Lookup));
+                        m.WriteUInt32(0, new AddressImport(new HintNameOffsetAnnotation(i, j), AddressType.RelativeVirtualAddress));
                     }
                 }
 
@@ -76,7 +74,7 @@ namespace Lucy.Assembler.ContainerFormats.PE
             {
                 for (int j = 0; j < directories[i].Lookups.Length; j++)
                 {
-                    m.WriteAnnotation(new AddressExport($"HintNameOffset_{i}_{j}"));
+                    m.WriteAnnotation(new HintNameOffsetAnnotation(i, j));
                     m.WriteUInt16(0);
                     var symbolName = directories[i].Lookups[j].Lookup;
                     if (symbolName == null)
@@ -94,6 +92,11 @@ namespace Lucy.Assembler.ContainerFormats.PE
         {
             _entries.Add(entry);
         }
+
+        private record HintNameOffsetAnnotation(int DirectoryIndex, int LookupIndex);
+        private record ImportAddressTableOffsetAnnotation(int Index);
+        private record DirectoryNamesOffset(int Index);
+        private record ImportLookupTableOffset(int Index);
     }
 
     public record ImportTableEntry

@@ -3,7 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Lucy.Assembler.ContainerFormats.PE.RawStructs
 {
-    public enum MachineTypes
+    internal enum MachineTypes
     {
         IMAGE_FILE_MACHINE_UNKNOWN = 0x0,
         IMAGE_FILE_MACHINE_AM33 = 0x1d3,
@@ -33,7 +33,7 @@ namespace Lucy.Assembler.ContainerFormats.PE.RawStructs
     }
 
     [Flags]
-    public enum Characteristics
+    internal enum Characteristics
     {
         IMAGE_FILE_RELOCS_STRIPPED = 0x0001,
         IMAGE_FILE_EXECUTABLE_IMAGE = 0x0002,
@@ -53,13 +53,13 @@ namespace Lucy.Assembler.ContainerFormats.PE.RawStructs
         IMAGE_FILE_BYTES_REVERSED_HI = 0x8000,
     }
 
-    public enum PEFormat
+    internal enum PEFormat
     {
         PE32 = 0x10b,
         PE32Plus = 0x20b
     }
 
-    public enum Subsystem
+    internal enum Subsystem
     {
         IMAGE_SUBSYSTEM_UNKNOWN = 0,
         IMAGE_SUBSYSTEM_NATIVE = 1,
@@ -78,7 +78,7 @@ namespace Lucy.Assembler.ContainerFormats.PE.RawStructs
     }
 
     [Flags]
-    public enum DllCharacteristics
+    internal enum DllCharacteristics
     {
         IMAGE_DLLCHARACTERISTICS_HIGH_ENTROPY_VA = 0x0020,
         IMAGE_DLLCHARACTERISTICS_DYNAMIC_BASE = 0x0040,

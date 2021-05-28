@@ -46,8 +46,7 @@ namespace Lucy.Assembler
                 else if (statement is Label lb)
                     writer.WriteAnnotaton(lb.Key);
             }
-                
-
+            
             var issues = writer.Issues;
             if (_statements.Count == 0)
                 issues = issues.Add(new AssemblerIssue(AssemblerIssueSeverity.Warning, "Operation list is empty"));
@@ -117,5 +116,5 @@ namespace Lucy.Assembler
         }
     }
 
-    public record EntryPoint();
+    public record EntryPointAnnotation();
 }

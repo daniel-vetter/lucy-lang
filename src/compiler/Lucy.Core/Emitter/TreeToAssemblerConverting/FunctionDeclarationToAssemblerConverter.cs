@@ -22,10 +22,10 @@ namespace Lucy.Core.Compiler.TreeToAssemblerConverting
             }
 
             ctx.Assembler.AddSpacer();
-            ctx.Assembler.AddLabel(new AddressExport(new EmitterFunctionId(info.Id)), "Function: " + info.Name);
+            ctx.Assembler.AddLabel(new EmitterFunctionId(info.Id), "Function: " + info.Name);
             
             if (info.IsEntryPoint)
-                ctx.Assembler.AddLabel(new AddressExport(new EntryPoint()));
+                ctx.Assembler.AddLabel(new EntryPointAnnotation());
 
             if (fd.Body != null)
                 TreeToAssemblerConverter.Run(fd.Body, ctx);

@@ -58,6 +58,12 @@ namespace Lucy.Assembler
             }
         }
 
+        [Obsolete("Dont use this")]
+        public void WriteAnnotation(string key)
+        {
+            AddAnnotation(Address, key);
+        }
+
         public void WriteAnnotation(object key)
         {
             AddAnnotation(Address, key);

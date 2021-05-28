@@ -17,7 +17,6 @@ namespace Lucy.Core.Helper
                 
                 if (value is IEnumerable<SyntaxNode> subList)
                 {
-                    int i = 0;
                     foreach (var element in subList)
                         yield return element;
                 }
