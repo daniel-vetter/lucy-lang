@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Lucy2.App.Cli": {
+      "commandName": "Project",
+      "commandLineArgs": "run"
+    }
+  }
+}

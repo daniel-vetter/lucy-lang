@@ -4,9 +4,7 @@ using System.CommandLine.Parsing;
 using System.Linq;
 using System.Threading.Tasks;
 using Lucy.App.Infrastructure.Cli;
-using Lucy.App.Infrastructure.Output;
 using Lucy.Common.ServiceDiscovery;
-using Lucy.Feature.LanguageServer;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Lucy.App
@@ -17,7 +15,6 @@ namespace Lucy.App
         {
             var sp = new ServiceCollection()
                 .AddServicesFromCurrentAssembly()
-                .AddLanguageServerFeatureModule()
                 .BuildServiceProvider();
 
             var cmdBuilder = new CommandLineBuilder(new RootCommand("Lucy command line interface"))
@@ -32,8 +29,7 @@ namespace Lucy.App
                 .UseParseErrorReporting()
                 .UseExceptionHandler()
                 .CancelOnProcessTermination()
-                .UseCustomExceptionHandler()
-                .UseJsonLoggingGlobalOption(sp.GetRequiredService<IOutput>());
+                .UseCustomExceptionHandler();
 
             sp.GetServices<ICliCommand>()
                 .ToList()

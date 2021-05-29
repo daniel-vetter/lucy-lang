@@ -1,11 +1,7 @@
 ﻿using Lucy.App.Infrastructure.Cli;
-using Lucy.App.Infrastructure.Output;
 using Lucy.Common.ServiceDiscovery;
 using Lucy.Core.Compiler;
-using Lucy.Core.Model;
 using Lucy.Core.ProjectManagement;
-using System;
-using System.Collections.Generic;
 using System.CommandLine;
 using System.CommandLine.Builder;
 using System.CommandLine.Invocation;
@@ -17,13 +13,6 @@ namespace Lucy.App.Features
     [Service]
     class CompileCliCommand : ICliCommand
     {
-        private readonly IOutput _output;
-
-        public CompileCliCommand(IOutput output)
-        {
-            _output = output;
-        }
-
         public void Register(CommandLineBuilder builder)
         {
             var cmd = new Command("compile", "Compiles a lucy script");

@@ -32,11 +32,11 @@
 		],
 		"grammars": [
 			{
-			  "language": "lucy",
-			  "scopeName": "source.lucy",
-			  "path": "./lucy.tmLanguage.json"
+				"language": "lucy",
+				"scopeName": "source.lucy",
+				"path": "./lucy.tmLanguage.json"
 			}
-		  ]
+		]
 	},
 	"scripts": {
 		"vscode:prepublish": "npm run compile",

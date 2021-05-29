@@ -12,14 +12,10 @@ namespace Lucy.Feature.LanguageServer.RpcController
     internal class ServerLifecycleRpcController
     {
         private readonly CurrentRpcConnection _currentRpcConnection;
-        private readonly CurrentWorkspace _currentWorkspace;
-        private readonly Updater _updater;
 
-        public ServerLifecycleRpcController(CurrentRpcConnection currentRpcConnection, CurrentWorkspace currentWorkspace, Updater updater)
+        public ServerLifecycleRpcController(CurrentRpcConnection currentRpcConnection)
         {
             _currentRpcConnection = currentRpcConnection;
-            _currentWorkspace = currentWorkspace;
-            _updater = updater;
         }
 
         [JsonRpcFunction("initialize", deserializeParamterIntoSingleObject: true)]
@@ -48,17 +44,9 @@ namespace Lucy.Feature.LanguageServer.RpcController
                 OpenClose = true
             };
 
-            /*
-            result.Capabilities.CompletionProvider = new CompletionOptions
-            {
-                TriggerCharacters = new string[] { "." }
-            };
-            */
-
             if (request.RootUri != null)
             {
-                await _currentWorkspace.Init(request.RootUri ?? throw new Exception("No root uri provided"));
-                
+                //TODO: Init workspace                
             }
 
             return result;
@@ -67,7 +55,7 @@ namespace Lucy.Feature.LanguageServer.RpcController
         [JsonRpcFunction("initialized")]
         public async Task Initialized()
         {
-            await _updater.Update();
+            //TODO: Update workspace
         }
 
         [JsonRpcFunction("shutdown")]

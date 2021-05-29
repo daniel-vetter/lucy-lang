@@ -1,19 +1,20 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+    <OutputType>Exe</OutputType>
     <TargetFramework>net5.0</TargetFramework>
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="5.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="5.0.0" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Lucy.Infrastructure.RpcServer\Lucy.Infrastructure.RpcServer.csproj" />
     <ProjectReference Include="..\Lucy.Common\Lucy.Common.csproj" />
     <ProjectReference Include="..\Lucy.Core\Lucy.Core.csproj" />
+    <ProjectReference Include="..\Lucy.Infrastructure.RpcServer\Lucy.Infrastructure.RpcServer.csproj" />
   </ItemGroup>
 
 </Project>
