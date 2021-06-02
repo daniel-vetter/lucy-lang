@@ -4,21 +4,25 @@ using System.Text;
 using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
+using Lucy.Common.ServiceDiscovery;
 using Lucy.Infrastructure.RpcServer.Internal.Infrastructure;
 
 namespace Lucy.Infrastructure.RpcServer.Internal
 {
-    internal class OutgoingMessageWriter
+    [Service(Lifetime.Singleton)]
+    public class OutgoingMessageWriter
     {
         private readonly PipeWriter _output;
         private readonly Channel<Message> _outbox = Channel.CreateUnbounded<Message>();
+        private readonly JsonRpcConfig _config;
+        private readonly JsonRpcSerializer _serializer;
         private readonly Worker _worker = new Worker();
-        private readonly IJsonRpcMessageTrace? _trace;
 
-        public OutgoingMessageWriter(IJsonRpcMessageTrace? trace)
+        public OutgoingMessageWriter(JsonRpcConfig config, JsonRpcSerializer serializer)
         {
+            _config = config;
+            _serializer = serializer;
             _output = PipeWriter.Create(Console.OpenStandardOutput());
-            _trace = trace;
         }
 
         public async ValueTask Write(Message message)
@@ -38,14 +42,14 @@ namespace Lucy.Infrastructure.RpcServer.Internal
             while (await _outbox.Reader.WaitToReadAsync())
                 while (_outbox.Reader.TryRead(out var message))
                 {
-                    var payload = Serializer.ObjectToBytes(message);
+                    var payload = _serializer.ObjectToBytes(message);
                     var header = Encoding.UTF8.GetBytes($"Content-Length: {payload.Length}\r\n\r\n");
 
                     await _output.WriteAsync(header);
                     await _output.WriteAsync(payload);
 
-                    if (_trace != null)
-                        await _trace.OnOutgoingMessage(message);
+                    if (_config.TraceTarget != null)
+                        await _config.TraceTarget.OnOutgoingMessage(message, _serializer);
                 }
         }
     }

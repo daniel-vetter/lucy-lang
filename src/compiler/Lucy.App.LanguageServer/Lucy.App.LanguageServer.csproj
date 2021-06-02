@@ -17,4 +17,8 @@
     <ProjectReference Include="..\Lucy.Infrastructure.RpcServer\Lucy.Infrastructure.RpcServer.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Infrastructure\" />
+  </ItemGroup>
+
 </Project>

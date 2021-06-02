@@ -7,10 +7,10 @@ namespace Lucy.Core.SemanticAnalysis
 {
     public static class IssueExtensions
     {
-        public static void AddError(this SyntaxNode node, string message) => node.AddIssue(new Issue(IssueSeverity.Error, message));
-        public static void AddWarning(this SyntaxNode node, string message) => node.AddIssue(new Issue(IssueSeverity.Warning, message));
+        public static void AddError(this SyntaxTreeNode node, string message) => node.AddIssue(new Issue(IssueSeverity.Error, message));
+        public static void AddWarning(this SyntaxTreeNode node, string message) => node.AddIssue(new Issue(IssueSeverity.Warning, message));
 
-        private static void AddIssue(this SyntaxNode node, Issue issue)
+        private static void AddIssue(this SyntaxTreeNode node, Issue issue)
         {
             var issueList = node.GetAnnotation<List<Issue>>();
             if (issueList == null)
@@ -22,7 +22,7 @@ namespace Lucy.Core.SemanticAnalysis
             issueList.Add(issue);
         }
 
-        public static ImmutableArray<Issue> GetIssues(this SyntaxNode node)
+        public static ImmutableArray<Issue> GetIssues(this SyntaxTreeNode node)
         {
             var issueList = node.GetAnnotation<List<Issue>>();
             if (issueList == null || issueList.Count == 0)

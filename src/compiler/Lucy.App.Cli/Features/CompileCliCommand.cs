@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace Lucy.App.Features
 {
-    [Service]
+    [Service(Lifetime.Singleton)]
     class CompileCliCommand : ICliCommand
     {
         public void Register(CommandLineBuilder builder)

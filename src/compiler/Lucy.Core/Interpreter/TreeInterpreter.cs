@@ -9,7 +9,7 @@ namespace Lucy.Core.Interpreter
 {
     public static class TreeInterpreter
     {
-        public static Value Run(SyntaxNode node, InterpreterContext ctx)
+        public static Value Run(SyntaxTreeNode node, InterpreterContext ctx)
         {
             return node switch
             {

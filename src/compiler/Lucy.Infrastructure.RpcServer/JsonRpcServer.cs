@@ -1,96 +1,95 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Lucy.Common.ServiceDiscovery;
 using Lucy.Infrastructure.RpcServer.Internal;
 using Lucy.Infrastructure.RpcServer.Internal.Infrastructure;
 
 namespace Lucy.Infrastructure.RpcServer
 {
+    [Service(Lifetime.Singleton)]
     public class JsonRpcServer
     {
-        private Running? _running;
+        private bool _running;
+        private readonly OutgoingMessageWriter _outgoingMessageWriter;
+        private readonly IncommingMessageHandler _incommingMessageHandler;
+        private readonly OutgoingRequestHandler _outgoingRequestHandler;
+        private readonly IEnumerable<IJsonRpcMessageTraceTarget> _traceTargets;
+        private readonly TaskCompletionSource _isDone = new TaskCompletionSource();
 
-        public async Task Start(JsonRpcConfig config)
+        public JsonRpcServer(
+            OutgoingMessageWriter outgoingMessageWriter,
+            IncommingMessageHandler incommingMessageHandler,
+            OutgoingRequestHandler outgoingRequestHandler,
+            IEnumerable<IJsonRpcMessageTraceTarget> traceTargets
+        )
         {
-            if (_running != null)
+            _outgoingMessageWriter = outgoingMessageWriter;
+            _incommingMessageHandler = incommingMessageHandler;
+            _outgoingRequestHandler = outgoingRequestHandler;
+            _traceTargets = traceTargets;
+        }
+
+        public async Task Start()
+        {
+            if (_running)
                 throw new Exception("Server is already running");
 
-            var incommingMessageReader = new IncommingMessageReader(config.TraceTarget);
-            var outgoingMessageWriter = new OutgoingMessageWriter(config.TraceTarget);
-            var outgoingRequestHandler = new OutgoingRequestHandler(outgoingMessageWriter);
-            var incommingMessageHandler = new IncommingMessageHandler(config, incommingMessageReader, outgoingMessageWriter, outgoingRequestHandler);
+            foreach(var traceTarget in _traceTargets)
+                await traceTarget.Initialize();
 
-            _running = new Running(
-                config,
-                incommingMessageReader,
-                outgoingMessageWriter,
-                incommingMessageHandler,
-                outgoingRequestHandler,
-                new TaskCompletionSource()
-            );
-
-            if (config.TraceTarget != null)
-                await config.TraceTarget.Initialize();
-
-            outgoingMessageWriter.Start();
-            incommingMessageHandler.Start();
+            _outgoingMessageWriter.Start();
+            _incommingMessageHandler.Start();
+            _running = true;
         }
 
         public async Task Stop()
         {
             var running = _running;
-            if (running == null)
+            if (!running)
                 throw new Exception("Server was not started");
 
             try
             {
-                await running.MessageHandler.Stop();
-                await running.OutgoingMessageWriter.Stop();
+                await _incommingMessageHandler.Stop();
+                await _outgoingMessageWriter.Stop();
             }
             finally
             {
-                _running = null;
-                running.FullRuntimeTask.SetResult();
+                _running = false;
+                _isDone.SetResult();
             }
         }
 
         public async Task SendNotification(string name, object? parameter)
         {
-            if (_running == null)
+            if (!_running)
                 throw new Exception("Can not send a notifiction because the connection is closed");
 
-            await _running.OutgoingRequestHandler.SendNotification(name, parameter);
+            await _outgoingRequestHandler.SendNotification(name, parameter);
 
         }
 
         public async Task<TResult> SendRequest<TResult>(string name, object? parameter)
         {
-            if (_running == null)
+            if (!_running)
                 throw new Exception("Can not send a request because the connection is closed");
 
-            return await _running.OutgoingRequestHandler.SendRequest<TResult>(name, parameter);
+            return await _outgoingRequestHandler.SendRequest<TResult>(name, parameter);
         }
 
         public async Task WaitTillStopped()
         {
-            var running = _running;
-            if (running == null)
+            if (!_running)
                 throw new Exception("Server was not started");
 
-            await running.FullRuntimeTask.Task;
+            await _isDone.Task;
         }
-
-        private record Running(
-            JsonRpcConfig Config,
-            IncommingMessageReader IncommingMessageReader,
-            OutgoingMessageWriter OutgoingMessageWriter,
-            IncommingMessageHandler MessageHandler,
-            OutgoingRequestHandler OutgoingRequestHandler,
-            TaskCompletionSource FullRuntimeTask
-        );
     }
 
-    internal class IncommingMessageHandler
+    [Service(Lifetime.Singleton)]
+    public class IncommingMessageHandler
     {
         private readonly IncommingMessageReader _incommingMessageReader;
         private readonly OutgoingRequestHandler _outgoingRequestHandler;
@@ -98,12 +97,12 @@ namespace Lucy.Infrastructure.RpcServer
         private readonly IncommingRequestHandler _incommingRequestHandler;
         private readonly Worker _worker = new Worker();
 
-        public IncommingMessageHandler(JsonRpcConfig config, IncommingMessageReader incommingMessageReader, OutgoingMessageWriter outgoingMessageWriter, OutgoingRequestHandler outgoingRequestHandler)
+        public IncommingMessageHandler(JsonRpcConfig config, IncommingRequestHandler incommingRequestHandler,  IncommingMessageReader incommingMessageReader, OutgoingMessageWriter outgoingMessageWriter, OutgoingRequestHandler outgoingRequestHandler, JsonRpcSerializer serializer, JobRunner jobRunner)
         {
             _incommingMessageReader = incommingMessageReader;
             _outgoingRequestHandler = outgoingRequestHandler;
-            _jobRunner = new JobRunner();
-            _incommingRequestHandler = new IncommingRequestHandler(config, outgoingMessageWriter, _jobRunner);
+            _jobRunner = jobRunner;
+            _incommingRequestHandler = incommingRequestHandler;
         }
 
         public void Start()
@@ -138,27 +137,30 @@ namespace Lucy.Infrastructure.RpcServer
         }
     }
 
-    internal class OutgoingRequestHandler
+    [Service(Lifetime.Singleton)]
+    public class OutgoingRequestHandler
     {
         private readonly OutgoingRequestTracker _outgoingRequestTracker;
         private readonly OutgoingMessageWriter _outgoingMessageWriter;
+        private readonly JsonRpcSerializer _serializer;
 
-        public OutgoingRequestHandler(OutgoingMessageWriter outgoingMessageWriter)
+        public OutgoingRequestHandler(OutgoingMessageWriter outgoingMessageWriter, JsonRpcSerializer serializer, OutgoingRequestTracker outgoingRequestTracker)
         {
-            _outgoingRequestTracker = new OutgoingRequestTracker();
+            _outgoingRequestTracker = outgoingRequestTracker;
             _outgoingMessageWriter = outgoingMessageWriter;
+            _serializer = serializer;
         }
 
         public async Task<TResult> SendRequest<TResult>(string name, object? parameter)
         {
             var tracker = _outgoingRequestTracker.CreateNew<TResult>();
-            await _outgoingMessageWriter.Write(new RequestMessage(tracker.Id, name, Serializer.ObjectToToken(parameter)));
+            await _outgoingMessageWriter.Write(new RequestMessage(tracker.Id, name, _serializer.ObjectToToken(parameter)));
             return await tracker.ResponseTask;
         }
 
         public async Task SendNotification(string name, object? parameter)
         {
-            await _outgoingMessageWriter.Write(new NotificationMessage(name, Serializer.ObjectToToken(parameter)));
+            await _outgoingMessageWriter.Write(new NotificationMessage(name, _serializer.ObjectToToken(parameter)));
         }
 
         public void HandleResponse(ResponseMessage response)
@@ -168,7 +170,7 @@ namespace Lucy.Infrastructure.RpcServer
                 return; //TODO: Logging
 
             if (response is ResponseSuccessMessage success)
-                _outgoingRequestTracker.SetResult(success.Id, Serializer.TokenToObject(success.Result, type));
+                _outgoingRequestTracker.SetResult(success.Id, _serializer.TokenToObject(success.Result, type));
 
             if (response is ResponseErrorMessage error)
                 _outgoingRequestTracker.SetResult(error.Id, new JsonRpcException(error.Error.Code, error.Error.Message));

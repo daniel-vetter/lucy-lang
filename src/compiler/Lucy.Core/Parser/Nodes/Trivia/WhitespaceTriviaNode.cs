@@ -4,10 +4,12 @@ namespace Lucy.Core.Parser.Nodes.Trivia
 {
     internal class WhitespaceTriviaNode : TriviaNode
     {
-        public WhitespaceTriviaNode(string withespace)
+        public WhitespaceTriviaNode(TokenNode token)
         {
-            Withespace = withespace;
+            Token = token;
         }
+
+        public TokenNode Token { get; }
 
         public static WhitespaceTriviaNode? Read(Code code)
         {
@@ -18,9 +20,7 @@ namespace Lucy.Core.Parser.Nodes.Trivia
             if (len == 0)
                 return null;
 
-            return new WhitespaceTriviaNode(code.Read(len));
+            return new WhitespaceTriviaNode(new TokenNode(code.Read(len)));
         }
-
-        public string Withespace { get; }
     }
 }

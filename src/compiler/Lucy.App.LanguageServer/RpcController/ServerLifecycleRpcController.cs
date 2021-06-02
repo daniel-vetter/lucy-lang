@@ -8,12 +8,12 @@ using Lucy.Feature.LanguageServer.Services;
 
 namespace Lucy.Feature.LanguageServer.RpcController
 {
-    [Service]
-    internal class ServerLifecycleRpcController
+    [Service(Lifetime.Singleton)]
+    public class ServerLifecycleRpcController
     {
-        private readonly CurrentRpcConnection _currentRpcConnection;
+        private readonly CurrentJsonRpcConnection _currentRpcConnection;
 
-        public ServerLifecycleRpcController(CurrentRpcConnection currentRpcConnection)
+        public ServerLifecycleRpcController(CurrentJsonRpcConnection currentRpcConnection)
         {
             _currentRpcConnection = currentRpcConnection;
         }

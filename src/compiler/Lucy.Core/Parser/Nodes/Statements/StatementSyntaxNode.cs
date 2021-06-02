@@ -4,7 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Lucy.Core.Parser.Nodes.Statements
 {
-    public abstract class StatementSyntaxNode : SyntaxNode
+    public abstract class StatementSyntaxNode : SyntaxTreeNode
     {
         public StatementSyntaxNode()
         {

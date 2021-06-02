@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Lucy.Common.ServiceDiscovery;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading;
@@ -6,7 +7,8 @@ using System.Threading.Tasks;
 
 namespace Lucy.Infrastructure.RpcServer.Internal.Infrastructure
 {
-    internal class OutgoingRequestTracker
+    [Service(Lifetime.Singleton)]
+    public class OutgoingRequestTracker
     {
         private int _lastId = -1;
 

@@ -5,7 +5,7 @@ namespace Lucy.Core.Helper
 {
     public static class SyntaxTreeNodeExtensions
     {
-        public static IEnumerable<SyntaxNode> GetChildNodes(this SyntaxNode node)
+        public static IEnumerable<SyntaxTreeNode> GetChildNodes(this SyntaxTreeNode node)
         {
             var props = node.GetType().GetProperties();
             foreach(var prop in props)
@@ -15,14 +15,14 @@ namespace Lucy.Core.Helper
                     continue;
 
                 
-                if (value is IEnumerable<SyntaxNode> subList)
+                if (value is IEnumerable<SyntaxTreeNode> subList)
                 {
                     foreach (var element in subList)
                         yield return element;
                 }
                     
 
-                if (value is SyntaxNode parserTreeNode)
+                if (value is SyntaxTreeNode parserTreeNode)
                     yield return parserTreeNode;
             }
         }

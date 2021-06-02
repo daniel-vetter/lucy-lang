@@ -1,4 +1,5 @@
-﻿using Lucy.Core.Parser.Nodes.Token;
+﻿using Lucy.Core.Model.Syntax;
+using Lucy.Core.Parser.Nodes.Token;
 using Lucy.Core.Parser.Nodes.Trivia;
 using System.Diagnostics.CodeAnalysis;
 
@@ -6,19 +7,19 @@ namespace Lucy.Core.Parser.Nodes.Expressions.Unary
 {
     public class StringConstantExpressionSyntaxNode : ExpressionSyntaxNode
     {
-        public StringConstantExpressionSyntaxNode(string value, TokenNode token)
+        public StringConstantExpressionSyntaxNode(string value, SyntaxElement token)
         {
             Value = value;
             Token = token;
         }
 
         public string Value { get; }
-        public TokenNode Token { get; }
+        public SyntaxElement Token { get; }
 
         public static bool TryRead(Code code, [NotNullWhen(true)] out StringConstantExpressionSyntaxNode? result)
         {
             var start = code.Position;
-            var leadingTrivia = TriviaListNode.Read(code);
+            var leadingTrivia = TriviaNode.ReadList(code);
 
             if (code.Peek() != '\"')
             {
@@ -34,7 +35,7 @@ namespace Lucy.Core.Parser.Nodes.Expressions.Unary
                 {
                     code.ReportError("Unterminated string detected. Missing '\"'");
                     var str = code.Read(len);
-                    var token = new TokenNode(leadingTrivia, str);
+                    var token = new SyntaxElement(leadingTrivia, new TokenNode(str));
                     result = new StringConstantExpressionSyntaxNode(str.Substring(1), token);
                     return true;
                 }
@@ -42,7 +43,7 @@ namespace Lucy.Core.Parser.Nodes.Expressions.Unary
                 if (code.Peek(len) == '"')
                 {
                     var str = code.Read(len + 1);
-                    var token = new TokenNode(leadingTrivia, str);
+                    var token = new SyntaxElement(leadingTrivia, new TokenNode(str));
                     result = new StringConstantExpressionSyntaxNode(str.Substring(1, str.Length - 2), token);
                     return true;
                 }

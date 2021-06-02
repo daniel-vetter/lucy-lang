@@ -5,7 +5,7 @@ namespace Lucy.Core.Parser.Nodes.Expressions.Nested
 {
     internal class AndExpressionSyntaxNode : ExpressionSyntaxNode
     {
-        public AndExpressionSyntaxNode(ExpressionSyntaxNode left, TokenNode andKeyword, ExpressionSyntaxNode right)
+        public AndExpressionSyntaxNode(ExpressionSyntaxNode left, SyntaxElement andKeyword, ExpressionSyntaxNode right)
         {
             Left = left;
             AndKeyword = andKeyword;
@@ -13,7 +13,7 @@ namespace Lucy.Core.Parser.Nodes.Expressions.Nested
         }
 
         public ExpressionSyntaxNode Left { get; }
-        public TokenNode AndKeyword { get; }
+        public SyntaxElement AndKeyword { get; }
         public ExpressionSyntaxNode Right { get; }
 
         public static bool TryReadOrInner(Code code, [NotNullWhen(true)] out ExpressionSyntaxNode? result)
@@ -23,7 +23,7 @@ namespace Lucy.Core.Parser.Nodes.Expressions.Nested
 
             while (true)
             {
-                if (!TokenNode.TryReadKeyword(code, "and", out var andToken))
+                if (!SyntaxElement.TryReadKeyword(code, "and", out var andToken))
                     return true;
 
                 if (!OrExpressionSyntaxNode.TryReadOrInner(code, out var right))

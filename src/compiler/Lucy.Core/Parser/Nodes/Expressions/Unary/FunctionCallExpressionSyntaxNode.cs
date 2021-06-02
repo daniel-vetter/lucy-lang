@@ -6,7 +6,7 @@ namespace Lucy.Core.Parser.Nodes.Expressions.Unary
 {
     public class FunctionCallExpressionSyntaxNode : ExpressionSyntaxNode
     {
-        public FunctionCallExpressionSyntaxNode(TokenNode functionName, TokenNode openBraket, List<FunctionCallArgumentSyntaxNode> argumentList, TokenNode closeBraket)
+        public FunctionCallExpressionSyntaxNode(SyntaxElement functionName, SyntaxElement openBraket, List<FunctionCallArgumentSyntaxNode> argumentList, SyntaxElement closeBraket)
         {
             FunctionName = functionName;
             OpenBraket = openBraket;
@@ -14,24 +14,24 @@ namespace Lucy.Core.Parser.Nodes.Expressions.Unary
             CloseBraket = closeBraket;
         }
 
-        public TokenNode FunctionName { get; }
-        public TokenNode OpenBraket { get; }
+        public SyntaxElement FunctionName { get; }
+        public SyntaxElement OpenBraket { get; }
         public List<FunctionCallArgumentSyntaxNode> ArgumentList { get; }
-        public TokenNode CloseBraket { get; }
+        public SyntaxElement CloseBraket { get; }
 
         public static bool TryRead(Code code, [NotNullWhen(true)] out FunctionCallExpressionSyntaxNode? result)
         {
             result = null;
 
-            if (!TokenNode.TryReadIdentifier(code, out var functionName))
+            if (!SyntaxElement.TryReadIdentifier(code, out var functionName))
                 return false;
 
-            if (!TokenNode.TryReadExact(code, "(", out var openBraket))
+            if (!SyntaxElement.TryReadExact(code, "(", out var openBraket))
                 return false;
 
             var argumentList = FunctionCallArgumentSyntaxNode.Read(code);
 
-            if (!TokenNode.TryReadExact(code, ")", out var closeBraket))
+            if (!SyntaxElement.TryReadExact(code, ")", out var closeBraket))
                 return false;
 
             result = new FunctionCallExpressionSyntaxNode(functionName, openBraket, argumentList, closeBraket);

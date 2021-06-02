@@ -6,7 +6,7 @@ namespace Lucy.Core.SemanticAnalysis
 {
     internal class EntryPointFinder
     {
-        internal static void Run(SyntaxNode node)
+        internal static void Run(SyntaxTreeNode node)
         {
             if (node is FunctionDeclarationStatementSyntaxNode function)
             {

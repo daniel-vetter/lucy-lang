@@ -1,25 +1,27 @@
 ﻿using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
+using Lucy.Common.ServiceDiscovery;
 using Lucy.Infrastructure.RpcServer.Internal.Infrastructure;
 
 namespace Lucy.Infrastructure.RpcServer.Internal
 {
-    class IncommingRequestHandler
+    [Service(Lifetime.Singleton)]
+    public class IncommingRequestHandler
     {
         private readonly FunctionCaller _functionCaller;
         private readonly FunctionFinder _functionFinder;
         private readonly OutgoingMessageWriter _outgoingMessageWriter;
-        private readonly JobRunner _jobRunner;
+        private readonly JsonRpcSerializer _serializer;
         private readonly Channel<Message> _inbox = Channel.CreateUnbounded<Message>();
         private readonly Worker _worker = new Worker();
 
-        public IncommingRequestHandler(JsonRpcConfig config, OutgoingMessageWriter outgoingMessageWriter, JobRunner jobRunner)
+        public IncommingRequestHandler(OutgoingMessageWriter outgoingMessageWriter, JsonRpcSerializer serializer, FunctionFinder functionFinder, FunctionCaller functionCaller)
         {
-            _functionCaller = new FunctionCaller();
-            _functionFinder = new FunctionFinder(config);
             _outgoingMessageWriter = outgoingMessageWriter;
-            _jobRunner = jobRunner;
+            _serializer = serializer;
+            _functionFinder = functionFinder;
+            _functionCaller = functionCaller;
         }
 
         public void HandleNotificion(NotificationMessage notification)
@@ -81,7 +83,7 @@ namespace Lucy.Infrastructure.RpcServer.Internal
                 return;
             }
 
-            await _outgoingMessageWriter.Write(new ResponseSuccessMessage(requestMessage.Id, Serializer.ObjectToToken(result.Result)));
+            await _outgoingMessageWriter.Write(new ResponseSuccessMessage(requestMessage.Id, _serializer.ObjectToToken(result.Result)));
         }
     }
 }

@@ -5,25 +5,25 @@ namespace Lucy.Core.Parser.Nodes.Statements.FunctionDeclaration
 {
     internal static class FunctionDeclarationModifierList
     {
-        public static List<TokenNode> Read(Code code)
+        public static List<SyntaxElement> Read(Code code)
         {
-            var l = new List<TokenNode>();
+            var l = new List<SyntaxElement>();
 
             while (true)
             {
-                if (TokenNode.TryReadKeyword(code, "extern", out var externKeyword))
+                if (SyntaxElement.TryReadKeyword(code, "extern", out var externKeyword))
                 {
                     l.Add(externKeyword);
                     continue;
                 }
 
-                if (TokenNode.TryReadKeyword(code, "cdecl", out var cdeclKeyword))
+                if (SyntaxElement.TryReadKeyword(code, "cdecl", out var cdeclKeyword))
                 {
                     l.Add(cdeclKeyword);
                     continue;
                 }
 
-                if (TokenNode.TryReadKeyword(code, "stdcall", out var stdcallKeyword))
+                if (SyntaxElement.TryReadKeyword(code, "stdcall", out var stdcallKeyword))
                 {
                     l.Add(stdcallKeyword);
                     continue;

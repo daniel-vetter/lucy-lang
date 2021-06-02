@@ -6,16 +6,16 @@ namespace Lucy.Core.Parser.Nodes.Statements
 {
     public class StatementListSyntaxNode : StatementSyntaxNode
     {
-        public StatementListSyntaxNode(TokenNode? blockStart, List<StatementSyntaxNode> statements, TokenNode? blockEnd)
+        public StatementListSyntaxNode(SyntaxElement? blockStart, List<StatementSyntaxNode> statements, SyntaxElement? blockEnd)
         {
             BlockStart = blockStart;
             Statements = statements;
             BlockEnd = blockEnd;
         }
 
-        public TokenNode? BlockStart { get; }
+        public SyntaxElement? BlockStart { get; }
         public List<StatementSyntaxNode> Statements { get; }
-        public TokenNode? BlockEnd { get; }
+        public SyntaxElement? BlockEnd { get; }
 
         public static StatementListSyntaxNode ReadStatementsWithoutBlock(Code code)
         {
@@ -30,7 +30,7 @@ namespace Lucy.Core.Parser.Nodes.Statements
 
         public static bool TryReadStatementBlock(Code code, [NotNullWhen(true)] out StatementListSyntaxNode? result)
         {
-            if (!TokenNode.TryReadExact(code, "{", out var blockStart))
+            if (!SyntaxElement.TryReadExact(code, "{", out var blockStart))
             {
                 result = null;
                 return false;
@@ -42,7 +42,7 @@ namespace Lucy.Core.Parser.Nodes.Statements
                 list.Add(statement);
             }
 
-            if (!TokenNode.TryReadExact(code, "}", out var blockEnd))
+            if (!SyntaxElement.TryReadExact(code, "}", out var blockEnd))
                 code.ReportError("Code block end '}' expected.");
 
             result = new StatementListSyntaxNode(blockStart, list, blockEnd);

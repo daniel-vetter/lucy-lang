@@ -5,7 +5,7 @@ namespace Lucy.Core.Parser.Nodes.Expressions.Nested
 {
     public class IfExpressionSyntaxNode : ExpressionSyntaxNode
     {
-        public IfExpressionSyntaxNode(ExpressionSyntaxNode condition, TokenNode ifToken, ExpressionSyntaxNode thenExpression, TokenNode elseToken, ExpressionSyntaxNode elseExpression)
+        public IfExpressionSyntaxNode(ExpressionSyntaxNode condition, SyntaxElement ifToken, ExpressionSyntaxNode thenExpression, SyntaxElement elseToken, ExpressionSyntaxNode elseExpression)
         {
             Condition = condition;
             IfToken = ifToken;
@@ -15,9 +15,9 @@ namespace Lucy.Core.Parser.Nodes.Expressions.Nested
         }
 
         public ExpressionSyntaxNode Condition { get; }
-        public TokenNode IfToken { get; }
+        public SyntaxElement IfToken { get; }
         public ExpressionSyntaxNode ThenExpression { get; }
-        public TokenNode ElseToken { get; }
+        public SyntaxElement ElseToken { get; }
         public ExpressionSyntaxNode ElseExpression { get; }
 
         public static bool TryReadOrInner(Code code, [NotNullWhen(true)] out ExpressionSyntaxNode? result)
@@ -27,7 +27,7 @@ namespace Lucy.Core.Parser.Nodes.Expressions.Nested
 
             while (true)
             {
-                if (!TokenNode.TryReadExact(code, "?", out var ifToken))
+                if (!SyntaxElement.TryReadExact(code, "?", out var ifToken))
                     return true;
 
                 if (!AndExpressionSyntaxNode.TryReadOrInner(code, out var thenExpression))
@@ -36,7 +36,7 @@ namespace Lucy.Core.Parser.Nodes.Expressions.Nested
                     return false;
                 }
 
-                if (!TokenNode.TryReadExact(code, ":", out var elseToken))
+                if (!SyntaxElement.TryReadExact(code, ":", out var elseToken))
                 {
                     code.ReportError("Expected ':'", code.Position);
                     return false;

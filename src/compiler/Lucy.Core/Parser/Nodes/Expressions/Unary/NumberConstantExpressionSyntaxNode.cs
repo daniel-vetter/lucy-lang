@@ -1,5 +1,7 @@
-﻿using Lucy.Core.Parser.Nodes.Token;
+﻿using Lucy.Core.Model.Syntax;
+using Lucy.Core.Parser.Nodes.Token;
 using Lucy.Core.Parser.Nodes.Trivia;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 
@@ -7,19 +9,19 @@ namespace Lucy.Core.Parser.Nodes.Expressions.Unary
 {
     public class NumberConstantExpressionSyntaxNode : ExpressionSyntaxNode
     {
-        public NumberConstantExpressionSyntaxNode(double value, TokenNode token)
+        public NumberConstantExpressionSyntaxNode(double value, SyntaxElement token)
         {
             Value = value;
             Token = token;
         }
 
         public double Value { get; }
-        public TokenNode Token { get; }
+        public SyntaxElement Token { get; }
 
         public static bool TryRead(Code code, [NotNullWhen(true)] out NumberConstantExpressionSyntaxNode? result)
         {
             var start = code.Position;
-            var leadingTrivia = TriviaListNode.Read(code);
+            var leadingTrivia = TriviaNode.ReadList(code);
 
             if (!CountDigits(code, out var beforeDigitCount))
             {
@@ -44,11 +46,11 @@ namespace Lucy.Core.Parser.Nodes.Expressions.Unary
             return true;
         }
 
-        private static NumberConstantExpressionSyntaxNode CreateNode(Code code, TriviaListNode leadingTrivia, int count)
+        private static NumberConstantExpressionSyntaxNode CreateNode(Code code, List<TriviaNode> leadingTrivia, int count)
         {
             var str = code.Read(count);
             var num = double.Parse(str, CultureInfo.InvariantCulture);
-            var token = new TokenNode(leadingTrivia, str);
+            var token = new SyntaxElement(leadingTrivia, new TokenNode(str));
             return new NumberConstantExpressionSyntaxNode(num, token);
         }
 

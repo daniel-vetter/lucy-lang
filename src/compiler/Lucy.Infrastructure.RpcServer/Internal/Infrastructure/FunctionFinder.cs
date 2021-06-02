@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Lucy.Common.ServiceDiscovery;
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -7,15 +8,17 @@ using System.Threading.Tasks;
 
 namespace Lucy.Infrastructure.RpcServer.Internal.Infrastructure
 {
-    internal class FunctionFinder
+    [Service(Lifetime.Singleton)]
+    public class FunctionFinder
     {
         private readonly Dictionary<string, CallableFunction> _methods = new Dictionary<string, CallableFunction>();
         private JsonRpcConfig _config;
+        private readonly IServiceProvider _serviceProvider;
 
-        public FunctionFinder(JsonRpcConfig config)
+        public FunctionFinder(JsonRpcConfig config, IServiceProvider serviceProvider)
         {
             _config = config;
-
+            _serviceProvider = serviceProvider;
             foreach (var assembly in config.AssembliesToScan)
             {
                 var types = assembly
@@ -51,7 +54,7 @@ namespace Lucy.Infrastructure.RpcServer.Internal.Infrastructure
                 {
                     toAdd.Add(name, new CallableFunction(name, attribute.SingleParameter, parameterTypes, p =>
                     {
-                        methodInfo.Invoke(_config.ControllerFactory(type), p);
+                        methodInfo.Invoke(_serviceProvider.GetService(type), p);
                         return Task.FromResult<object?>(null);
                     }));
                 }
@@ -59,7 +62,7 @@ namespace Lucy.Infrastructure.RpcServer.Internal.Infrastructure
                 {
                     toAdd.Add(name, new CallableFunction(name, attribute.SingleParameter, parameterTypes, async p =>
                     {
-                        await (methodInfo.Invoke(_config.ControllerFactory(type), p) as Task ?? throw new Exception("Function did not return a task."));
+                        await (methodInfo.Invoke(_serviceProvider.GetService(type), p) as Task ?? throw new Exception("Function did not return a task."));
                         return null;
                     }));
                 }
@@ -67,7 +70,7 @@ namespace Lucy.Infrastructure.RpcServer.Internal.Infrastructure
                 {
                     toAdd.Add(name, new CallableFunction(name, attribute.SingleParameter, parameterTypes, async p =>
                     {
-                        dynamic task = methodInfo.Invoke(_config.ControllerFactory(type), p) ?? throw new Exception("Function did not return a task.");
+                        dynamic task = methodInfo.Invoke(_serviceProvider.GetService(type), p) ?? throw new Exception("Function did not return a task.");
                         await task;
                         return task.Result;
                     }));
@@ -76,7 +79,7 @@ namespace Lucy.Infrastructure.RpcServer.Internal.Infrastructure
                 {
                     toAdd.Add(name, new CallableFunction(name, attribute.SingleParameter, parameterTypes, p =>
                     {
-                        var result = methodInfo.Invoke(_config.ControllerFactory(type), p);
+                        var result = methodInfo.Invoke(_serviceProvider.GetService(type), p);
                         return Task.FromResult(result);
                     }));
                 }
@@ -100,7 +103,7 @@ namespace Lucy.Infrastructure.RpcServer.Internal.Infrastructure
         }
     }
 
-    internal class CallableFunction
+    public class CallableFunction
     {
         private readonly Func<object?[], Task<object?>> _handler;
         public string Name { get; }

@@ -1,24 +1,25 @@
 ﻿using Lucy.Core.Model.Syntax;
 using Lucy.Core.Parser.Nodes.Trivia;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Lucy.Core.Parser.Nodes.Token
 {
-    public class TokenNode : SyntaxNode
+    public class SyntaxElement : SyntaxTreeNode
     {
-        public TokenNode(TriviaListNode leadingTrivia, string value)
+        public SyntaxElement(List<TriviaNode> leadingTrivia, TokenNode token)
         {
             LeadingTrivia = leadingTrivia;
-            Value = value;
+            Token = token;
         }
 
-        public TriviaListNode LeadingTrivia { get; set; }
-        public string Value { get; set; }
+        public List<TriviaNode> LeadingTrivia { get; set; }
+        public TokenNode Token { get; set; }
 
-        public static bool TryReadExact(Code code, string text, [NotNullWhen(true)] out TokenNode? result)
+        public static bool TryReadExact(Code code, string text, [NotNullWhen(true)] out SyntaxElement? result)
         {
             var start = code.Position;
-            var leadingTrivia = TriviaListNode.Read(code);
+            var leadingTrivia = TriviaNode.ReadList(code);
 
             for (int i = 0; i < text.Length; i++)
                 if (code.Peek(i) != text[i])
@@ -29,15 +30,15 @@ namespace Lucy.Core.Parser.Nodes.Token
                 }
 
 
-            result = new TokenNode(leadingTrivia, text);
+            result = new SyntaxElement(leadingTrivia, new TokenNode(text));
             code.Seek(text.Length);
             return true;
         }
 
-        public static bool TryReadIdentifier(Code code, [NotNullWhen(true)] out TokenNode? result)
+        public static bool TryReadIdentifier(Code code, [NotNullWhen(true)] out SyntaxElement? result)
         {
             var start = code.Position;
-            var trivia = TriviaListNode.Read(code);
+            var trivia = TriviaNode.ReadList(code);
 
             int length = 0;
             while (IsIdentifierChar(code.Peek(length), length == 0))
@@ -50,14 +51,14 @@ namespace Lucy.Core.Parser.Nodes.Token
                 return false;
             }
 
-            result = new TokenNode(trivia, code.Read(length));
+            result = new SyntaxElement(trivia, new TokenNode(code.Read(length)));
             return true;
         }
 
-        public static bool TryReadKeyword(Code code, string keyword, [NotNullWhen(true)] out TokenNode? result)
+        public static bool TryReadKeyword(Code code, string keyword, [NotNullWhen(true)] out SyntaxElement? result)
         {
             var start = code.Position;
-            if (!TryReadIdentifier(code, out result) || result.Value != keyword)
+            if (!TryReadIdentifier(code, out result) || result.Token.Text != keyword)
             {
                 code.SeekTo(start);
                 return false;

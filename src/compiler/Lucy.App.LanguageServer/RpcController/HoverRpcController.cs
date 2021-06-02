@@ -4,7 +4,7 @@ using Lucy.Common.ServiceDiscovery;
 
 namespace Lucy.Feature.LanguageServer.RpcController
 {
-    [Service]
+    [Service(Lifetime.Singleton)]
     internal class HoverRpcController
     {
         [JsonRpcFunction("textDocument/hover")]

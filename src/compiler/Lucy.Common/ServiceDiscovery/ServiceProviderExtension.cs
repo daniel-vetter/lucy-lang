@@ -19,10 +19,21 @@ namespace Lucy.Common.ServiceDiscovery
 
                     if (printServices)
                         Console.WriteLine(serviceType + " -> " + type + ": " + attribute.Lifetime);
-                    sc.Add(new ServiceDescriptor(serviceType, type, attribute.Lifetime));
+                    sc.Add(new ServiceDescriptor(serviceType, type, Map(attribute.Lifetime)));
                 }
             }
             return sc;
+        }
+
+        private static ServiceLifetime Map(Lifetime lifetime)
+        {
+            return lifetime switch
+            {
+                Lifetime.Transient => ServiceLifetime.Transient,
+                Lifetime.Scoped => ServiceLifetime.Scoped,
+                Lifetime.Singleton => ServiceLifetime.Singleton,
+                _ => throw new NotSupportedException()
+            };
         }
     }
 }

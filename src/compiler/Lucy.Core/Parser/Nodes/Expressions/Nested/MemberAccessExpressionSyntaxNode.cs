@@ -6,7 +6,7 @@ namespace Lucy.Core.Parser.Nodes.Expressions.Nested
 {
     public class MemberAccessExpressionSyntaxNode : ExpressionSyntaxNode
     {
-        public MemberAccessExpressionSyntaxNode(ExpressionSyntaxNode target, TokenNode dotToken, TokenNode memberToken)
+        public MemberAccessExpressionSyntaxNode(ExpressionSyntaxNode target, SyntaxElement dotToken, SyntaxElement memberToken)
         {
             Target = target;
             DotToken = dotToken;
@@ -14,8 +14,8 @@ namespace Lucy.Core.Parser.Nodes.Expressions.Nested
         }
 
         public ExpressionSyntaxNode Target { get; }
-        public TokenNode DotToken { get; }
-        public TokenNode MemberToken { get; }
+        public SyntaxElement DotToken { get; }
+        public SyntaxElement MemberToken { get; }
 
         public static bool TryReadOrInner(Code code, [NotNullWhen(true)] out ExpressionSyntaxNode? result)
         {
@@ -24,10 +24,10 @@ namespace Lucy.Core.Parser.Nodes.Expressions.Nested
 
             while (true)
             {
-                if (!TokenNode.TryReadExact(code, ".", out var dotToken))
+                if (!SyntaxElement.TryReadExact(code, ".", out var dotToken))
                     return true;
 
-                if (!TokenNode.TryReadIdentifier(code, out var identifier))
+                if (!SyntaxElement.TryReadIdentifier(code, out var identifier))
                 {
                     code.ReportError("Identifier expected after member access '.'", code.Position);
                     return true;

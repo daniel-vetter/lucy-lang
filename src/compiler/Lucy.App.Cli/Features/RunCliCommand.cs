@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace Lucy.App.Features
 {
-    [Service]
+    [Service(Lifetime.Singleton)]
     class RunCliCommand : ICliCommand
     {
         public void Register(CommandLineBuilder builder)

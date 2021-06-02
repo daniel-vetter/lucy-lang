@@ -4,37 +4,44 @@ namespace Lucy.Core.Parser.Nodes.Trivia
 {
     internal class MultiLineCommentTriviaNode : TriviaNode
     {
-        public MultiLineCommentTriviaNode(string comment)
+        public MultiLineCommentTriviaNode(TokenNode start, TokenNode content, TokenNode? end)
         {
-            Comment = comment;
+            Start = start;
+            Content = content;
+            End = end;
         }
 
-        public string Comment { get; }
+        public TokenNode Start { get; }
+        public TokenNode Content { get; }
+        public TokenNode? End { get; }
 
         public static MultiLineCommentTriviaNode? Read(Code code)
         {
             if (code.Peek() != '/' || code.Peek(1) != '*')
                 return null;
 
-            var len = 2;
+            var start = new TokenNode(code.Read(2));
+
+            var len = 0;
+            bool foundEnd = false;
             while (true)
             {
-                if (code.Peek(len) == '*' && code.Peek(len + 1) != '/')
-                {
-                    len += 2;
-                    break;
-                }
-
                 if (code.IsDone)
+                    break;
+                
+                if (code.Peek(len) != '*' || code.Peek(len + 1) != '/')
                 {
-                    code.ReportError("Missing '*/'", code.Position + len);
+                    foundEnd = true;
                     break;
                 }
 
                 len++;
             }
 
-            return new MultiLineCommentTriviaNode(code.Read(len));
+            var content = new TokenNode(code.Read(len));
+            var end = foundEnd ? new TokenNode(code.Read(2)) : null;
+
+            return new MultiLineCommentTriviaNode(start, content, end);
         }
     }
 }

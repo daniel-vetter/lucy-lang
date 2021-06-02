@@ -4,16 +4,16 @@ using System.Collections.Generic;
 
 namespace Lucy.Core.Parser.Nodes.Statements.FunctionDeclaration
 {
-    public class FunctionDeclarationParameterSyntaxNode : SyntaxNode
+    public class FunctionDeclarationParameterSyntaxNode : SyntaxTreeNode
     {
-        public FunctionDeclarationParameterSyntaxNode(VariableNameWithTypeDeclarationSyntaxNode parameter, TokenNode? seperator)
+        public FunctionDeclarationParameterSyntaxNode(VariableNameWithTypeDeclarationSyntaxNode parameter, SyntaxElement? seperator)
         {
             Parameter = parameter;
             Seperator = seperator;
         }
 
         public VariableNameWithTypeDeclarationSyntaxNode Parameter { get; set; }
-        public TokenNode? Seperator { get; set; }
+        public SyntaxElement? Seperator { get; set; }
 
         public static List<FunctionDeclarationParameterSyntaxNode> ReadList(Code code)
         {
@@ -23,7 +23,7 @@ namespace Lucy.Core.Parser.Nodes.Statements.FunctionDeclaration
                 if (!VariableNameWithTypeDeclarationSyntaxNode.Read(code, out var variableNameWithTypeDeclaration))
                     break;
 
-                TokenNode.TryReadExact(code, ",", out var seperator);
+                SyntaxElement.TryReadExact(code, ",", out var seperator);
 
                 l.Add(new FunctionDeclarationParameterSyntaxNode(variableNameWithTypeDeclaration, seperator));
 

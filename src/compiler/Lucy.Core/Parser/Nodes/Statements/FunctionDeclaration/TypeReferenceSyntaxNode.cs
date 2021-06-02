@@ -4,18 +4,18 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Lucy.Core.Parser.Nodes.Statements.FunctionDeclaration
 {
-    public class TypeReferenceSyntaxNode : SyntaxNode
+    public class TypeReferenceSyntaxNode : SyntaxTreeNode
     {
-        public TypeReferenceSyntaxNode(TokenNode typeName)
+        public TypeReferenceSyntaxNode(SyntaxElement typeName)
         {
             TypeName = typeName;
         }
 
-        public TokenNode TypeName { get; set; }
+        public SyntaxElement TypeName { get; set; }
 
         public static bool TryRead(Code code, [NotNullWhen(true)] out TypeReferenceSyntaxNode? result)
         {
-            if (!TokenNode.TryReadIdentifier(code, out var token))
+            if (!SyntaxElement.TryReadIdentifier(code, out var token))
             {
                 result = null;
                 return false;

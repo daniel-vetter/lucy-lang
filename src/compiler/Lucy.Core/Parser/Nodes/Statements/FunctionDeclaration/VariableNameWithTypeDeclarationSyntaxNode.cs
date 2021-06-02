@@ -4,17 +4,17 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Lucy.Core.Parser.Nodes.Statements.FunctionDeclaration
 {
-    public class VariableNameWithTypeDeclarationSyntaxNode : SyntaxNode
+    public class VariableNameWithTypeDeclarationSyntaxNode : SyntaxTreeNode
     {
-        public VariableNameWithTypeDeclarationSyntaxNode(TokenNode variableName, TokenNode seperator, TypeReferenceSyntaxNode typeReference)
+        public VariableNameWithTypeDeclarationSyntaxNode(SyntaxElement variableName, SyntaxElement seperator, TypeReferenceSyntaxNode typeReference)
         {
             VariableName = variableName;
             Seperator = seperator;
             TypeReference = typeReference;
         }
 
-        public TokenNode VariableName { get; set; }
-        public TokenNode Seperator { get; set; }
+        public SyntaxElement VariableName { get; set; }
+        public SyntaxElement Seperator { get; set; }
         public TypeReferenceSyntaxNode TypeReference { get; set; }
 
         public static bool Read(Code code, [NotNullWhen(true)] out VariableNameWithTypeDeclarationSyntaxNode? result)
@@ -22,10 +22,10 @@ namespace Lucy.Core.Parser.Nodes.Statements.FunctionDeclaration
             var start = code.Position;
             result = null;
 
-            if (!TokenNode.TryReadIdentifier(code, out var variableName))
+            if (!SyntaxElement.TryReadIdentifier(code, out var variableName))
                 return false;
 
-            if (!TokenNode.TryReadExact(code, ":", out var seperator))
+            if (!SyntaxElement.TryReadExact(code, ":", out var seperator))
             {
                 code.SeekTo(start);
                 return false;

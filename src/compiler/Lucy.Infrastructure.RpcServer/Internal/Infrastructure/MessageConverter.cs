@@ -1,4 +1,5 @@
 ﻿using System;
+using Lucy.Common.ServiceDiscovery;
 using Newtonsoft.Json.Linq;
 
 namespace Lucy.Infrastructure.RpcServer.Internal.Infrastructure
@@ -12,12 +13,19 @@ namespace Lucy.Infrastructure.RpcServer.Internal.Infrastructure
     public record ErrorDescription(int Code, string Message);
     public record NotificationMessage(string Method, JToken? Params) : Message;
 
-
+    [Service(Lifetime.Singleton)]
     public class MessageConverter
     {
-        public static Message FromBytes(byte[] data)
+        private readonly JsonRpcSerializer _serializer;
+
+        public MessageConverter(JsonRpcSerializer serializer)
         {
-            var msg = Serializer.ByteArrayToObject<GenericMessage>(data);
+            _serializer = serializer;
+        }
+
+        public Message FromBytes(byte[] data)
+        {
+            var msg = _serializer.ByteArrayToObject<GenericMessage>(data);
             if (msg == null)
                 throw new Exception("Could not parse message");
 

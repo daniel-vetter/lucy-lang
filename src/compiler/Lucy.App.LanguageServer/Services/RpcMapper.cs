@@ -1,11 +1,9 @@
 ﻿using System;
-using Lucy.Feature.LanguageServer.Models;
 using Lucy.Common.ServiceDiscovery;
-using Lucy.Core.Model;
 
 namespace Lucy.Feature.LanguageServer.Services
 {
-    [Service]
+    [Service(Lifetime.Singleton)]
     public class RpcMapper
     {
         private Uri? _rootUri;
@@ -13,16 +11,6 @@ namespace Lucy.Feature.LanguageServer.Services
         public void SetWorkspaceRootUri(Uri rootUri)
         {
             _rootUri = rootUri;
-        }
-
-
-        public RpcRange ConvertRange(Range2D range)
-        {
-            return new RpcRange
-            {
-                Start = new RpcPosition { Line = range.Start.Line, Character = range.Start.Column },
-                End = new RpcPosition { Line = range.End.Line, Character = range.End.Column },
-            };
         }
 
         public string ToSystemPath(Uri uri)

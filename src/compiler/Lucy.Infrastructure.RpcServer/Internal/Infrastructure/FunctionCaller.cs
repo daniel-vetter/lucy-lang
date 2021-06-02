@@ -1,12 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Lucy.Common.ServiceDiscovery;
 using Newtonsoft.Json.Linq;
 
 namespace Lucy.Infrastructure.RpcServer.Internal.Infrastructure
 {
-    internal class FunctionCaller
+    [Service(Lifetime.Singleton)]
+    public class FunctionCaller
     {
+        private readonly JsonRpcSerializer _serializer;
+
+        public FunctionCaller(JsonRpcSerializer serializer)
+        {
+            _serializer = serializer;
+        }
+
         public async Task<FunctionCallResult> Call(CallableFunction function, JToken? parameter)
         {
             var parsedParameter = Parse(parameter, function);
@@ -37,7 +46,7 @@ namespace Lucy.Infrastructure.RpcServer.Internal.Infrastructure
             return ParseMultipleParameters(json, function);
         }
 
-        private static object?[] ParseMultipleParameters(JToken? json, CallableFunction function)
+        private object?[] ParseMultipleParameters(JToken? json, CallableFunction function)
         {
             var result = new List<object?>();
             if (json is JObject obj)
@@ -49,7 +58,7 @@ namespace Lucy.Infrastructure.RpcServer.Internal.Infrastructure
                     if (prop == null)
                         result.Add(null);
                     else
-                        result.Add(Serializer.TokenToObject(prop.Value, p.ParameterType));
+                        result.Add(_serializer.TokenToObject(prop.Value, p.ParameterType));
                 }
             }
 
@@ -60,19 +69,19 @@ namespace Lucy.Infrastructure.RpcServer.Internal.Infrastructure
 
                 for (int i = 0; i < arr.Count; i++)
                 {
-                    result.Add(Serializer.TokenToObject(arr[i], function.Parameters[i].ParameterType));
+                    result.Add(_serializer.TokenToObject(arr[i], function.Parameters[i].ParameterType));
                 }
             }
 
             return result.ToArray();
         }
 
-        private static object?[] ParseSingleParameter(JToken? json, CallableFunction function)
+        private object?[] ParseSingleParameter(JToken? json, CallableFunction function)
         {
             if (json == null)
                 return new object?[] { null };
 
-            var result = json.ToObject(function.Parameters[0].ParameterType);
+            var result = _serializer.TokenToObject(json, function.Parameters[0].ParameterType);
             if (result == null)
                 return new object?[] { null };
 

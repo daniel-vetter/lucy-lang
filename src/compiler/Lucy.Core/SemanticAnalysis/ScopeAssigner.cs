@@ -7,13 +7,13 @@ namespace Lucy.Core.SemanticAnalysis
 {
     internal class ScopeAssigner
     {
-        internal static void Run(SyntaxNode node)
+        internal static void Run(SyntaxTreeNode node)
         {
             var rootScope = new Scope(null);
             Annotate(node, rootScope);
         }
 
-        private static void Annotate(SyntaxNode node, Scope parentScope)
+        private static void Annotate(SyntaxTreeNode node, Scope parentScope)
         {
             node.SetAnnotation(parentScope);
 
@@ -24,7 +24,7 @@ namespace Lucy.Core.SemanticAnalysis
 
     public static class ScopeExtensionMethods
     {
-        public static Scope GetScope(this SyntaxNode node)
+        public static Scope GetScope(this SyntaxTreeNode node)
         {
             return node.GetRequiredAnnotation<Scope>();
         }

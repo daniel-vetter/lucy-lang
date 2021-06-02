@@ -7,14 +7,14 @@ using Lucy.Infrastructure.RpcServer.Internal.Infrastructure;
 
 namespace Lucy.Infrastructure.RpcServer
 {
-    public interface IJsonRpcMessageTrace : IAsyncDisposable
+    public interface IJsonRpcMessageTraceTarget : IAsyncDisposable
     {
         Task Initialize();
-        Task OnIncomingMessage(Message message);
-        Task OnOutgoingMessage(Message message);
+        Task OnIncomingMessage(Message message, JsonRpcSerializer serializer);
+        Task OnOutgoingMessage(Message message, JsonRpcSerializer serializer);
     }
 
-    public class DiskTraceTarget : IJsonRpcMessageTrace
+    public class DiskTraceTarget : IJsonRpcMessageTraceTarget
     {
         private readonly string _file;
         private Channel<string> _channel = Channel.CreateUnbounded<string>();
@@ -54,7 +54,7 @@ namespace Lucy.Infrastructure.RpcServer
             file.Close();
         }
 
-        public async Task OnIncomingMessage(Message message)
+        public async Task OnIncomingMessage(Message message, JsonRpcSerializer serializer)
         {
             var type = message switch
             {
@@ -66,10 +66,10 @@ namespace Lucy.Infrastructure.RpcServer
             };
 
             var c = new Container(type, message, DateTimeOffset.Now.ToUnixTimeMilliseconds());
-            await _channel.Writer.WriteAsync(Serializer.ObjectToString(c));
+            await _channel.Writer.WriteAsync(serializer.ObjectToString(c));
         }
 
-        public async Task OnOutgoingMessage(Message message)
+        public async Task OnOutgoingMessage(Message message, JsonRpcSerializer serializer)
         {
             var type = message switch
             {
@@ -81,7 +81,7 @@ namespace Lucy.Infrastructure.RpcServer
             };
 
             var c = new Container(type, message, DateTimeOffset.Now.ToUnixTimeMilliseconds());
-            await _channel.Writer.WriteAsync(Serializer.ObjectToString(c));
+            await _channel.Writer.WriteAsync(serializer.ObjectToString(c));
         }
     }
 

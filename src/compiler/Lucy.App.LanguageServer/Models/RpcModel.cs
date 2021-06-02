@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using System;
+using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 
 namespace Lucy.Feature.LanguageServer.Models
@@ -443,7 +444,7 @@ namespace Lucy.Feature.LanguageServer.Models
         /// <summary>
         /// The rootUri of the workspace. Is null if no folder is open. If both `rootPath` and `rootUri` are set `rootUri` wins.
         /// </summary>
-        public Uri? RootUri { get; set; }
+        public SystemPath? RootUri { get; set; }
 
         /// <summary>
         /// The capabilities provided by the client (editor or tool)
@@ -1063,5 +1064,40 @@ namespace Lucy.Feature.LanguageServer.Models
     {
         public Uri Uri { get; set; } = null!;
         public RpcRange Range { get; set; } = null!;
+    }
+
+    public class SystemPath
+    {
+        private string? _host;
+        private string _path;
+
+        public SystemPath(string? host, string path)
+        {
+            _host = host;
+            _path = path;
+        }
+
+        public static SystemPath FromUri(Uri uri)
+        {
+            if (!string.IsNullOrWhiteSpace(uri.Host))
+                throw new NotSupportedException("Remote path is not supported");
+
+            return new SystemPath(uri.Host, uri.LocalPath);
+        }
+
+        public override string ToString()
+        {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                if (_host != null)
+                    return $"\\\\{_host}\\{_path}";
+                return _path;
+            }
+
+            if (_host != null)
+                throw new NotSupportedException("Remote paths are only supported on windows.");
+
+            return _path;
+        }
     }
 }

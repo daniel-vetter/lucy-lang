@@ -1,18 +1,24 @@
 ﻿using System;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace Lucy.Common.ServiceDiscovery
 {
     [AttributeUsage(AttributeTargets.Class)]
     public class ServiceAttribute : Attribute
     {
-        public ServiceAttribute(ServiceLifetime lifetime = ServiceLifetime.Singleton, Type? serviceType = null)
+        public ServiceAttribute(Lifetime lifetime, Type? serviceType = null)
         {
             Lifetime = lifetime;
             ServiceType = serviceType;
         }
 
-        public ServiceLifetime Lifetime { get; }
+        public Lifetime Lifetime { get; }
         public Type? ServiceType { get; }
+    }
+
+    public enum Lifetime
+    {
+        Singleton,
+        Scoped,
+        Transient
     }
 }

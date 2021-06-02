@@ -5,18 +5,24 @@ using System.IO.Pipelines;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Lucy.Common.ServiceDiscovery;
 using Lucy.Infrastructure.RpcServer.Internal.Infrastructure;
 
 namespace Lucy.Infrastructure.RpcServer.Internal
 {
-    internal class IncommingMessageReader
+    [Service(Lifetime.Singleton)]
+    public class IncommingMessageReader
     {
-        private IJsonRpcMessageTrace? _traceTarget;
-        private PipeReader _reader;
+        private readonly JsonRpcConfig _config;
+        private readonly MessageConverter _messageConverter;
+        private readonly JsonRpcSerializer _serializer;
+        private readonly PipeReader _reader;
 
-        public IncommingMessageReader(IJsonRpcMessageTrace? traceTarget)
+        public IncommingMessageReader(JsonRpcConfig config, MessageConverter messageConverter, JsonRpcSerializer serializer)
         {
-            _traceTarget = traceTarget;
+            _config = config;
+            _messageConverter = messageConverter;
+            _serializer = serializer;
             _reader = PipeReader.Create(Console.OpenStandardInput());
         }
 
@@ -66,8 +72,8 @@ namespace Lucy.Infrastructure.RpcServer.Internal
                 {
                     var message = ReadJson(ref buffer, contentLength);
                     _reader.AdvanceTo(buffer.Start, buffer.End);
-                    if (_traceTarget != null && message != null)
-                        await _traceTarget.OnIncomingMessage(message);
+                    if (_config.TraceTarget != null && message != null)
+                        await _config.TraceTarget.OnIncomingMessage(message, _serializer);
                     return message;
                 }
 
@@ -81,7 +87,7 @@ namespace Lucy.Infrastructure.RpcServer.Internal
         private Message? ReadJson(ref ReadOnlySequence<byte> buffer, int length)
         {
             var bytes = buffer.Slice(0, length).ToArray();
-            var msg = MessageConverter.FromBytes(bytes);
+            var msg = _messageConverter.FromBytes(bytes);
             buffer = buffer.Slice(length);
             return msg;
         }

@@ -8,7 +8,7 @@ namespace Lucy.Core.SemanticAnalysis
     //Requires: Scopes
     internal class TypeDiscovery
     {
-        internal static void Run(SyntaxNode node)
+        internal static void Run(SyntaxTreeNode node)
         {
             if (node is FunctionDeclarationStatementSyntaxNode functionDeclarationStatementSyntaxNode)
             {
@@ -29,12 +29,12 @@ namespace Lucy.Core.SemanticAnalysis
 
     public class FunctionInfo : Symbol
     {
-        public FunctionInfo(string id, FunctionDeclarationStatementSyntaxNode declaration) : base(declaration.FunctionName.Value)
+        public FunctionInfo(string id, FunctionDeclarationStatementSyntaxNode declaration) : base(declaration.FunctionName.Token.Text)
         {
             Id = id;
             Declaration = declaration;
             if (declaration.ExternLibraryName != null)
-                Extern = new FunctionInfoExtern(declaration.ExternLibraryName.Value, declaration.ExternFunctionName?.Value ?? declaration.FunctionName.Value);
+                Extern = new FunctionInfoExtern(declaration.ExternLibraryName.Value, declaration.ExternFunctionName?.Value ?? declaration.FunctionName.Token.Text);
         }
 
         public string Id { get; }

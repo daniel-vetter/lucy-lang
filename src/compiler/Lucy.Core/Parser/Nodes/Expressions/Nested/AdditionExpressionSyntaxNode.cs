@@ -5,7 +5,7 @@ namespace Lucy.Core.Parser.Nodes.Expressions.Nested
 {
     public class AdditionExpressionSyntaxNode : ExpressionSyntaxNode
     {
-        public AdditionExpressionSyntaxNode(ExpressionSyntaxNode left, TokenNode plusToken, ExpressionSyntaxNode right)
+        public AdditionExpressionSyntaxNode(ExpressionSyntaxNode left, SyntaxElement plusToken, ExpressionSyntaxNode right)
         {
             Left = left;
             PlusToken = plusToken;
@@ -13,7 +13,7 @@ namespace Lucy.Core.Parser.Nodes.Expressions.Nested
         }
 
         public ExpressionSyntaxNode Left { get; }
-        public TokenNode PlusToken { get; }
+        public SyntaxElement PlusToken { get; }
         public ExpressionSyntaxNode Right { get; }
 
         public static bool TryReadOrInner(Code code, [NotNullWhen(true)] out ExpressionSyntaxNode? result)
@@ -23,7 +23,7 @@ namespace Lucy.Core.Parser.Nodes.Expressions.Nested
 
             while (true)
             {
-                if (!TokenNode.TryReadExact(code, "+", out var plusToken))
+                if (!SyntaxElement.TryReadExact(code, "+", out var plusToken))
                     return true;
 
                 if (!MemberAccessExpressionSyntaxNode.TryReadOrInner(code, out var right))

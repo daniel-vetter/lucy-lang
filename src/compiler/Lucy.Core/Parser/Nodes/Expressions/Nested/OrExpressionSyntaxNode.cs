@@ -5,7 +5,7 @@ namespace Lucy.Core.Parser.Nodes.Expressions.Nested
 {
     internal class OrExpressionSyntaxNode : ExpressionSyntaxNode
     {
-        public OrExpressionSyntaxNode(ExpressionSyntaxNode left, TokenNode token, ExpressionSyntaxNode right)
+        public OrExpressionSyntaxNode(ExpressionSyntaxNode left, SyntaxElement token, ExpressionSyntaxNode right)
         {
             Left = left;
             Token = token;
@@ -13,7 +13,7 @@ namespace Lucy.Core.Parser.Nodes.Expressions.Nested
         }
 
         public ExpressionSyntaxNode Left { get; }
-        public TokenNode Token { get; }
+        public SyntaxElement Token { get; }
         public ExpressionSyntaxNode Right { get; }
 
         public static bool TryReadOrInner(Code code, [NotNullWhen(true)] out ExpressionSyntaxNode? result)
@@ -25,7 +25,7 @@ namespace Lucy.Core.Parser.Nodes.Expressions.Nested
             
             while (true)
             {
-                if (!TokenNode.TryReadKeyword(code, "or", out var orToken))
+                if (!SyntaxElement.TryReadKeyword(code, "or", out var orToken))
                 {
                     result = left;
                     return true;

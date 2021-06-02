@@ -3,16 +3,9 @@ using System.Collections.Generic;
 
 namespace Lucy.Core.Parser.Nodes.Trivia
 {
-    public class TriviaListNode
+    public abstract class TriviaNode : SyntaxTreeNode
     {
-        public TriviaListNode(List<TriviaNode> trivia)
-        {
-            Trivia = trivia;
-        }
-
-        public List<TriviaNode> Trivia { get; }
-
-        public static TriviaListNode Read(Code code)
+        public static List<TriviaNode> ReadList(Code code)
         {
             var l = new List<TriviaNode>();
 
@@ -29,7 +22,7 @@ namespace Lucy.Core.Parser.Nodes.Trivia
                 l.Add(next);
             }
 
-            return new TriviaListNode(l);
+            return l;
         }
     }
 }

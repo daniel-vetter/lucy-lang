@@ -4,16 +4,16 @@ using System.Collections.Generic;
 
 namespace Lucy.Core.Parser.Nodes.Expressions.Unary
 {
-    public class FunctionCallArgumentSyntaxNode : SyntaxNode
+    public class FunctionCallArgumentSyntaxNode : SyntaxTreeNode
     {
-        public FunctionCallArgumentSyntaxNode(ExpressionSyntaxNode expression, TokenNode? seperator)
+        public FunctionCallArgumentSyntaxNode(ExpressionSyntaxNode expression, SyntaxElement? seperator)
         {
             Expression = expression;
             Seperator = seperator;
         }
 
         public ExpressionSyntaxNode Expression { get; }
-        public TokenNode? Seperator { get; }
+        public SyntaxElement? Seperator { get; }
 
         public static List<FunctionCallArgumentSyntaxNode> Read(Code code)
         {
@@ -23,7 +23,7 @@ namespace Lucy.Core.Parser.Nodes.Expressions.Unary
                 if (!ExpressionSyntaxNode.TryRead(code, out var expression))
                     break;
 
-                TokenNode.TryReadExact(code, ",", out var seperator);
+                SyntaxElement.TryReadExact(code, ",", out var seperator);
 
                 result.Add(new FunctionCallArgumentSyntaxNode(expression, seperator));
 

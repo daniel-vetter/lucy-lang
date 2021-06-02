@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Lucy.Common.ServiceDiscovery;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -8,7 +9,8 @@ namespace Lucy.Infrastructure.RpcServer.Internal.Infrastructure
     /// This class executes delegates in the background.
     /// It keeps track of all running "jobs" so the system can be shutdown without any running jobs left.
     /// </summary>
-    internal class JobRunner
+    [Service(Lifetime.Singleton)]
+    public class JobRunner
     {
         private readonly List<Task> _runningJobs = new List<Task>();
         private volatile bool _isRunning = true;

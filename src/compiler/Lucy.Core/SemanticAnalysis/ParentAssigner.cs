@@ -5,7 +5,7 @@ namespace Lucy.Core.SemanticAnalysis
 {
     internal class ParentAssigner
     {
-        internal static void Run(SyntaxNode node)
+        internal static void Run(SyntaxTreeNode node)
         {
             foreach(var child in node.GetChildNodes())
             {
@@ -17,12 +17,12 @@ namespace Lucy.Core.SemanticAnalysis
 
     public static class ParentNodeExtension
     {
-        public static SyntaxNode? GetParent(this SyntaxNode node) => node.GetAnnotation<ParentNodeAnnotation>()?.Node;
+        public static SyntaxTreeNode? GetParent(this SyntaxTreeNode node) => node.GetAnnotation<ParentNodeAnnotation>()?.Node;
     }
 
     internal class ParentNodeAnnotation
     {
-        public ParentNodeAnnotation(SyntaxNode node) => Node = node;
-        public SyntaxNode Node { get; set; }
+        public ParentNodeAnnotation(SyntaxTreeNode node) => Node = node;
+        public SyntaxTreeNode Node { get; set; }
     }
 }

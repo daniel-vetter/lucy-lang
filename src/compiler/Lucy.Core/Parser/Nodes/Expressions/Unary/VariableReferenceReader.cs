@@ -5,16 +5,16 @@ namespace Lucy.Core.Parser.Nodes.Expressions.Unary
 {
     public class VariableReferenceExpressionSyntaxNode : ExpressionSyntaxNode
     {
-        public VariableReferenceExpressionSyntaxNode(TokenNode token)
+        public VariableReferenceExpressionSyntaxNode(SyntaxElement token)
         {
             Token = token;
         }
 
-        public TokenNode Token { get; }
+        public SyntaxElement Token { get; }
 
         public static bool TryRead(Code code, [NotNullWhen(true)] out VariableReferenceExpressionSyntaxNode? result)
         {
-            if (TokenNode.TryReadIdentifier(code, out var token))
+            if (SyntaxElement.TryReadIdentifier(code, out var token))
             {
                 result = new VariableReferenceExpressionSyntaxNode(token);
                 return true;
