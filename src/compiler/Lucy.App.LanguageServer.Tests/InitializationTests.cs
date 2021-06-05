@@ -1,5 +1,5 @@
-using FluentAssertions;
 using Lucy.Feature.LanguageServer.Models;
+using Shouldly;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -13,12 +13,23 @@ namespace Lucy.App.LanguageServer.Tests
             var server = new LanguageServer();
             var result = await server.Initialze();
 
-            result.ServerInfo.Name.Should().Be("Lucy language server");
-            result.ServerInfo.Version.Should().NotBeNull();
-            result.Capabilities.HoverProvider.Should().BeTrue();
-            result.Capabilities.TextDocumentSync.Should().NotBeNull();
-            result.Capabilities.TextDocumentSync!.OpenClose.Should().BeTrue();
-            result.Capabilities.TextDocumentSync!.Change.Should().Be(RpcTextDocumentSyncKind.Incremental);
+            result.ServerInfo.Name.ShouldBe("Lucy language server");
+            result.ServerInfo.Version.ShouldNotBeNull();
+            result.Capabilities.HoverProvider.ShouldBe(true);
+            result.Capabilities.TextDocumentSync.ShouldNotBeNull();
+            result.Capabilities.TextDocumentSync!.OpenClose.ShouldBe(true);
+            result.Capabilities.TextDocumentSync!.Change.ShouldBe(RpcTextDocumentSyncKind.Incremental);
+        }
+    }
+
+    public class DocumentSyncTests
+    {
+        [Fact]
+        public async Task Test()
+        {
+            var server = new LanguageServer();
+            await server.Initialze();
+
         }
     }
 }

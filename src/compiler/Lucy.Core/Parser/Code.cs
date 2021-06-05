@@ -1,4 +1,5 @@
 ﻿using Lucy.Core.Model;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 
@@ -30,6 +31,8 @@ namespace Lucy.Core.Parser
             return result;
         }
 
+        public PositionTransaction BeginTransaction() => new PositionTransaction(this, _pos);
+
         public void Seek(int offset) => _pos += offset;
         public void SeekTo(int position) => _pos = position;
         public char Peek(int offset = 0) => _pos + offset < _code.Length ? _code[_pos + offset] : '\0';
@@ -44,6 +47,31 @@ namespace Lucy.Core.Parser
 
         public void ReportError(string message, int position) => Issues.Add(new Issue(IssueSeverity.Error, message));
         public void ReportError(string message) => Issues.Add(new Issue(IssueSeverity.Error, message));
+    }
+
+    public struct PositionTransaction : IDisposable
+    {
+        private readonly Code _code;
+        private readonly int _position;
+        private bool _commited;
+
+        public PositionTransaction(Code code, int position)
+        {
+            _code = code;
+            _position = position;
+            _commited = false;
+        }
+
+        public void Commit()
+        {
+            _commited = true;
+        }
+
+        public void Dispose()
+        {
+            if (!_commited)
+                _code.SeekTo(_position);
+        }
     }
 }
 

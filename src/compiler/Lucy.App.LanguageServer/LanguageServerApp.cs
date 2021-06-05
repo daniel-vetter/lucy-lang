@@ -3,6 +3,7 @@ using Lucy.Feature.LanguageServer.Services;
 using Lucy.Infrastructure.RpcServer;
 using Microsoft.Extensions.DependencyInjection;
 using System;
+using System.Diagnostics;
 using System.Threading.Tasks;
 
 namespace Lucy.App.LanguageServer
@@ -17,9 +18,9 @@ namespace Lucy.App.LanguageServer
             _jsonRpcServer = jsonRpcServer;
         }
 
-        public static async Task<int> Main() => await CreateServiceProvider().GetRequiredService<LanguageServerApp>().Run();
+        public static async Task<int> Main() => await CreateServiceCollection().BuildServiceProvider().GetRequiredService<LanguageServerApp>().Run();
 
-        public static ServiceProvider CreateServiceProvider()
+        public static IServiceCollection CreateServiceCollection()
         {
             return new ServiceCollection()
                 .AddServicesFromCurrentAssembly()
@@ -27,12 +28,13 @@ namespace Lucy.App.LanguageServer
                 {
                     b.AddControllerFromCurrentAssembly();
                     b.AddJsonConverter<SystemPathConverter>();
-                })
-                .BuildServiceProvider();
+                });
         }
 
         internal async Task<int> Run()
         {
+            Debugger.Launch();
+
             try
             {
                 await _jsonRpcServer.Start();

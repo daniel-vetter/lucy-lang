@@ -21,6 +21,7 @@ namespace Lucy.Core.Parser.Nodes.Expressions.Unary
 
         public static bool TryRead(Code code, [NotNullWhen(true)] out FunctionCallExpressionSyntaxNode? result)
         {
+            using var t = code.BeginTransaction();
             result = null;
 
             if (!SyntaxElement.TryReadIdentifier(code, out var functionName))
@@ -28,13 +29,14 @@ namespace Lucy.Core.Parser.Nodes.Expressions.Unary
 
             if (!SyntaxElement.TryReadExact(code, "(", out var openBraket))
                 return false;
-
+            
             var argumentList = FunctionCallArgumentSyntaxNode.Read(code);
 
             if (!SyntaxElement.TryReadExact(code, ")", out var closeBraket))
                 return false;
 
             result = new FunctionCallExpressionSyntaxNode(functionName, openBraket, argumentList, closeBraket);
+            t.Commit();
             return true;
         }
     }

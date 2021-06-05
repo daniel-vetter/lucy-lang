@@ -30,34 +30,52 @@ namespace Lucy.Core.SemanticAnalysis
             return end;
         }
 
-        public record Range(Position Start, Position End)
+    }
+
+    public record Range(Position Start, Position End)
+    {
+        public override string ToString() => $"{Start.Index} - {End.Index}";
+
+        public bool Contains(int index) => index >= Start.Index && index < End.Index;
+        public bool Contains(int line, int column)
         {
-            public override string ToString() => $"{Start.Index} - {End.Index}";
-        }
+            if (line < Start.Line || line > End.Line)
+                return false;
 
-        public record Position(int Index, int Line, int Column)
-        {
-            public Position Append(string str)
-            {
-                var character = Index + str.Length;
-                var line = Line;
-                var column = Column;
-
-                for (int i=0;i<str.Length;i++)
-                {
-                    if (str[i] == '\n')
-                    {
-                        line++;
-                        column = 0;
-                    }
-                    else
-                    {
-                        column++;
-                    }
-                }
-
-                return new Position(character, line, column);
-            }
+            var isAfterStart = (line == Start.Line && column >= Start.Column) || (line > Start.Line);
+            var isBeforeEnd = (line == End.Line && column < End.Column) || (line < End.Line);
+            return isAfterStart && isBeforeEnd;
         }
     }
+
+    public record Position(int Index, int Line, int Column)
+    {
+        public Position Append(string str)
+        {
+            var character = Index + str.Length;
+            var line = Line;
+            var column = Column;
+
+            for (int i = 0; i < str.Length; i++)
+            {
+                if (str[i] == '\n')
+                {
+                    line++;
+                    column = 0;
+                }
+                else
+                {
+                    column++;
+                }
+            }
+
+            return new Position(character, line, column);
+        }
+    }
+
+    public static class SyntaxNodeExtension
+    {
+        public static Range GetRange(this SyntaxTreeNode node) => node.GetRequiredAnnotation<Range>();
+    }
+
 }

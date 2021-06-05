@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Lucy.App.LanguageServer.Infrastructure;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Lucy.App.LanguageServer.Tests
 {
@@ -8,7 +9,10 @@ namespace Lucy.App.LanguageServer.Tests
 
         public LanguageServer()
         {
-            _sp = LanguageServerApp.CreateServiceProvider();
+            _sp = LanguageServerApp
+                .CreateServiceCollection()
+                .AddSingleton<IFileSystem, InMemoryFileSystem>()
+                .BuildServiceProvider();
         }
 
         public T Get<T>() where T : class
@@ -16,4 +20,5 @@ namespace Lucy.App.LanguageServer.Tests
             return _sp.GetRequiredService<T>();
         }
     }
+
 }

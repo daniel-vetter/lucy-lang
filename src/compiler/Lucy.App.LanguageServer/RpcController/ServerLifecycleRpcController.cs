@@ -5,6 +5,9 @@ using Lucy.Infrastructure.RpcServer;
 using Lucy.Feature.LanguageServer.Models;
 using Lucy.Common.ServiceDiscovery;
 using Lucy.Feature.LanguageServer.Services;
+using System.Diagnostics;
+using Lucy.App.LanguageServer.Infrastructure;
+using Lucy.Core.ProjectManagement;
 
 namespace Lucy.Feature.LanguageServer.RpcController
 {
@@ -12,10 +15,12 @@ namespace Lucy.Feature.LanguageServer.RpcController
     public class ServerLifecycleRpcController
     {
         private readonly CurrentJsonRpcConnection _currentRpcConnection;
+        private readonly CurrentWorkspace _currentWorkspace;
 
-        public ServerLifecycleRpcController(CurrentJsonRpcConnection currentRpcConnection)
+        public ServerLifecycleRpcController(CurrentJsonRpcConnection currentRpcConnection, CurrentWorkspace currentWorkspace)
         {
             _currentRpcConnection = currentRpcConnection;
+            _currentWorkspace = currentWorkspace;
         }
 
         [JsonRpcFunction("initialize", deserializeParamterIntoSingleObject: true)]
@@ -46,6 +51,7 @@ namespace Lucy.Feature.LanguageServer.RpcController
 
             if (request.RootUri != null)
             {
+                await _currentWorkspace.Load(request.RootUri);
                 //TODO: Init workspace                
             }
 
