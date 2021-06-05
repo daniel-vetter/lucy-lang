@@ -1,6 +1,7 @@
 ﻿using Lucy.App.LanguageServer.Infrastructure;
 using Lucy.Feature.LanguageServer.Models;
 using Lucy.Feature.LanguageServer.RpcController;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
 namespace Lucy.App.LanguageServer.Tests
@@ -9,7 +10,7 @@ namespace Lucy.App.LanguageServer.Tests
     {
         public static async Task<RpcInitializeResult> Initialze(this LanguageServer server)
         {
-            server.Get<IFileSystem>().CreateDirectory(new SystemPath("C:\\workspace"));
+            server.Get<IFileSystem>().CreateDirectory(server.GetWorkspacePath());
 
             var input = new RpcInitializeParams
             {
@@ -23,13 +24,21 @@ namespace Lucy.App.LanguageServer.Tests
                         }
                     }
                 },
-                RootUri = new SystemPath("C:\\workspace")
+                RootUri = server.GetWorkspacePath()
             };
 
             var result = await server.Get<ServerLifecycleRpcController>().Initialize(input);
             await server.Get<ServerLifecycleRpcController>().Initialized();
 
             return result;
+        }
+
+        public static SystemPath GetWorkspacePath(this LanguageServer server)
+        {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                return new SystemPath("C:\\workspace");
+
+            return new SystemPath("/workspace");
         }
     }
 }
