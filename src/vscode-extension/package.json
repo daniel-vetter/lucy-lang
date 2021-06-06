@@ -36,6 +36,16 @@
 				"scopeName": "source.lucy",
 				"path": "./lucy.tmLanguage.json"
 			}
+		],
+		"commands": [
+			{
+				"command": "lucy.openSyntaxTree",
+				"title": "Get Lucy Syntax Tree"
+			},
+			{
+				"command": "lucy.attachDebugger",
+				"title": "Attach Debugger to Lucy Language Server"
+			}
 		]
 	},
 	"scripts": {

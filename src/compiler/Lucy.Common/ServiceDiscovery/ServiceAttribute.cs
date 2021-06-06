@@ -5,7 +5,7 @@ namespace Lucy.Common.ServiceDiscovery
     [AttributeUsage(AttributeTargets.Class)]
     public class ServiceAttribute : Attribute
     {
-        public ServiceAttribute(Lifetime lifetime, Type? serviceType = null)
+        public ServiceAttribute(Lifetime lifetime = Lifetime.Singleton, Type? serviceType = null)
         {
             Lifetime = lifetime;
             ServiceType = serviceType;

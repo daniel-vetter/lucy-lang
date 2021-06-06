@@ -33,8 +33,6 @@ namespace Lucy.App.LanguageServer
 
         internal async Task<int> Run()
         {
-            Debugger.Launch();
-
             try
             {
                 await _jsonRpcServer.Start();

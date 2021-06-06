@@ -1,0 +1,66 @@
+﻿<style>
+    html,
+    body {
+        font-family: Consolas, 'Courier New', Courier, monospace;
+        font-size: 14px;
+        user-select: none;
+    }
+
+    .clickable {
+        cursor: pointer;
+    }
+
+    .clickable:hover {
+        background-color: rgba(255, 255, 255, 0.2)
+    }
+
+    .hidden {
+        display: none;
+    }
+
+    li {
+        list-style: none;
+        display: table;
+        padding: 0.2rem;
+    }
+
+    ul {
+        padding-inline-start: 1rem;
+    }
+
+    .property {
+        color: #569cd6;
+    }
+
+    .string {
+        color: #ce9178;
+    }
+</style>
+
+<script>
+    const trees = document.getElementsByClassName("tree");
+    for (const tree of trees) {
+        walkUl(tree);
+    }
+
+    function walkUl(node) {
+        let lastLi = undefined;
+        for (const subNode of node.childNodes) {
+            if (subNode.nodeType != Node.ELEMENT_NODE)
+                continue;
+
+            if (subNode.tagName == "LI") {
+                lastLi = subNode;
+                var splitter = subNode.textContent.indexOf(":");
+            }
+
+            if (subNode.tagName == "UL") {
+                lastLi.classList.add("clickable")
+                lastLi.addEventListener("click", () => {
+                    subNode.classList.toggle("hidden");
+                });
+                walkUl(subNode);
+            }
+        }
+    }
+</script>

@@ -8,7 +8,7 @@ using Lucy.Core.Helper;
 using Lucy.Core.SemanticAnalysis;
 using Lucy.Core.Parser.Nodes.Token;
 
-namespace Lucy.Feature.LanguageServer.RpcController
+namespace Lucy.App.LanguageServer.Features.Hover
 {
     [Service(Lifetime.Singleton)]
     internal class HoverRpcController
@@ -32,7 +32,7 @@ namespace Lucy.Feature.LanguageServer.RpcController
 
             SyntaxTreeNode? Walk(SyntaxTreeNode node)
             {
-                foreach(var child in node.GetChildNodes())
+                foreach (var child in node.GetChildNodes())
                 {
                     if (child.GetRange().Contains(input.Position.Line, input.Position.Character))
                     {

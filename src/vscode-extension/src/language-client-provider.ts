@@ -37,3 +37,9 @@ export function shutdownAllLanguageClients() {
 	}
     return Promise.all(promises).then(() => undefined);
 }
+
+export function getSingleLanguageClient() : LanguageClient | undefined {
+    if (_clients.size == 1)
+        return _clients.values().next().value;
+    return undefined;
+}
