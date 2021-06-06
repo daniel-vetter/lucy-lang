@@ -3,30 +3,95 @@ using System.Threading.Tasks;
 using Lucy.Infrastructure.RpcServer;
 using Lucy.Feature.LanguageServer.Models;
 using Lucy.Common.ServiceDiscovery;
+using Lucy.App.LanguageServer.Infrastructure;
+using System;
+using System.Linq;
 
 namespace Lucy.Feature.LanguageServer.RpcController
 {
     [Service(Lifetime.Singleton)]
     internal class TextDocumentController
     {
+        private readonly CurrentWorkspace _currentWorkspace;
+
+        public TextDocumentController(CurrentWorkspace currentWorkspace)
+        {
+            _currentWorkspace = currentWorkspace;
+        }
+
         [JsonRpcFunction("textDocument/didOpen", deserializeParamterIntoSingleObject: false)]
         public Task DidOpen(RpcTextDocumentItem textDocument)
         {
-            //_currentWorkspace.OpenFile(textDocument.Uri, textDocument.Text);
+            if (_currentWorkspace.Workspace == null)
+                throw new Exception("No workspace loaded.");
+
+            _currentWorkspace.Workspace.AddOrUpdateDocument(_currentWorkspace.ToWorkspacePath(textDocument.Uri), textDocument.Text);
+            _currentWorkspace.Process();
+
             return Task.CompletedTask;
         }
 
         [JsonRpcFunction("textDocument/didClose", deserializeParamterIntoSingleObject: false)]
         public Task DidClose(RpcTextDocumentIdentifier textDocument)
         {
-            //await _currentWorkspace.CloseFile(textDocument.Uri);
             return Task.CompletedTask;
         }
 
         [JsonRpcFunction("textDocument/didChange", deserializeParamterIntoSingleObject: false)]
         public Task DidChange(RpcVersionedTextDocumentIdentifier textDocument, ImmutableArray<RpcTextDocumentContentChangeEvent> contentChanges)
         {
-            //_currentWorkspace.ChangeFile(textDocument.Uri, contentChanges);
+            if (_currentWorkspace.Workspace == null)
+                throw new Exception("No workspace loaded.");
+
+            var document = _currentWorkspace.Workspace.Get(_currentWorkspace.ToWorkspacePath(textDocument.Uri));
+            if (document == null)
+                throw new Exception("Could not find document: " + textDocument.Uri);
+
+            var fileContent = document.Content;
+            foreach(var change in contentChanges)
+            {
+                if (change.Range == null)
+                {
+                    fileContent = change.Text;
+                }
+                else
+                {
+                    var startIndex = -1;
+                    var endIndex = -1;
+                    var curLine = 0;
+                    var curChar = 0;
+                    for (int i = 0; true; i++)
+                    {
+                        if (curLine == change.Range.Start.Line && curChar == change.Range.Start.Character)
+                            startIndex = i;
+
+                        if (curLine == change.Range.End.Line && curChar == change.Range.End.Character)
+                        {
+                            endIndex = i;
+                            break;
+                        }
+
+                        if (i == fileContent.Length)
+                            break;
+                        
+                        if (fileContent[i] == '\n')
+                        {
+                            curLine++;
+                            curChar = 0;
+                        }
+                        else
+                        {
+                            curChar++;
+                        }
+                    }                  
+
+                    fileContent = fileContent.Substring(0, startIndex) + change.Text + fileContent.Substring(endIndex);
+                }
+            }
+
+            _currentWorkspace.Workspace.AddOrUpdateDocument(_currentWorkspace.ToWorkspacePath(textDocument.Uri), fileContent);
+            _currentWorkspace.Process();
+
             return Task.CompletedTask;
         }
     }

@@ -923,7 +923,7 @@ namespace Lucy.Feature.LanguageServer.Models
         /// <summary>
         /// The text document's URI.
         /// </summary>
-        public Uri Uri { get; set; } = null!;
+        public SystemPath Uri { get; set; } = null!;
 
         /// <summary>
         /// The text document's language identifier.
