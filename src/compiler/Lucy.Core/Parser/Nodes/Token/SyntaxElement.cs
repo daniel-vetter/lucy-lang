@@ -7,11 +7,19 @@ namespace Lucy.Core.Parser.Nodes.Token
 {
     public class SyntaxElement : SyntaxTreeNode
     {
+        public SyntaxElement()
+        {
+            LeadingTrivia = new List<TriviaNode>();
+            Token = new TokenNode();
+        }
+
         public SyntaxElement(List<TriviaNode> leadingTrivia, TokenNode token)
         {
             LeadingTrivia = leadingTrivia;
             Token = token;
         }
+
+        public static SyntaxElement Missing(string? errorMessage = null) => new SyntaxElement(new List<TriviaNode>(), TokenNode.Missing()) { Source = new Syntetic(errorMessage) };
 
         public List<TriviaNode> LeadingTrivia { get; set; }
         public TokenNode Token { get; set; }
@@ -81,6 +89,8 @@ namespace Lucy.Core.Parser.Nodes.Token
 
             return isValid;
         }
+
+        
     }
 }
 

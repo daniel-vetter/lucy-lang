@@ -7,14 +7,14 @@ namespace Lucy.Core.Parser.Nodes.Expressions.Unary
 {
     public class StringConstantExpressionSyntaxNode : ExpressionSyntaxNode
     {
-        public StringConstantExpressionSyntaxNode(string value, SyntaxElement token)
+        public StringConstantExpressionSyntaxNode(string value, SyntaxElement str)
         {
             Value = value;
-            Token = token;
+            String = str;
         }
 
         public string Value { get; }
-        public SyntaxElement Token { get; }
+        public SyntaxElement String { get; }
 
         public static bool TryRead(Code code, [NotNullWhen(true)] out StringConstantExpressionSyntaxNode? result)
         {

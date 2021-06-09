@@ -67,6 +67,8 @@ namespace Lucy.Core.Parser
             _commited = true;
         }
 
+        public bool IsCommited => _commited;
+
         public void Dispose()
         {
             if (!_commited)

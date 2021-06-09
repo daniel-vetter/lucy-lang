@@ -31,6 +31,16 @@ namespace Lucy.App.LanguageServer.Infrastructure
             _runningOnWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
         }
 
+        private SystemPath(string? host, string[] elements)
+        {
+            _host = host;
+            _elements = elements;
+
+            _equalString = _runningOnWindows
+                ? ToString().ToLowerInvariant()
+                : ToString();
+        }
+
         public SystemPath(string path)
         {
             if (path.StartsWith("file://", StringComparison.InvariantCultureIgnoreCase))
@@ -58,6 +68,20 @@ namespace Lucy.App.LanguageServer.Infrastructure
             _equalString = _runningOnWindows 
                 ? ToString().ToLowerInvariant() 
                 : ToString();
+        }
+
+        public Uri ToUri()
+        {
+            return new Uri($"file://{_host}/" + string.Join("/", _elements.Select(x => Uri.EscapeDataString(x))));
+        }
+
+        internal SystemPath Append(string path)
+        {
+            if (path.StartsWith("/"))
+                path = path.Substring(1);
+
+            var elements = path.Split('/');
+            return new SystemPath(_host, _elements.Concat(elements).ToArray());
         }
 
         public SystemPath SubPath(int start, int length)

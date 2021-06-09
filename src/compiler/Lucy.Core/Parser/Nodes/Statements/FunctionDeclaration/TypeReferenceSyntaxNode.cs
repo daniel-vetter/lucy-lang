@@ -20,9 +20,14 @@ namespace Lucy.Core.Parser.Nodes.Statements.FunctionDeclaration
                 result = null;
                 return false;
             }
-            
+
             result = new TypeReferenceSyntaxNode(token);
             return true;
+        }
+
+        internal static TypeReferenceSyntaxNode Missing(string? errorMessage = null)
+        {
+            return new TypeReferenceSyntaxNode(SyntaxElement.Missing(errorMessage));
         }
     }
 }

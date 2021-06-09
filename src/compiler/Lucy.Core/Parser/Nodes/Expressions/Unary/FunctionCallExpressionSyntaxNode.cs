@@ -29,14 +29,15 @@ namespace Lucy.Core.Parser.Nodes.Expressions.Unary
 
             if (!SyntaxElement.TryReadExact(code, "(", out var openBraket))
                 return false;
-            
+
+            t.Commit();
+
             var argumentList = FunctionCallArgumentSyntaxNode.Read(code);
 
             if (!SyntaxElement.TryReadExact(code, ")", out var closeBraket))
-                return false;
+                closeBraket = SyntaxElement.Missing();
 
             result = new FunctionCallExpressionSyntaxNode(functionName, openBraket, argumentList, closeBraket);
-            t.Commit();
             return true;
         }
     }

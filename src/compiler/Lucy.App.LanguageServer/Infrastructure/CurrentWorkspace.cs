@@ -1,6 +1,5 @@
 ﻿using Lucy.Common.ServiceDiscovery;
 using Lucy.Core.ProjectManagement;
-using Lucy.Feature.LanguageServer.Models;
 using System;
 using System.Threading.Tasks;
 
@@ -35,12 +34,20 @@ namespace Lucy.App.LanguageServer.Infrastructure
             Process();
         }
 
-        public string ToWorkspacePath(SystemPath path)
+        public string ToWorkspacePath(SystemPath systemPath)
         {
             if (RootPath == null)
                 throw new Exception("No workspace path availible.");
 
-            return path.ToString().Substring(RootPath.ToString().Length).Replace("\\", "/");
+            return systemPath.ToString().Substring(RootPath.ToString().Length).Replace("\\", "/");
+        }
+
+        public SystemPath ToSystemPath(string workspacePath)
+        {
+            if (RootPath == null)
+                throw new Exception("No workspace path availible.");
+
+            return RootPath.Append(workspacePath);
         }
 
         public void Process()

@@ -5,7 +5,7 @@ using Lucy.Feature.LanguageServer.Models;
 using Lucy.Common.ServiceDiscovery;
 using Lucy.App.LanguageServer.Infrastructure;
 using System;
-using System.Linq;
+using Lucy.App.LanguageServer.Features.Diagnoistics;
 
 namespace Lucy.Feature.LanguageServer.RpcController
 {
@@ -13,22 +13,23 @@ namespace Lucy.Feature.LanguageServer.RpcController
     internal class TextDocumentController
     {
         private readonly CurrentWorkspace _currentWorkspace;
+        private readonly DiagnosticsReporter _diagnosticsReporter;
 
-        public TextDocumentController(CurrentWorkspace currentWorkspace)
+        public TextDocumentController(CurrentWorkspace currentWorkspace, DiagnosticsReporter diagnosticsReporter)
         {
             _currentWorkspace = currentWorkspace;
+            _diagnosticsReporter = diagnosticsReporter;
         }
 
         [JsonRpcFunction("textDocument/didOpen", deserializeParamterIntoSingleObject: false)]
-        public Task DidOpen(RpcTextDocumentItem textDocument)
+        public async Task DidOpen(RpcTextDocumentItem textDocument)
         {
             if (_currentWorkspace.Workspace == null)
                 throw new Exception("No workspace loaded.");
 
             _currentWorkspace.Workspace.AddOrUpdateDocument(_currentWorkspace.ToWorkspacePath(textDocument.Uri), textDocument.Text);
             _currentWorkspace.Process();
-
-            return Task.CompletedTask;
+            await _diagnosticsReporter.Report();
         }
 
         [JsonRpcFunction("textDocument/didClose", deserializeParamterIntoSingleObject: false)]
@@ -38,7 +39,7 @@ namespace Lucy.Feature.LanguageServer.RpcController
         }
 
         [JsonRpcFunction("textDocument/didChange", deserializeParamterIntoSingleObject: false)]
-        public Task DidChange(RpcVersionedTextDocumentIdentifier textDocument, ImmutableArray<RpcTextDocumentContentChangeEvent> contentChanges)
+        public async Task DidChange(RpcVersionedTextDocumentIdentifier textDocument, ImmutableArray<RpcTextDocumentContentChangeEvent> contentChanges)
         {
             if (_currentWorkspace.Workspace == null)
                 throw new Exception("No workspace loaded.");
@@ -91,8 +92,7 @@ namespace Lucy.Feature.LanguageServer.RpcController
 
             _currentWorkspace.Workspace.AddOrUpdateDocument(_currentWorkspace.ToWorkspacePath(textDocument.Uri), fileContent);
             _currentWorkspace.Process();
-
-            return Task.CompletedTask;
+            await _diagnosticsReporter.Report();
         }
     }
 }

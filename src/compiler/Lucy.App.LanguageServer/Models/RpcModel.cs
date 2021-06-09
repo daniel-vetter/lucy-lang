@@ -1061,6 +1061,50 @@ namespace Lucy.Feature.LanguageServer.Models
         public string? Message { get; set; }
     }
 
+    public class RpcHoverParams
+    {
+        /// <summary>
+        /// The text document.
+        /// </summary>
+        public RpcTextDocumentIdentifier TextDocument { get; set; } = new RpcTextDocumentIdentifier();
+
+        /// <summary>
+        /// The position inside the text document.
+        /// </summary>
+        public RpcPosition Position { get; set; } = new RpcPosition();
+    }
+
+    public class RpcHover
+    {
+        /// <summary>
+        /// The hover's content
+        /// </summary>
+        public RpcMarkupContent Contents { get; set; } = new RpcMarkupContent();
+
+        /// <summary>
+        /// An optional range is a range inside a text document that is used to visualize a hover, e.g.by changing the background color.
+        /// </summary>
+        public RpcRange? Range { get; set; }
+    }
+
+    public class RpcPublishDiagnosticsParams
+    {
+        /// <summary>
+        /// The URI for which diagnostic information is reported.
+        /// </summary>
+        public SystemPath Uri { get; set; } = null!;
+
+        /// <summary>
+        /// Optional the version number of the document the diagnostics are published for.
+        /// </summary>
+        public uint? Version { get; set; }
+
+        /// <summary>
+        /// An array of diagnostic information items.
+        /// </summary>
+        public RpcDiagnostic[] Diagnostics { get; set; } = Array.Empty<RpcDiagnostic>();
+    }
+
     public class RpcLocation
     {
         public Uri Uri { get; set; } = null!;

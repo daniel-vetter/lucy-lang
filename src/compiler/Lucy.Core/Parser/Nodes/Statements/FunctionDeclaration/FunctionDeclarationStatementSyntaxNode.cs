@@ -46,7 +46,7 @@ namespace Lucy.Core.Parser.Nodes.Statements.FunctionDeclaration
 
         public static FunctionDeclarationStatementSyntaxNode? Read(Code code)
         {
-            var start = code.Position;
+            using var t = code.BeginTransaction();
 
             var modifier = FunctionDeclarationModifierList.Read(code);
 
@@ -54,42 +54,26 @@ namespace Lucy.Core.Parser.Nodes.Statements.FunctionDeclaration
             StringConstantExpressionSyntaxNode.TryRead(code, out var functionNameToken);
 
             if (!SyntaxElement.TryReadKeyword(code, "fun", out var funKeyword))
-            {
-                code.SeekTo(start);
                 return null;
-            }
+
+            t.Commit();
 
             if (!SyntaxElement.TryReadIdentifier(code, out var functionName))
-            {
-                code.ReportError("Expected method name", code.Position);
-                return null;
-            }
+                functionName = new SyntaxElement();
 
             if (!SyntaxElement.TryReadExact(code, "(", out var openBraket))
-            {
-                code.ReportError("Expected '('", code.Position);
-                return null;
-            }
+                openBraket = SyntaxElement.Missing("Expected '('");
 
             var parameterList = FunctionDeclarationParameterSyntaxNode.ReadList(code);
 
             if (!SyntaxElement.TryReadExact(code, ")", out var closeBraket))
-            {
-                code.ReportError("Expected ')'", code.Position);
-                return null;
-            }
+                closeBraket = SyntaxElement.Missing("Expected ')'");
 
             if (!SyntaxElement.TryReadExact(code, ":", out var returnTypeSeperator))
-            {
-                code.ReportError("Expected ':'", code.Position);
-                return null;
-            }
+                returnTypeSeperator = SyntaxElement.Missing("Expected ':'");
 
             if (!TypeReferenceSyntaxNode.TryRead(code, out var returnType))
-            {
-                code.ReportError("Expected return type", code.Position);
-                return null;
-            }
+                returnType = TypeReferenceSyntaxNode.Missing("Expected return type");
 
             StatementListSyntaxNode.TryReadStatementBlock(code, out var body);
 

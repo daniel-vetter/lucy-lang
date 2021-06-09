@@ -4,22 +4,19 @@ using System.Threading.Tasks;
 using Lucy.Infrastructure.RpcServer;
 using Lucy.Feature.LanguageServer.Models;
 using Lucy.Common.ServiceDiscovery;
-using Lucy.Feature.LanguageServer.Services;
-using System.Diagnostics;
 using Lucy.App.LanguageServer.Infrastructure;
-using Lucy.Core.ProjectManagement;
 
 namespace Lucy.Feature.LanguageServer.RpcController
 {
     [Service(Lifetime.Singleton)]
     public class ServerLifecycleRpcController
     {
-        private readonly CurrentJsonRpcConnection _currentRpcConnection;
+        private readonly JsonRpcServer _jsonRpcServer;
         private readonly CurrentWorkspace _currentWorkspace;
 
-        public ServerLifecycleRpcController(CurrentJsonRpcConnection currentRpcConnection, CurrentWorkspace currentWorkspace)
+        public ServerLifecycleRpcController(JsonRpcServer jsonRpcServer, CurrentWorkspace currentWorkspace)
         {
-            _currentRpcConnection = currentRpcConnection;
+            _jsonRpcServer = jsonRpcServer;
             _currentWorkspace = currentWorkspace;
         }
 
@@ -67,7 +64,7 @@ namespace Lucy.Feature.LanguageServer.RpcController
         [JsonRpcFunction("shutdown")]
         public void Shutdown()
         {
-            _ = _currentRpcConnection.Shutdown();
+            _ = _jsonRpcServer.Stop();
         }
     }
 }

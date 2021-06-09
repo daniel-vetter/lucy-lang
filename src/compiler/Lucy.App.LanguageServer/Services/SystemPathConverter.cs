@@ -25,7 +25,7 @@ namespace Lucy.Feature.LanguageServer.Services
 
         public override void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer)
         {
-            writer.WriteToken(JsonToken.String, value?.ToString());
+            writer.WriteToken(JsonToken.String, ((SystemPath?)value)?.ToUri().ToString());
         }
     }
 }
