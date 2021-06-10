@@ -62,18 +62,18 @@ namespace Lucy.Core.Parser.Nodes.Statements.FunctionDeclaration
                 functionName = new SyntaxElement();
 
             if (!SyntaxElement.TryReadExact(code, "(", out var openBraket))
-                openBraket = SyntaxElement.Missing("Expected '('");
+                openBraket = SyntaxElement.Synthesize("Expected '('");
 
             var parameterList = FunctionDeclarationParameterSyntaxNode.ReadList(code);
 
             if (!SyntaxElement.TryReadExact(code, ")", out var closeBraket))
-                closeBraket = SyntaxElement.Missing("Expected ')'");
+                closeBraket = SyntaxElement.Synthesize("Expected ')'");
 
             if (!SyntaxElement.TryReadExact(code, ":", out var returnTypeSeperator))
-                returnTypeSeperator = SyntaxElement.Missing("Expected ':'");
+                returnTypeSeperator = SyntaxElement.Synthesize("Expected ':'");
 
             if (!TypeReferenceSyntaxNode.TryRead(code, out var returnType))
-                returnType = TypeReferenceSyntaxNode.Missing("Expected return type");
+                returnType = TypeReferenceSyntaxNode.Synthesize("Expected return type");
 
             StatementListSyntaxNode.TryReadStatementBlock(code, out var body);
 

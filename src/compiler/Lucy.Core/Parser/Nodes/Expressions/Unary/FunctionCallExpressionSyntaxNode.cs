@@ -35,7 +35,7 @@ namespace Lucy.Core.Parser.Nodes.Expressions.Unary
             var argumentList = FunctionCallArgumentSyntaxNode.Read(code);
 
             if (!SyntaxElement.TryReadExact(code, ")", out var closeBraket))
-                closeBraket = SyntaxElement.Missing();
+                closeBraket = SyntaxElement.Synthesize();
 
             result = new FunctionCallExpressionSyntaxNode(functionName, openBraket, argumentList, closeBraket);
             return true;

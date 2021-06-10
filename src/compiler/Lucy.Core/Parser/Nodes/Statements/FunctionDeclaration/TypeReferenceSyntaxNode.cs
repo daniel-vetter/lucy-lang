@@ -25,9 +25,9 @@ namespace Lucy.Core.Parser.Nodes.Statements.FunctionDeclaration
             return true;
         }
 
-        internal static TypeReferenceSyntaxNode Missing(string? errorMessage = null)
+        internal static TypeReferenceSyntaxNode Synthesize(string? errorMessage = null)
         {
-            return new TypeReferenceSyntaxNode(SyntaxElement.Missing(errorMessage));
+            return new TypeReferenceSyntaxNode(SyntaxElement.Synthesize(errorMessage));
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using Lucy.Core.Helper;
 using Lucy.Core.Model.Syntax;
 using Lucy.Core.Parser.Nodes;
+using System;
 
 namespace Lucy.Core.SemanticAnalysis
 {
@@ -26,56 +27,34 @@ namespace Lucy.Core.SemanticAnalysis
             }
             
             var end = pos;
-            node.SetAnnotation(new Range(start, end));
-            return end;
-        }
-
-    }
-
-    public record Range(Position Start, Position End)
-    {
-        public override string ToString() => $"{Start.Index} - {End.Index}";
-
-        public bool Contains(int index) => index >= Start.Index && index < End.Index;
-        public bool Contains(int line, int column)
-        {
-            if (line < Start.Line || line > End.Line)
-                return false;
-
-            var isAfterStart = (line == Start.Line && column >= Start.Column) || (line > Start.Line);
-            var isBeforeEnd = (line == End.Line && column < End.Column) || (line < End.Line);
-            return isAfterStart && isBeforeEnd;
-        }
-    }
-
-    public record Position(int Index, int Line, int Column)
-    {
-        public Position Append(string str)
-        {
-            var character = Index + str.Length;
-            var line = Line;
-            var column = Column;
-
-            for (int i = 0; i < str.Length; i++)
+            if (node.Source is SourceCode sourceCodeSource)
             {
-                if (str[i] == '\n')
-                {
-                    line++;
-                    column = 0;
-                }
-                else
-                {
-                    column++;
-                }
+                sourceCodeSource.Range = new Model.Syntax.Range(start, end);
             }
-
-            return new Position(character, line, column);
+            if (node.Source is Syntetic synteticSource)
+            {
+                synteticSource.Position = start;
+            }
+            return end;
         }
     }
 
     public static class SyntaxNodeExtension
     {
-        public static Range GetRange(this SyntaxTreeNode node) => node.GetRequiredAnnotation<Range>();
-    }
+        public static Model.Syntax.Range GetRange(this SyntaxTreeNode node)
+        {
+            if (node.Source is SourceCode sourceCodeSource)
+                return sourceCodeSource.Range ?? throw new Exception("Node has not valid range set.");
 
+            if (node.Source is Syntetic synteticSource)
+            {
+                if (synteticSource.Position == null)
+                    throw new Exception("Node has not valid range set.");
+
+                return new Model.Syntax.Range(synteticSource.Position, synteticSource.Position);
+            }
+
+            throw new Exception("No range avalilible");
+        }
+    }
 }

@@ -19,7 +19,7 @@ namespace Lucy.Core.Parser.Nodes.Token
             Token = token;
         }
 
-        public static SyntaxElement Missing(string? errorMessage = null) => new SyntaxElement(new List<TriviaNode>(), TokenNode.Missing()) { Source = new Syntetic(errorMessage) };
+        public static SyntaxElement Synthesize(string? errorMessage = null) => new SyntaxElement(new List<TriviaNode>(), TokenNode.Missing()) { Source = new Syntetic(errorMessage, null) };
 
         public List<TriviaNode> LeadingTrivia { get; set; }
         public TokenNode Token { get; set; }

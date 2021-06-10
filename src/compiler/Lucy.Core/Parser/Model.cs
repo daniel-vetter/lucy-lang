@@ -58,17 +58,19 @@ namespace Lucy.Core.Model.Syntax
 
     public class Syntetic : SyntaxTreeNodeSource
     {
-        public Syntetic(string? errorMessage)
+        public Syntetic(string? errorMessage, Position? position)
         {
             ErrorMessage = errorMessage;
+            Position = position;
         }
 
-        public string? ErrorMessage { get; } 
+        public string? ErrorMessage { get; }
+        public Position? Position { get; set; }
     }
 
     public class SourceCode : SyntaxTreeNodeSource
     {
-        public Range Range { get; set; }
+        public Range? Range { get; set; }
     }
 
     public class Generated : SyntaxTreeNodeSource
@@ -84,9 +86,50 @@ namespace Lucy.Core.Model.Syntax
 
         public static TokenNode Missing(string? errorMessage = null)
         {
-            return new TokenNode("") { Source = new Syntetic(errorMessage) };
+            return new TokenNode("") { Source = new Syntetic(errorMessage, null) };
         }
 
         public string Text { get; }
+    }
+
+    public record Range(Position Start, Position End)
+    {
+        public override string ToString() => $"{Start.Index} - {End.Index}";
+
+        public bool Contains(int index) => index >= Start.Index && index < End.Index;
+        public bool Contains(int line, int column)
+        {
+            if (line < Start.Line || line > End.Line)
+                return false;
+
+            var isAfterStart = (line == Start.Line && column >= Start.Column) || (line > Start.Line);
+            var isBeforeEnd = (line == End.Line && column < End.Column) || (line < End.Line);
+            return isAfterStart && isBeforeEnd;
+        }
+    }
+
+    public record Position(int Index, int Line, int Column)
+    {
+        public Position Append(string str)
+        {
+            var character = Index + str.Length;
+            var line = Line;
+            var column = Column;
+
+            for (int i = 0; i < str.Length; i++)
+            {
+                if (str[i] == '\n')
+                {
+                    line++;
+                    column = 0;
+                }
+                else
+                {
+                    column++;
+                }
+            }
+
+            return new Position(character, line, column);
+        }
     }
 }

@@ -40,11 +40,11 @@
 		"commands": [
 			{
 				"command": "lucy.openSyntaxTree",
-				"title": "Get Lucy Syntax Tree"
+				"title": "Lucy: Show Syntax Tree"
 			},
 			{
 				"command": "lucy.attachDebugger",
-				"title": "Attach Debugger to Lucy Language Server"
+				"title": "Lucy: Attach Debugger to Language Server"
 			}
 		]
 	},
