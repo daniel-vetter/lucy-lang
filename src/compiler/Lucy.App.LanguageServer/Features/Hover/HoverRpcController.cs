@@ -3,10 +3,9 @@ using Lucy.Feature.LanguageServer.Models;
 using Lucy.Common.ServiceDiscovery;
 using Lucy.App.LanguageServer.Infrastructure;
 using System;
-using Lucy.Core.Model.Syntax;
 using Lucy.Core.Helper;
-using Lucy.Core.SemanticAnalysis;
-using Lucy.Core.Parser.Nodes.Token;
+using Lucy.Core.Parsing.Nodes.Token;
+using Lucy.Core.Parsing;
 
 namespace Lucy.App.LanguageServer.Features.Hover
 {

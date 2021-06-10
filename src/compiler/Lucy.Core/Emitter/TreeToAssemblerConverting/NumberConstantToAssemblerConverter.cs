@@ -1,6 +1,6 @@
 ﻿using Lucy.Assembler;
 using Lucy.Assembler.Operations;
-using Lucy.Core.Parser.Nodes.Expressions.Unary;
+using Lucy.Core.Parsing.Nodes.Expressions.Unary;
 
 namespace Lucy.Core.Compiler.TreeToAssemblerConverting
 {

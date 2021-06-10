@@ -1,7 +1,7 @@
-﻿using Lucy.Core.Model.Syntax;
-using Lucy.Core.Parser.Nodes.Expressions.Nested;
-using Lucy.Core.Parser.Nodes.Expressions.Unary;
-using Lucy.Core.Parser.Nodes.Statements;
+﻿using Lucy.Core.Parsing.Nodes.Expressions.Nested;
+using Lucy.Core.Parsing.Nodes.Expressions.Unary;
+using Lucy.Core.Parsing.Nodes.Statements;
+using Lucy.Core.Parsing;
 using System;
 using System.Collections.Generic;
 

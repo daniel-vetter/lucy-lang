@@ -1,9 +1,8 @@
 ﻿using Lucy.App.LanguageServer.Infrastructure;
 using Lucy.Common.ServiceDiscovery;
 using Lucy.Core.Helper;
-using Lucy.Core.Model.Syntax;
+using Lucy.Core.Parsing;
 using Lucy.Core.ProjectManagement;
-using Lucy.Core.SemanticAnalysis;
 using Lucy.Feature.LanguageServer.Models;
 using Lucy.Feature.LanguageServer.Services;
 using Lucy.Infrastructure.RpcServer;

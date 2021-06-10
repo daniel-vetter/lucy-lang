@@ -1,4 +1,4 @@
-﻿using Lucy.Core.Model.Syntax;
+﻿using Lucy.Core.Parsing;
 using System.Collections.Generic;
 
 namespace Lucy.Core.Helper

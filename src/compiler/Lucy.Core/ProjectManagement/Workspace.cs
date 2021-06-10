@@ -1,5 +1,5 @@
-﻿using Lucy.Core.Parser;
-using Lucy.Core.Parser.Nodes;
+﻿using Lucy.Core.Parsing;
+using Lucy.Core.Parsing.Nodes;
 using Lucy.Core.SemanticAnalysis;
 using System.Collections.Generic;
 using System.IO;
@@ -48,7 +48,7 @@ namespace Lucy.Core.ProjectManagement
             foreach(var doc in Documents)
             {
                 if (doc.SyntaxTree == null)
-                    doc.SyntaxTree = DocumentSyntaxNode.ReadDocumentSyntaxNode(new Code(doc.Content));
+                    doc.SyntaxTree = Parser.Parse(doc.Content);
             }
 
             SemanticAnalyzer.Run(this);

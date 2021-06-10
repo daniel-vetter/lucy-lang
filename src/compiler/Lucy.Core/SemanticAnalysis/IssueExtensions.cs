@@ -1,5 +1,5 @@
 ﻿using Lucy.Core.Model;
-using Lucy.Core.Model.Syntax;
+using Lucy.Core.Parsing;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 

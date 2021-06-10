@@ -1,8 +1,8 @@
 ﻿using Lucy.App.LanguageServer.Infrastructure;
 using Lucy.Common.ServiceDiscovery;
 using Lucy.Core.Helper;
-using Lucy.Core.Model.Syntax;
-using Lucy.Core.Parser.Nodes.Token;
+using Lucy.Core.Parsing.Nodes.Token;
+using Lucy.Core.Parsing;
 using System;
 using System.Collections.Generic;
 using System.IO;

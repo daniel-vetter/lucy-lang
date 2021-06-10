@@ -1,6 +1,6 @@
 ﻿using Lucy.Assembler;
 using Lucy.Assembler.ContainerFormats.PE;
-using Lucy.Core.Parser.Nodes.Statements.FunctionDeclaration;
+using Lucy.Core.Parsing.Nodes.Statements.FunctionDeclaration;
 using Lucy.Core.SemanticAnalysis;
 using System;
 

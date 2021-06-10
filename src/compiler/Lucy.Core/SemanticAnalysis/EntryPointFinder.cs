@@ -1,6 +1,6 @@
 ﻿using Lucy.Core.Helper;
-using Lucy.Core.Model.Syntax;
-using Lucy.Core.Parser.Nodes.Statements.FunctionDeclaration;
+using Lucy.Core.Parsing.Nodes.Statements.FunctionDeclaration;
+using Lucy.Core.Parsing;
 
 namespace Lucy.Core.SemanticAnalysis
 {

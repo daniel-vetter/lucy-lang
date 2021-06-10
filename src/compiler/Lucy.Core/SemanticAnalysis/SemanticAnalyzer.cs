@@ -13,8 +13,6 @@ namespace Lucy.Core.SemanticAnalysis
                 if (rootNode == null)
                     throw new Exception($"Could not find a syntax tree for workspace document  '{document.Path}'.");
 
-                ParentAssigner.Run(rootNode);
-                RangeAssigner.Run(rootNode);
                 ScopeAssigner.Run(rootNode);
                 TypeDiscovery.Run(rootNode);
                 EntryPointFinder.Run(rootNode);

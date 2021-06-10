@@ -1,7 +1,7 @@
 ﻿using Lucy.Assembler;
 using Lucy.Assembler.ContainerFormats.PE;
 using Lucy.Assembler.Operations;
-using Lucy.Core.Parser.Nodes.Expressions.Unary;
+using Lucy.Core.Parsing.Nodes.Expressions.Unary;
 using System.Linq;
 using System.Text;
 
