@@ -687,7 +687,51 @@ namespace Lucy.Feature.LanguageServer.Models
 
     public class RpcSignatureHelpClientCapabilities
     {
-        //TODO
+        /// <summary>
+        /// Whether signature help supports dynamic registration.
+        /// </summary>
+        public bool? DynamicRegistration { get; set; }
+
+        /// <summary>
+        /// The client supports the following `SignatureInformation` specific properties.
+        /// </summary>
+        public RpcSignatureHelpClientCapabilitiesSignatureInformation? SignatureInformation { get; set; }
+
+        /// <summary>
+        /// The client supports to send additional context information for a
+	    /// `textDocument/signatureHelp` request.A client that opts into
+        /// contextSupport will also support the `retriggerCharacters` on
+        /// `SignatureHelpOptions`.
+        /// </summary>
+        public bool? ContextSupport { get; set; }
+    }
+
+    public class RpcSignatureHelpClientCapabilitiesSignatureInformation
+    {
+        /// <summary>
+        /// Client supports the following content formats for the documentation
+		/// property.The order describes the preferred format of the client.
+        /// </summary>
+        public RpcMarkupKind[]? DocumentationFormat { get; set; }
+
+        /// <summary>
+        /// Client capabilities specific to parameter information.
+        /// </summary>
+        public RpcSignatureHelpClientCapabilitiesSignatureInformationParameterInformation? ParameterInformation { get; set; }
+
+        /// <summary>
+        /// The client supports the `activeParameter` property on
+		/// `SignatureInformation` literal.
+        /// </summary>
+        public bool? ActiveParameterSupport;
+    }
+
+    public class RpcSignatureHelpClientCapabilitiesSignatureInformationParameterInformation
+    {
+        /// <summary>
+        /// The client supports processing label offsets instead of a simple label string.
+        /// </summary>
+        public bool? LabelOffsetSupport { get; set; }
     }
 
     public class RpcHoverClientCapabilities
@@ -1109,5 +1153,150 @@ namespace Lucy.Feature.LanguageServer.Models
     {
         public Uri Uri { get; set; } = null!;
         public RpcRange Range { get; set; } = null!;
+    }
+
+    public class RpcSignatureHelpParams
+    {
+        /// <summary>
+        /// The text document.
+        /// </summary>
+        public RpcTextDocumentIdentifier? TextDocument { get; set; }
+
+        /// <summary>
+        /// The position inside the text document.
+        /// </summary>
+        public RpcPosition? Position { get; set; }
+
+        /// <summary>
+        /// The signature help context. This is only available if the client specifies to send this using the client capability `textDocument.signatureHelp.contextSupport === true`
+        /// </summary>
+        public RpcSignatureHelpContext? Context { get; set; }
+    }
+
+    /// <summary>
+    /// Additional information about the context in which a signature help request was triggered.
+    /// </summary>
+    public class RpcSignatureHelpContext
+    {
+        /// <summary>
+        /// Action that caused signature help to be triggered.
+        /// </summary>
+        RpcSignatureHelpTriggerKind TriggerKind { get; set; }
+
+        /// <summary>
+        /// Character that caused signature help to be triggered. This is null when triggerKind !== SignatureHelpTriggerKind.TriggerCharacter
+        /// </summary>
+        public string? TriggerCharacter { get; set; }
+
+        /// <summary>
+        /// `true` if signature help was already showing when it was triggered.
+        /// Retriggers occur when the signature help is already active and can be
+        /// caused by actions such as typing a trigger character, a cursor move, or 
+        /// document content changes.
+        /// </summary>
+        public bool IsRetrigger { get; set; }
+
+        /// <summary>
+        /// The currently active `SignatureHelp`.
+        /// The `activeSignatureHelp` has its `SignatureHelp.activeSignature` field updated based on the user navigating through available signatures.
+        /// </summary>
+        public RpcSignatureHelp? SignatureHelp { get; set; }
+    }
+
+    /// <summary>
+    /// Signature help represents the signature of something callable.There can be multiple signature but only one active and only one active parameter.
+    /// </summary>
+    public class RpcSignatureHelp
+    {
+        /// <summary>
+        /// One or more signatures. If no signatures are available the signature help request should return `null`.
+        /// </summary>
+        public RpcSignatureInformation[] Signatures { get; set; } = Array.Empty<RpcSignatureInformation>();
+
+        /// <summary>
+        /// The active signature. If omitted or the value lies outside the
+	    /// range of `signatures` the value defaults to zero or is ignore if
+	    /// the `SignatureHelp` as no signatures.
+	    ///
+	    /// Whenever possible implementors should make an active decision about
+        /// the active signature and shouldn't rely on a default value.
+	    ///
+	    /// In future version of the protocol this property might become
+        /// mandatory to better express this.
+        /// </summary>
+        public uint? ActiveSignature { get; set; }
+
+        /// <summary>
+        /// The active parameter of the active signature. If omitted or the value
+	    /// lies outside the range of `signatures[activeSignature].parameters`
+	    /// defaults to 0 if the active signature has parameters.If
+        /// the active signature has no parameters it is ignored.
+        /// 
+        /// In future version of the protocol this property might become
+        /// mandatory to better express the active parameter if the
+        /// active signature does have any.
+        /// </summary>
+        public uint ActiveParameter { get; set; }
+    }
+
+    /// <summary>
+    /// Represents the signature of something callable. A signature can have a label, like a function-name, a doc-comment, and a set of parameters.
+    /// </summary>
+    public class RpcSignatureInformation
+    {
+        /// <summary>
+        /// The label of this signature. Will be shown in the UI.
+        /// </summary>
+        public string Label { get; set; } = "";
+
+        /// <summary>
+        /// The human-readable doc-comment of this signature. Will be shown in the UI but can be omitted.
+        /// </summary>
+        public RpcMarkupContent? Documentation { get; set; }
+
+        /// <summary>
+        /// The parameters of this signature.
+        /// </summary>
+        public RpcParameterInformation[] Parameters { get; set; } = Array.Empty<RpcParameterInformation>();
+    }
+
+    /// <summary>
+    /// Represents a parameter of a callable-signature. A parameter can have a label and a doc-comment.
+    /// </summary>
+    public class RpcParameterInformation
+    {
+        /// <summary>
+	    /// The label of this parameter information.
+	    /// 
+	    /// Either a string or an inclusive start and exclusive end offsets within
+	    /// its containing signature label. (see SignatureInformation.label). The
+	    /// offsets are based on a UTF-16 string representation as `Position` and
+	    /// `Range` does.
+	    /// 
+	    /// *Note*: a label of type string should be a substring of its containing
+	    /// signature label. Its intended use case is to highlight the parameter
+	    /// label part in the `SignatureInformation.label`.
+	    /// </summary>
+        public string Label { get; set; } = "";
+
+        public RpcMarkupContent? Documentation { get; set; }
+    }
+
+    public enum RpcSignatureHelpTriggerKind
+    {
+        /// <summary>
+        /// Signature help was invoked manually by the user or by a command.
+        /// </summary>
+        Invoked = 1,
+
+        /// <summary>
+        /// Signature help was triggered by a trigger character.
+        /// </summary>
+        TriggerCharacter = 2,
+
+        /// <summary>
+        /// Signature help was triggered by the cursor moving or by the document content changing.
+        /// </summary>
+        ContentChange = 3
     }
 }

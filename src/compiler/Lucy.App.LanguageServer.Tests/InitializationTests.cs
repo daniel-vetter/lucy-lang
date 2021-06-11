@@ -29,7 +29,6 @@ namespace Lucy.App.LanguageServer.Tests
         {
             var server = new LanguageServer();
             await server.Initialze();
-
         }
     }
 }

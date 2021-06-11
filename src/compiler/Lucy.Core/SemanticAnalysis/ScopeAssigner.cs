@@ -62,7 +62,7 @@ namespace Lucy.Core.SemanticAnalysis
             list.Add(symbol);
         }
 
-        internal ImmutableArray<Symbol> GetAllMatchingSymbols(string name)
+        public ImmutableArray<Symbol> GetAllMatchingSymbols(string name)
         {
             var currentScope = this;
             var result = ImmutableArray.CreateBuilder<Symbol>();

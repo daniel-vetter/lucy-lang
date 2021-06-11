@@ -5,6 +5,7 @@ using Lucy.Infrastructure.RpcServer;
 using Lucy.Feature.LanguageServer.Models;
 using Lucy.Common.ServiceDiscovery;
 using Lucy.App.LanguageServer.Infrastructure;
+using System.Diagnostics;
 
 namespace Lucy.Feature.LanguageServer.RpcController
 {
@@ -46,10 +47,15 @@ namespace Lucy.Feature.LanguageServer.RpcController
                 OpenClose = true
             };
 
+            //Enable signature he
+            result.Capabilities.SignatureHelpProvider = new RpcSignatureHelpOptions
+            {
+                TriggerCharacters = new[] { "(" }
+            };
+            
             if (request.RootUri != null)
             {
                 await _currentWorkspace.Load(request.RootUri);
-                //TODO: Init workspace                
             }
 
             return result;
