@@ -62,9 +62,8 @@ namespace Lucy.Feature.LanguageServer.RpcController
         }
 
         [JsonRpcFunction("initialized")]
-        public async Task Initialized()
+        public void Initialized()
         {
-            //TODO: Update workspace
         }
 
         [JsonRpcFunction("shutdown")]

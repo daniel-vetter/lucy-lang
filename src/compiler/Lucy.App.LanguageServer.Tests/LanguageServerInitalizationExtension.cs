@@ -28,7 +28,7 @@ namespace Lucy.App.LanguageServer.Tests
             };
 
             var result = await server.Get<ServerLifecycleRpcController>().Initialize(input);
-            await server.Get<ServerLifecycleRpcController>().Initialized();
+            server.Get<ServerLifecycleRpcController>().Initialized();
 
             return result;
         }
