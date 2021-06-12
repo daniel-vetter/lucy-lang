@@ -12,6 +12,7 @@ export function activate(context: ExtensionContext) {
     workspace.textDocuments.forEach(x => onDidOpenTextDocument(x));
 
     context.subscriptions.push(commands.registerCommand("lucy.openSyntaxTree", async () => await openSyntaxTree()));
+    context.subscriptions.push(commands.registerCommand("lucy.openAssembly",   async () => await openAssembly()));
     context.subscriptions.push(commands.registerCommand("lucy.attachDebugger", async () => await attachDebugger()));
 }
 
@@ -49,5 +50,20 @@ async function openSyntaxTree(): Promise<void> {
             retainContextWhenHidden: true
         });
         panel.webview.html = result;
+    }
+}
+
+async function openAssembly(): Promise<void> {
+    var client = getSingleLanguageClient();
+
+    if (client != undefined) {
+        const result = await client.sendRequest<string>("debug/getAssembly");
+        
+        const doc = await workspace.openTextDocument({
+            language: "asm-collection",
+            content: result
+        });
+
+        window.showTextDocument(doc);
     }
 }

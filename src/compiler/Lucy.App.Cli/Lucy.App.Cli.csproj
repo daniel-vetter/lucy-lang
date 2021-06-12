@@ -22,9 +22,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="SampleApp\helper.lucy">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
     <None Update="SampleApp\main.lucy">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

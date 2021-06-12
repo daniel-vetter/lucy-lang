@@ -11,18 +11,22 @@ namespace Lucy.Core.Compiler.TreeToAssemblerConverting
     {
         internal static void Run(FunctionCallExpressionSyntaxNode fc, WinExecutableEmitterContext ctx)
         {
-            for (int i = fc.ArgumentList.Count - 1; i >= 0; i--)
-            {
-                var arg = fc.ArgumentList[i];
-                TreeToAssemblerConverter.Run(arg, ctx);
-                ctx.Assembler.AddOperation(new Push(Register.EAX));
-            }
-
             var functionInfo = fc.GetFunctionInfo();
             if (functionInfo == null)
                 throw new Exception("No function info found.");
 
-            Call? call = null;
+            if (functionInfo.CallingConvention == CallingConvention.Cdecl)
+            {
+                for (int i = fc.ArgumentList.Count - 1; i >= 0; i--)
+                {
+                    TreeToAssemblerConverter.Run(fc.ArgumentList[i].Expression, ctx);
+                    ctx.Assembler.AddOperation(new Push(Register.EAX));
+                }
+            }
+            else
+                throw new NotImplementedException("Missing callling convetion implementation");
+
+            Call? call;
             if (functionInfo.Extern == null)
             {
                 //TODO: Should just use call rel32
@@ -32,10 +36,14 @@ namespace Lucy.Core.Compiler.TreeToAssemblerConverting
             else
             {
                 call = new Call(new Memory(OperandSize.S32, 0, new AddressImport(new ImportAddressTableEntry(functionInfo.Extern.LibraryName, functionInfo.Extern.FunctionName), AddressType.AbsoluteVirtualAddress)));
-                
             }
 
             ctx.Assembler.AddOperation(call);
+
+            if (functionInfo.CallingConvention == CallingConvention.Cdecl)
+            {
+                ctx.Assembler.AddOperation(new Add(Register.ESP, new Immediate(OperandSize.S32, (uint)(fc.ArgumentList.Count * 4))));
+            }
         }
     }
 }

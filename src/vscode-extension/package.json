@@ -43,6 +43,10 @@
 				"title": "Lucy: Show Syntax Tree"
 			},
 			{
+				"command": "lucy.openAssembly",
+				"title": "Lucy: Show Assembly"
+			},
+			{
 				"command": "lucy.attachDebugger",
 				"title": "Lucy: Attach Debugger to Language Server"
 			}

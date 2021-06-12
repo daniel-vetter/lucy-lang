@@ -7,7 +7,8 @@ namespace Lucy.Assembler.Operations
     {
         public override void Write(MachineCodeWriter w)
         {
-            throw new NotImplementedException();
+            //TODO
+            //throw new NotImplementedException();
         }
 
         public override void Write(AssemblyWriter w)
