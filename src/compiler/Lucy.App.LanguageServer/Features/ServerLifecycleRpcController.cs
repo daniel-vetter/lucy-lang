@@ -50,7 +50,7 @@ namespace Lucy.Feature.LanguageServer.RpcController
             //Enable signature he
             result.Capabilities.SignatureHelpProvider = new RpcSignatureHelpOptions
             {
-                TriggerCharacters = new[] { "(" }
+                TriggerCharacters = new[] { "(", "," }
             };
             
             if (request.RootUri != null)

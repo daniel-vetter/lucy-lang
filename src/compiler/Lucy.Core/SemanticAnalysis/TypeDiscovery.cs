@@ -2,6 +2,8 @@
 using Lucy.Core.Parsing.Nodes.Statements.FunctionDeclaration;
 using Lucy.Core.Parsing;
 using System;
+using System.Collections.Immutable;
+using System.Linq;
 
 namespace Lucy.Core.SemanticAnalysis
 {
@@ -33,16 +35,19 @@ namespace Lucy.Core.SemanticAnalysis
         {
             Id = id;
             Declaration = declaration;
+            Parameter = declaration.ParameterList.Select(x => new FunctionParameterInfo(x.VariableDeclaration.VariableName.Token.Text)).ToImmutableArray();
             if (declaration.ExternLibraryName != null)
                 Extern = new FunctionInfoExtern(declaration.ExternLibraryName.Value, declaration.ExternFunctionName?.Value ?? declaration.FunctionName.Token.Text);
         }
 
         public string Id { get; }
+        public ImmutableArray<FunctionParameterInfo> Parameter { get; }
         public FunctionDeclarationStatementSyntaxNode Declaration { get; }
         public FunctionInfoExtern? Extern { get; }
         public bool IsEntryPoint { get; set; }
     }
 
     public record FunctionInfoExtern(string LibraryName, string FunctionName);
+    public record FunctionParameterInfo(string Name);
 
 }

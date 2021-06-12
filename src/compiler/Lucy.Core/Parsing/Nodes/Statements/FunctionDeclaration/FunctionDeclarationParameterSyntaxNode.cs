@@ -1,18 +1,17 @@
 ﻿using Lucy.Core.Parsing.Nodes.Token;
-using Lucy.Core.Parsing;
 using System.Collections.Generic;
 
 namespace Lucy.Core.Parsing.Nodes.Statements.FunctionDeclaration
 {
     public class FunctionDeclarationParameterSyntaxNode : SyntaxTreeNode
     {
-        public FunctionDeclarationParameterSyntaxNode(VariableNameWithTypeDeclarationSyntaxNode parameter, SyntaxElement? seperator)
+        public FunctionDeclarationParameterSyntaxNode(VariableNameWithTypeDeclarationSyntaxNode variableDeclaration, SyntaxElement? seperator)
         {
-            Parameter = parameter;
+            VariableDeclaration = variableDeclaration;
             Seperator = seperator;
         }
 
-        public VariableNameWithTypeDeclarationSyntaxNode Parameter { get; set; }
+        public VariableNameWithTypeDeclarationSyntaxNode VariableDeclaration { get; set; }
         public SyntaxElement? Seperator { get; set; }
 
         public static List<FunctionDeclarationParameterSyntaxNode> ReadList(Code code)

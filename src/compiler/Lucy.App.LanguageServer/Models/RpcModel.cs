@@ -2,6 +2,7 @@
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using System;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 
@@ -1224,7 +1225,7 @@ namespace Lucy.Feature.LanguageServer.Models
 	    /// In future version of the protocol this property might become
         /// mandatory to better express this.
         /// </summary>
-        public uint? ActiveSignature { get; set; }
+        public int? ActiveSignature { get; set; }
 
         /// <summary>
         /// The active parameter of the active signature. If omitted or the value
@@ -1236,7 +1237,7 @@ namespace Lucy.Feature.LanguageServer.Models
         /// mandatory to better express the active parameter if the
         /// active signature does have any.
         /// </summary>
-        public uint ActiveParameter { get; set; }
+        public int ActiveParameter { get; set; }
     }
 
     /// <summary>
@@ -1257,7 +1258,7 @@ namespace Lucy.Feature.LanguageServer.Models
         /// <summary>
         /// The parameters of this signature.
         /// </summary>
-        public RpcParameterInformation[] Parameters { get; set; } = Array.Empty<RpcParameterInformation>();
+        public List<RpcParameterInformation> Parameters { get; set; } = new();
     }
 
     /// <summary>
@@ -1277,7 +1278,7 @@ namespace Lucy.Feature.LanguageServer.Models
 	    /// signature label. Its intended use case is to highlight the parameter
 	    /// label part in the `SignatureInformation.label`.
 	    /// </summary>
-        public string Label { get; set; } = "";
+        public int[] Label { get; set; } = new int[2];
 
         public RpcMarkupContent? Documentation { get; set; }
     }

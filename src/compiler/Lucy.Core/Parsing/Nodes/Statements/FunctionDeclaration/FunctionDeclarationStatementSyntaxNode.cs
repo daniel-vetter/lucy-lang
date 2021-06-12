@@ -13,7 +13,7 @@ namespace Lucy.Core.Parsing.Nodes.Statements.FunctionDeclaration
             SyntaxElement funKeyword,
             SyntaxElement functionName,
             SyntaxElement openBraket,
-            List<FunctionDeclarationParameterSyntaxNode> functionDeclarationParameterNodes,
+            List<FunctionDeclarationParameterSyntaxNode> parameterList,
             SyntaxElement closeBraket,
             SyntaxElement returnTypeSeperator,
             TypeReferenceSyntaxNode returnType,
@@ -25,7 +25,7 @@ namespace Lucy.Core.Parsing.Nodes.Statements.FunctionDeclaration
             FunKeyword = funKeyword;
             FunctionName = functionName;
             OpenBraket = openBraket;
-            FunctionDeclarationParameterNodes = functionDeclarationParameterNodes;
+            ParameterList = parameterList;
             CloseBraket = closeBraket;
             ReturnTypeSeperator = returnTypeSeperator;
             ReturnType = returnType;
@@ -38,7 +38,7 @@ namespace Lucy.Core.Parsing.Nodes.Statements.FunctionDeclaration
         public SyntaxElement FunKeyword { get; set; }
         public SyntaxElement FunctionName { get; set; }
         public SyntaxElement OpenBraket { get; set; }
-        public List<FunctionDeclarationParameterSyntaxNode> FunctionDeclarationParameterNodes { get; }
+        public List<FunctionDeclarationParameterSyntaxNode> ParameterList { get; }
         public SyntaxElement CloseBraket { get; set; }
         public SyntaxElement ReturnTypeSeperator { get; set; }
         public TypeReferenceSyntaxNode ReturnType { get; set; }
@@ -84,7 +84,7 @@ namespace Lucy.Core.Parsing.Nodes.Statements.FunctionDeclaration
                 funKeyword: funKeyword,
                 functionName: functionName,
                 openBraket: openBraket,
-                functionDeclarationParameterNodes: parameterList,
+                parameterList: parameterList,
                 closeBraket: closeBraket,
                 returnTypeSeperator: returnTypeSeperator,
                 returnType: returnType,

@@ -96,14 +96,14 @@ namespace Lucy.Core.Parsing
     {
         public override string ToString() => $"{Start.Index} - {End.Index}";
 
-        public bool Contains(int index) => index >= Start.Index && index < End.Index;
-        public bool Contains(int line, int column)
+        public bool Contains(int index, bool exclusiveEnd = true) => exclusiveEnd ? index >= Start.Index && index < End.Index : index >= Start.Index && index <= End.Index;
+        public bool Contains(int line, int column, bool exclusiveEnd = true)
         {
             if (line < Start.Line || line > End.Line)
                 return false;
 
             var isAfterStart = line == Start.Line && column >= Start.Column || line > Start.Line;
-            var isBeforeEnd = line == End.Line && column < End.Column || line < End.Line;
+            var isBeforeEnd = exclusiveEnd ? line == End.Line && column < End.Column || line < End.Line : line == End.Line && column < End.Column || line <= End.Line;
             return isAfterStart && isBeforeEnd;
         }
     }

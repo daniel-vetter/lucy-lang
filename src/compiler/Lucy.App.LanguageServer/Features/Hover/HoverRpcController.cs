@@ -6,6 +6,7 @@ using System;
 using Lucy.Core.Helper;
 using Lucy.Core.Parsing.Nodes.Token;
 using Lucy.Core.Parsing;
+using System.Text;
 
 namespace Lucy.App.LanguageServer.Features.Hover
 {
@@ -29,32 +30,24 @@ namespace Lucy.App.LanguageServer.Features.Hover
             if (document == null || document.SyntaxTree == null)
                 return new RpcHover();
 
-            SyntaxTreeNode? Walk(SyntaxTreeNode node)
+            var stack = TreeAnalyzer.GetStack(document.SyntaxTree, input.Position.Line, input.Position.Character);
+            var sb = new StringBuilder();
+            foreach(var node in stack)
             {
-                foreach (var child in node.GetChildNodes())
+                sb.AppendLine(" * " + node.GetType().Name);
+                foreach(var annotation in node.Annotations)
                 {
-                    if (child.GetRange().Contains(input.Position.Line, input.Position.Character))
-                    {
-                        if (child is SyntaxElement)
-                            return node;
-                        else
-                            return Walk(child);
-                    }
+                    sb.AppendLine("   * " + annotation.Key.Name);
                 }
-
-                return null;
+                sb.AppendLine();
             }
-
-            var node = Walk(document.SyntaxTree);
-            if (node == null)
-                return new RpcHover();
 
             return new RpcHover
             {
                 Contents = new RpcMarkupContent
                 {
-                    Kind = RpcMarkupKind.Plaintext,
-                    Value = node.GetType().Name
+                    Kind = RpcMarkupKind.Markdown,
+                    Value = sb.ToString()
                 }
             };
         }

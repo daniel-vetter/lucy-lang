@@ -1,18 +1,12 @@
 ﻿using Lucy.App.LanguageServer.Infrastructure;
 using Lucy.Common.ServiceDiscovery;
-using Lucy.Core.Helper;
 using Lucy.Core.Parsing;
-using Lucy.Core.Parsing.Nodes;
 using Lucy.Core.Parsing.Nodes.Expressions.Unary;
 using Lucy.Core.SemanticAnalysis;
 using Lucy.Feature.LanguageServer.Models;
 using Lucy.Infrastructure.RpcServer;
-using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Lucy.App.LanguageServer.Features.SignatureHelp
 {
@@ -27,7 +21,7 @@ namespace Lucy.App.LanguageServer.Features.SignatureHelp
         }
 
         [JsonRpcFunction("textDocument/signatureHelp")]
-        public async Task<RpcSignatureHelp> SignatureHelp(RpcSignatureHelpParams request)
+        public RpcSignatureHelp SignatureHelp(RpcSignatureHelpParams request)
         {
             if (request.TextDocument == null)
                 return new RpcSignatureHelp();
@@ -45,8 +39,7 @@ namespace Lucy.App.LanguageServer.Features.SignatureHelp
             if (request.Position == null)
                 return new RpcSignatureHelp();
 
-            
-            var functionCall = FindFunctionCall(document.SyntaxTree, request.Position);
+            var functionCall = TreeAnalyzer.FindDeepest<FunctionCallExpressionSyntaxNode>(document.SyntaxTree, request.Position.Line, request.Position.Character);
             if (functionCall == null)
                 return new RpcSignatureHelp();
 
@@ -55,41 +48,50 @@ namespace Lucy.App.LanguageServer.Features.SignatureHelp
 
             var result = new List<RpcSignatureInformation>();
 
-            foreach(var matchingFunction in matchingFunctions)
+            foreach (var matchingFunction in matchingFunctions.OfType<FunctionInfo>())
             {
                 var sigInfo = new RpcSignatureInformation();
-                sigInfo.Label = matchingFunction.Name;
+
+                var labelSb = new StringBuilder();
+                labelSb.Append(matchingFunction.Name);
+                labelSb.Append("(");
+
+                for (int i = 0; i < matchingFunction.Parameter.Length; i++)
+                {
+                    FunctionParameterInfo? parameter = matchingFunction.Parameter[i];
+                    sigInfo.Parameters.Add(new RpcParameterInformation
+                    {
+                        Label = new[] { labelSb.Length, labelSb.Length + parameter.Name.Length }
+                    });
+
+                    labelSb.Append(parameter.Name);
+                    if (i != matchingFunction.Parameter.Length - 1)
+                        labelSb.Append(", ");
+                }
+
+                labelSb.Append(")");
+                sigInfo.Label = labelSb.ToString();
                 result.Add(sigInfo);
             }
 
             return new RpcSignatureHelp
             {
-                Signatures = result.ToArray()
+                Signatures = result.ToArray(),
+                ActiveParameter = GetActiveParameterIndex(functionCall, request.Position)
             };
         }
 
-        private FunctionCallExpressionSyntaxNode? FindFunctionCall(DocumentSyntaxNode rootNode, RpcPosition position)
+        private static int GetActiveParameterIndex(FunctionCallExpressionSyntaxNode functionCall, RpcPosition position)
         {
-            List<SyntaxTreeNode> stack = new();
-            stack.Add(rootNode);
-
-            void Walk(SyntaxTreeNode node)
+            for (int i = 0; i < functionCall.ArgumentList.Count; i++)
             {
-                foreach (var child in node.GetChildNodes())
+                if (functionCall.ArgumentList[i].GetRange().Contains(position.Line, position.Character, functionCall.ArgumentList[i].Seperator != null))
                 {
-                    var range = child.GetRange();
-                    if (range.Contains(position.Line, position.Character))
-                    {
-                        stack.Add(child);
-                        Walk(child);
-                    }
+                    return i;
                 }
             }
-            Walk(rootNode);
 
-            stack.Reverse();
-
-            return (FunctionCallExpressionSyntaxNode?)stack.FirstOrDefault(x => x is FunctionCallExpressionSyntaxNode);
+            return functionCall.ArgumentList.Count;
         }
     }
 }
