@@ -1,4 +1,5 @@
 ﻿using NUnit.Framework;
+using System;
 using System.Collections.Immutable;
 using System.IO;
 
@@ -11,6 +12,7 @@ namespace Lucy.Assembler.Tests
             var dir = Path.GetFullPath(TestContext.CurrentContext.TestDirectory);
             while (!Directory.Exists(Path.Combine(dir, "Cases")))
             {
+                Console.WriteLine("Checking " + dir);
                 dir = Path.GetFullPath(Path.Combine(dir, ".."));
             }
 
