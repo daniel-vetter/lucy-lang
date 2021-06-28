@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
-
+    <Nullable>enable</Nullable>
     <IsPackable>false</IsPackable>
   </PropertyGroup>
 
@@ -17,10 +17,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Lucy.Assembler\Lucy.Assembler.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Cases\" />
   </ItemGroup>
 
 </Project>

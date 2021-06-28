@@ -15,7 +15,7 @@ namespace Lucy.Assembler.Tests
 {
     public class CsvTestCases
     {
-        [TestCaseSource(nameof(GetTestCases))]
+        [TestCaseSource(nameof(GetTestCases))][Ignore("No csv files provided yet")]
         public async Task RunCsvTests(CsvTestCaseFile file)
         {
             var results = await RunTestCaseFile(file);
