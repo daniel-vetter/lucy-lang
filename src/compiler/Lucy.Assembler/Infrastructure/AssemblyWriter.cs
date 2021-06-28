@@ -20,7 +20,7 @@ namespace Lucy.Assembler.Infrastructure
             {
                 _sb.Append(operands[i]);
                 if (i != operands.Length - 1)
-                    _sb.Append(",");
+                    _sb.Append(", ");
             }
         }
 

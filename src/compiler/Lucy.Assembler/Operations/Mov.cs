@@ -79,6 +79,8 @@ namespace Lucy.Assembler.Operations
             if (Target.IsRegister8(out var r8) && Source.IsImmediate8(out var imm8))
             {
                 w.WriteByte((byte)(0xB0 + r8.Index));
+                if (imm8 is LabelRef labelRef)
+                    w.WriteAnnotaton(new AsmLabelRequestAnnotation(labelRef.Key));
                 w.WriteByte((byte)imm8.Value, imm8.Annotation);
                 return true;
             }
@@ -86,6 +88,8 @@ namespace Lucy.Assembler.Operations
             if (Target.IsRegister16(out var r16) && Source.IsImmediate16(out var imm16))
             {
                 w.WriteByte((byte)(0xB8 + r16.Index));
+                if (imm16 is LabelRef labelRef)
+                    w.WriteAnnotaton(new AsmLabelRequestAnnotation(labelRef.Key));
                 w.WriteUInt16((ushort)imm16.Value, imm16.Annotation);
                 return true;
             }
@@ -93,6 +97,8 @@ namespace Lucy.Assembler.Operations
             if (Target.IsRegister32(out var r32) && Source.IsImmediate32(out var imm32))
             {
                 w.WriteByte((byte)(0xB8 + r32.Index));
+                if (imm32 is LabelRef labelRef)
+                    w.WriteAnnotaton(new AsmLabelRequestAnnotation(labelRef.Key));
                 w.WriteUInt32(imm32.Value, imm32.Annotation);
                 return true;
             }
@@ -101,6 +107,8 @@ namespace Lucy.Assembler.Operations
             {
                 w.WriteByte(0b01001000);
                 w.WriteByte((byte)(0xB8 + r64.Index));
+                if (imm64 is LabelRef labelRef)
+                    w.WriteAnnotaton(new AsmLabelRequestAnnotation(labelRef.Key));
                 w.WriteUInt32(imm64.Value, imm64.Annotation);
                 return true;
             }

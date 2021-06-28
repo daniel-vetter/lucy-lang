@@ -29,6 +29,18 @@ namespace Lucy.Assembler
             return b.ToImmutable();
         }
 
+        public static ImmutableArray<Register> All
+        {
+            get
+            {
+                var b = ImmutableArray.CreateBuilder<Register>();
+                foreach (var group in _r)
+                    foreach (var r in group.Value)
+                        b.Add(r);
+                return b.ToImmutable();
+            }
+        }
+
         public static Register AL = new Register(0, "al", OperandSize.S8);
         public static Register CL = new Register(1, "cl", OperandSize.S8);
         public static Register DL = new Register(2, "dl", OperandSize.S8);

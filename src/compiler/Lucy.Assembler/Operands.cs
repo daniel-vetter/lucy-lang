@@ -91,6 +91,11 @@ namespace Lucy.Assembler
         }
     }
 
+    public record LabelRef(OperandSize Size, object Key) : Immediate(Size, 0)
+    {
+        public override string ToString() => Key.ToString() ?? throw new NullReferenceException();
+    }
+
     public class Memory : IRegisterOrMemory
     {
         public Memory(OperandSize size, uint address, object? annotation = null)

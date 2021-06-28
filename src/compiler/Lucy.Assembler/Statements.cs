@@ -16,7 +16,7 @@ namespace Lucy.Assembler
         }
     }
 
-    public record Label(object Key, string? Comment = null) : AssemblerStatement(Comment)
+    public record Label(object Key, string? Comment = null) : Operation(Comment)
     {
         public override void Write(AssemblyWriter w)
         {
@@ -25,9 +25,22 @@ namespace Lucy.Assembler
             w.WriteComment(Comment);
             w.WriteNewLine();
         }
+
+        public override void Write(MachineCodeWriter w)
+        {
+            w.WriteAnnotaton(new AsmLabelAnnotation(Key));
+        }
     }
 
-    public abstract record Operation : AssemblerStatement
+    public record AsmLabelAnnotation(object Key)
+    {
+    }
+
+    public record AsmLabelRequestAnnotation(object Key)
+    {
+    }
+
+    public abstract record Operation(string? Comment = null) : AssemblerStatement(Comment)
     {
         public abstract void Write(MachineCodeWriter w);
     }
