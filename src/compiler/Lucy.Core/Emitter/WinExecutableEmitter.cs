@@ -45,7 +45,10 @@ namespace Lucy.Core.Compiler
                 if (doc.SyntaxTree == null)
                     throw new Exception($"Could not find a syntax tree for workspace document '{doc.Path}'.");
 
-                TreeToAssemblerConverter.Run(doc.SyntaxTree, ctx);
+                if (doc.SemanticModel == null)
+                    throw new Exception($"Could not find a sementic model for workspace document '{doc.Path}'.");
+
+                TreeToAssemblerConverter.Run(doc.SyntaxTree, doc.SemanticModel, ctx);
             }
 
             return ctx;

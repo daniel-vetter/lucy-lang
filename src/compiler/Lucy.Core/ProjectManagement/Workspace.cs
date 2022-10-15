@@ -19,6 +19,7 @@ namespace Lucy.Core.ProjectManagement
         public string Path { get; }
         public string Content { get; private set; }
         public DocumentSyntaxNode? SyntaxTree { get; set; }
+        public SemanticModel? SemanticModel { get; set; }
     }
 
     public class Workspace
@@ -47,11 +48,9 @@ namespace Lucy.Core.ProjectManagement
         {
             foreach(var doc in Documents)
             {
-                if (doc.SyntaxTree == null)
-                    doc.SyntaxTree = Parser.Parse(doc.Content);
+                doc.SyntaxTree = Parser.Parse(doc.Content);
+                doc.SemanticModel = SemanticModelGenerator.Run(doc.SyntaxTree);
             }
-
-            SemanticAnalyzer.Run(this);
         }
 
         public void AddDocument(string path, string content) => _documents.Add(path, new WorkspaceDocument(path, content));

@@ -36,6 +36,9 @@ namespace Lucy.App.LanguageServer.Features.SignatureHelp
             if (document.SyntaxTree == null)
                 return new RpcSignatureHelp();
 
+            if (document.SemanticModel == null)
+                return new RpcSignatureHelp();
+
             if (request.Position == null)
                 return new RpcSignatureHelp();
 
@@ -43,7 +46,7 @@ namespace Lucy.App.LanguageServer.Features.SignatureHelp
             if (functionCall == null)
                 return new RpcSignatureHelp();
 
-            var scope = functionCall.GetScope();
+            var scope = document.SemanticModel.GetScope(functionCall);
             var matchingFunctions = scope.GetAllMatchingSymbols(functionCall.FunctionName.Token.Text);
 
             var result = new List<RpcSignatureInformation>();

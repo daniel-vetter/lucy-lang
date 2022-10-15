@@ -7,26 +7,18 @@ namespace Lucy.Core.SemanticAnalysis
 {
     internal class ScopeAssigner
     {
-        internal static void Run(SyntaxTreeNode node)
+        internal static void Run(SyntaxTreeNode node, SemanticModel semanticModel)
         {
             var rootScope = new Scope(null);
-            Annotate(node, rootScope);
+            Traverse(node, rootScope, semanticModel);
         }
 
-        private static void Annotate(SyntaxTreeNode node, Scope parentScope)
+        private static void Traverse(SyntaxTreeNode node, Scope parentScope, SemanticModel semanticModel)
         {
-            node.SetAnnotation(parentScope);
+            semanticModel.SetScope(node, parentScope);
 
             foreach (var child in node.GetChildNodes())
-                Annotate(child, parentScope);
-        }
-    }
-
-    public static class ScopeExtensionMethods
-    {
-        public static Scope GetScope(this SyntaxTreeNode node)
-        {
-            return node.GetRequiredAnnotation<Scope>();
+                Traverse(child, parentScope, semanticModel);
         }
     }
 
@@ -42,7 +34,7 @@ namespace Lucy.Core.SemanticAnalysis
 
     public class Scope
     {
-        Dictionary<string, List<Symbol>> _symbols = new Dictionary<string, List<Symbol>>();
+        Dictionary<string, List<Symbol>> _symbols = new();
 
         public Scope(Scope? parent)
         {

@@ -35,10 +35,6 @@ namespace Lucy.App.LanguageServer.Features.Hover
             foreach(var node in stack)
             {
                 sb.AppendLine(" * " + node.GetType().Name);
-                foreach(var annotation in node.Annotations)
-                {
-                    sb.AppendLine("   * " + annotation.Key.Name);
-                }
                 sb.AppendLine();
             }
 
