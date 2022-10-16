@@ -5,7 +5,10 @@ using Lucy.Core.Parsing.Nodes.Expressions.Unary;
 using Lucy.Core.SemanticAnalysis;
 using Lucy.Feature.LanguageServer.Models;
 using Lucy.Infrastructure.RpcServer;
+using System;
 using System.Collections.Generic;
+using System.Reflection.Emit;
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace Lucy.App.LanguageServer.Features.SignatureHelp
@@ -50,6 +53,7 @@ namespace Lucy.App.LanguageServer.Features.SignatureHelp
             var matchingFunctions = scope.GetAllMatchingSymbols(functionCall.FunctionName.Token.Text);
 
             var result = new List<RpcSignatureInformation>();
+
 
             foreach (var matchingFunction in matchingFunctions.OfType<FunctionInfo>())
             {
