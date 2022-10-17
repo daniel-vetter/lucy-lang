@@ -2,6 +2,6 @@
 extern cdecl "kernel32.dll" "ExitProcess" fun exitProcess(code: number): void
 
 fun main() {
-	printf("Was geht %d", 2)
+	printf("This is the %s %d", "number", 2)
 	exitProcess(0)
 }

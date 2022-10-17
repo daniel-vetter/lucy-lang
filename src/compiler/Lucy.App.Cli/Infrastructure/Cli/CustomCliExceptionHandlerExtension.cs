@@ -11,12 +11,12 @@ namespace Lucy.App.Infrastructure.Cli
             {
                 if (e is CliException)
                 {
-                    AnsiConsole.WriteException(e, ExceptionFormats.ShortenEverything);
+                    AnsiConsole.WriteException(e);
                     ctx.ResultCode = -1;
                 }
                 else
                 {
-                    AnsiConsole.WriteException(e, ExceptionFormats.ShortenEverything);
+                    AnsiConsole.WriteException(e);
                     ctx.ResultCode = -2;
                 }
             });
