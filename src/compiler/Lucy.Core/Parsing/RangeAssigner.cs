@@ -6,7 +6,7 @@ namespace Lucy.Core.Parsing
 {
     internal class RangeAssigner
     {
-        internal static void Run(DocumentSyntaxNode node)
+        internal static void Run(DocumentRootSyntaxNode node)
         {
             Calc(node, new Position(0, 0, 0));
         }

@@ -5,9 +5,9 @@ using System.Collections.Generic;
 
 namespace Lucy.Core.Parsing.Nodes
 {
-    public class DocumentSyntaxNode : SyntaxTreeNode
+    public class DocumentRootSyntaxNode : SyntaxTreeNode
     {
-        public DocumentSyntaxNode(StatementListSyntaxNode statementList, List<TriviaNode> trailingTrivia)
+        public DocumentRootSyntaxNode(StatementListSyntaxNode statementList, List<TriviaNode> trailingTrivia)
         {
             StatementList = statementList;
             TrailingTrivia = trailingTrivia;
@@ -16,12 +16,12 @@ namespace Lucy.Core.Parsing.Nodes
         public StatementListSyntaxNode StatementList { get; }
         public List<TriviaNode> TrailingTrivia { get; }
 
-        public static DocumentSyntaxNode ReadDocumentSyntaxNode(Code code)
+        public static DocumentRootSyntaxNode ReadDocumentSyntaxNode(Code code)
         {
             var statementList = StatementListSyntaxNode.ReadStatementsWithoutBlock(code);
             var trailingTrivia = TriviaNode.ReadList(code);
 
-            return new DocumentSyntaxNode(statementList, trailingTrivia);
+            return new DocumentRootSyntaxNode(statementList, trailingTrivia);
         }
     }
 }

@@ -11,6 +11,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Lucy.Assembler\Lucy.Assembler.csproj" />
+    <ProjectReference Include="..\Lucy.Common\Lucy.Common.csproj" />
   </ItemGroup>
 
 </Project>

@@ -8,8 +8,9 @@ namespace Lucy.Core.Compiler.TreeToAssemblerConverting
 {
     internal class FunctionDeclarationToAssemblerConverter
     {
-        internal static void Run(FunctionDeclarationStatementSyntaxNode fd, SemanticModel semanticModel, WinExecutableEmitterContext ctx)
+        internal static void Run(FunctionDeclarationStatementSyntaxNode fd, SemanticAnalyzer semanticModel, WinExecutableEmitterContext ctx)
         {
+            /*
             var info = semanticModel.GetFunctionInfo(fd);
             
             if (info.Extern != null)
@@ -26,6 +27,7 @@ namespace Lucy.Core.Compiler.TreeToAssemblerConverting
 
             if (fd.Body != null)
                 TreeToAssemblerConverter.Run(fd.Body, semanticModel, ctx);
+            */
         }
     }
 

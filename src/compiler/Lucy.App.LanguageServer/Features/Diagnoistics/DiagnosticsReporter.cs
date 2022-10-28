@@ -40,7 +40,7 @@ namespace Lucy.App.LanguageServer.Features.Diagnoistics
             }
         }
 
-        private RpcDiagnostic[] GetIssues(WorkspaceDocument doc)
+        private RpcDiagnostic[] GetIssues(CodeFile doc)
         {
             List<RpcDiagnostic> result = new();
             void Walk(SyntaxTreeNode node)

@@ -1,85 +1,65 @@
-﻿using Lucy.Core.Model;
-using Lucy.Core.Parsing;
-using Lucy.Core.Parsing.Nodes.Expressions.Unary;
-using Lucy.Core.Parsing.Nodes.Statements.FunctionDeclaration;
+﻿using Lucy.Core.Parsing.Nodes;
+using Lucy.Core.ProjectManagement;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 
 namespace Lucy.Core.SemanticAnalysis
 {
-    public class SemanticModelGenerator
+    public class SemanticAnalyzer : IDisposable
     {
-        public static SemanticModel Run(SyntaxTreeNode syntaxTreeNode)
-        {
-            var semanticModel = new SemanticModel();
-            ScopeAssigner.Run(syntaxTreeNode, semanticModel);
-            TypeDiscovery.Run(syntaxTreeNode, semanticModel);
-            EntryPointFinder.Run(syntaxTreeNode, semanticModel);
-            FunctionSymbolResolver.Run(syntaxTreeNode, semanticModel);
-            return semanticModel;
-        }
-    }
+        private readonly Workspace _workspace;
+        private IDisposable _workspaceEventSubscription;
+        private Db _db = new();
 
-    public class SemanticModel
-    {
-        private Dictionary<SyntaxTreeNode, Scope> _scopes = new();
-        private Dictionary<SyntaxTreeNode, FunctionInfo> _functionInfos = new();
-        private Dictionary<SyntaxTreeNode, List<Issue>> _issues = new();
-        
-        public void SetScope(SyntaxTreeNode node, Scope scope)
+        public SemanticAnalyzer(Workspace workspace)
         {
-            _scopes.Add(node, scope);
+            _workspaceEventSubscription = workspace.AddEventHandler(OnWorkspaceEvent);
+            _workspace = workspace;
         }
 
-        public Scope GetScope(SyntaxTreeNode node)
+        public void Dispose()
         {
-            if (!_scopes.TryGetValue(node, out var scope))
-                throw new Exception("No scope for the given node available.");
-            return scope;
+            _workspaceEventSubscription.Dispose();
         }
 
-        public void SetFunctionInfo(FunctionDeclarationStatementSyntaxNode functionDeclarationStatementSyntaxNode, FunctionInfo functionInfo)
+        private void OnWorkspaceEvent(IWorkspaceEvent @event)
         {
-            _functionInfos.Add(functionDeclarationStatementSyntaxNode, functionInfo);
-        }
-
-        public void SetFunctionInfo(FunctionCallExpressionSyntaxNode functionCallExpressionSyntaxNode, FunctionInfo functionInfo)
-        {
-            _functionInfos.Add(functionCallExpressionSyntaxNode, functionInfo);
-        }
-
-        public FunctionInfo GetFunctionInfo(FunctionDeclarationStatementSyntaxNode functionDeclarationStatementSyntaxNode)
-        {
-            if (!_functionInfos.TryGetValue(functionDeclarationStatementSyntaxNode, out var functionInfo))
-                throw new Exception("No function info for the given function declaration available.");
-            return functionInfo;
-        }
-
-        public FunctionInfo GetFunctionInfo(FunctionCallExpressionSyntaxNode functionCallExpressionSyntaxNode)
-        {
-            if (!_functionInfos.TryGetValue(functionCallExpressionSyntaxNode, out var functionInfo))
-                throw new Exception("No function info for the given function call available.");
-            return functionInfo;
-        }
-
-        public void AddErrorIssue(SyntaxTreeNode node, string message) => AddIssue(node, IssueSeverity.Error, message);
-        public void AddWarningIssue(SyntaxTreeNode node, string message) => AddIssue(node, IssueSeverity.Warning, message);
-
-        public void AddIssue(SyntaxTreeNode node, IssueSeverity severity, string message)
-        {
-            if (!_issues.TryGetValue(node, out var list))
+            if (@event is DocumentAdded documentAdded)
             {
-                list = new List<Issue>();
-                _issues.Add(node, list);
+                _db.SetInput(new DocumentListQuery(), new DocumentListResult(_workspace.Paths));
+                if (documentAdded.Document is CodeFile codeFile)
+                    _db.SetInput(new DocumentSyntaxTreeQuery(codeFile.Path), new DocumentSyntaxTreeResult(codeFile.SyntaxTree));
+                else
+                    throw new NotSupportedException("Unsupported workspace document: " + documentAdded.Document.GetType().Name);
             }
-            list.Add(new Issue(severity, message));
-        }
-
-        public IEnumerable<Issue> GetIssues(SyntaxTreeNode node)
-        {
-            if (_issues.TryGetValue(node, out var list))
-                return list;
-            return Array.Empty<Issue>();
+            if (@event is DocumentChanged documentChanged)
+            {
+                if (documentChanged.NewDocument is CodeFile codeFile)
+                    _db.SetInput(new DocumentSyntaxTreeQuery(codeFile.Path), new DocumentSyntaxTreeResult(codeFile.SyntaxTree));
+            }
+            if (@event is DocumentRemoved documentRemoved)
+            {
+                _db.SetInput(new DocumentListQuery(), new DocumentListResult(_workspace.Paths));
+                _db.RemoveInput(new DocumentSyntaxTreeQuery(documentRemoved.Document.Path));
+            }
         }
     }
+
+    public record DocumentListQuery() : IQuery<DocumentListResult>;
+    public class DocumentListResult
+    {
+        public DocumentListResult(ImmutableList<string> paths)
+        {
+            Paths = paths;
+        }
+
+        public ImmutableList<string> Paths { get; }
+
+        public override bool Equals(object? obj) => obj is DocumentListResult result && EqualityComparer<ImmutableList<string>>.Default.Equals(Paths, result.Paths);
+        public override int GetHashCode() => HashCode.Combine(Paths);
+    }
+
+    public record DocumentSyntaxTreeQuery(string Path) : IQuery<DocumentSyntaxTreeResult>;
+    public record DocumentSyntaxTreeResult(DocumentRootSyntaxNode RootNode);
 }

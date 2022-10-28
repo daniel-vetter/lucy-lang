@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-
-namespace Lucy.Core.Parsing
+﻿namespace Lucy.Core.Parsing
 {
     public abstract class SyntaxTreeNode
     {
+        public NodeId NodeId { get; set; } = NodeId.Uninitalized;
         public SyntaxTreeNodeSource Source { get; set; } = new SourceCode();
     }
 

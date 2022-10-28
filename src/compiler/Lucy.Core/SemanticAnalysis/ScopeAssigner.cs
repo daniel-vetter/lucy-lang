@@ -7,18 +7,20 @@ namespace Lucy.Core.SemanticAnalysis
 {
     internal class ScopeAssigner
     {
-        internal static void Run(SyntaxTreeNode node, SemanticModel semanticModel)
+        internal static void Run(SyntaxTreeNode node, SemanticAnalyzer semanticModel)
         {
             var rootScope = new Scope(null);
             Traverse(node, rootScope, semanticModel);
         }
 
-        private static void Traverse(SyntaxTreeNode node, Scope parentScope, SemanticModel semanticModel)
+        private static void Traverse(SyntaxTreeNode node, Scope parentScope, SemanticAnalyzer semanticModel)
         {
+            /*
             semanticModel.SetScope(node, parentScope);
 
             foreach (var child in node.GetChildNodes())
                 Traverse(child, parentScope, semanticModel);
+            */
         }
     }
 

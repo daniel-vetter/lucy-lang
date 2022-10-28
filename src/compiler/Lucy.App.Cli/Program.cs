@@ -1,7 +1,9 @@
-﻿using System.CommandLine;
+﻿using System;
+using System.CommandLine;
 using System.CommandLine.Builder;
 using System.CommandLine.Parsing;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Lucy.App.Infrastructure.Cli;
 using Lucy.Common.ServiceDiscovery;
@@ -11,7 +13,7 @@ namespace Lucy.App
 {
     class Program
     {
-        static async Task<int> Main(string[] args)
+        public static async Task<int> Main(string[] args)
         {
             var sp = new ServiceCollection()
                 .AddServicesFromCurrentAssembly()

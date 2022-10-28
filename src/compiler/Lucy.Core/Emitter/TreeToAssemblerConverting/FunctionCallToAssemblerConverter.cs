@@ -9,8 +9,9 @@ namespace Lucy.Core.Compiler.TreeToAssemblerConverting
 {
     internal class FunctionCallToAssemblerConverter
     {
-        internal static void Run(FunctionCallExpressionSyntaxNode fc, SemanticModel semanticModel, WinExecutableEmitterContext ctx)
+        internal static void Run(FunctionCallExpressionSyntaxNode fc, SemanticAnalyzer semanticModel, WinExecutableEmitterContext ctx)
         {
+            /*
             var functionInfo = semanticModel.GetFunctionInfo(fc);
             if (functionInfo == null)
                 throw new Exception("No function info found.");
@@ -44,6 +45,8 @@ namespace Lucy.Core.Compiler.TreeToAssemblerConverting
             {
                 ctx.Assembler.AddOperation(new Add(Register.ESP, new Immediate(OperandSize.S32, (uint)(fc.ArgumentList.Count * 4))));
             }
+            
+            */
         }
     }
 }

@@ -27,7 +27,7 @@ namespace Lucy.App.Features
         private async Task<int> Run(bool useInterpreter)
         {
             var workspace = await Workspace.CreateFromPath(Environment.CurrentDirectory);
-            workspace.Process();
+            //workspace.Process();
 
             return useInterpreter 
                 ? Interpret(workspace) 
@@ -44,20 +44,22 @@ namespace Lucy.App.Features
 
             var doc = workspace.Documents.Single();
 
-            if (doc.SyntaxTree == null)
-                throw new Exception("Syntax tree was not parsed.");
+            //if (doc.SyntaxTree == null)
+            //throw new Exception("Syntax tree was not parsed.");
 
-            if (doc.SemanticModel == null)
-                throw new Exception("Semenatic model was not provided.");
+            //if (doc.SemanticModel == null)
+            //throw new Exception("Semenatic model was not provided.");
 
-            var ctx = new InterpreterContext(doc.SemanticModel);
-            var result = TreeInterpreter.Run(doc.SyntaxTree, ctx);
-
+            //var ctx = new InterpreterContext(doc.SemanticModel);
+            //var result = TreeInterpreter.Run(doc.SyntaxTree, ctx);
+            /*
             if (result is VoidValue)
                 return 0;
             else if (result is NumberValue nv)
                 return (int)nv.Value;
             else throw new Exception("Application did not return a valid exit code.");
+            */
+            return 0;
         }
 
         private static async Task<int> CompileAndRun(Workspace workspace)

@@ -6,8 +6,9 @@ namespace Lucy.Core.SemanticAnalysis
 {
     internal class FunctionSymbolResolver
     {
-        internal static void Run(SyntaxTreeNode node, SemanticModel semanticModel)
+        internal static void Run(SyntaxTreeNode node, SemanticAnalyzer semanticModel)
         {
+            /*
             if (node is FunctionCallExpressionSyntaxNode functionCall)
             {
                 var matchingFunctions = semanticModel.GetScope(functionCall).GetAllMatchingSymbols(functionCall.FunctionName.Token.Text);
@@ -27,6 +28,7 @@ namespace Lucy.Core.SemanticAnalysis
 
             foreach (var child in node.GetChildNodes())
                 Run(child, semanticModel);
+            */
         }
     }
 }

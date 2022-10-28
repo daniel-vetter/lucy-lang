@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.30804.86
+# Visual Studio Version 17
+VisualStudioVersion = 17.3.32929.385
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Lucy.Core", "Lucy.Core\Lucy.Core.csproj", "{D046973F-2027-462E-9572-80A24E28250E}"
 EndProject
@@ -24,7 +24,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Lucy.App.LanguageServer.Tes
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Lucy.Assembler.Tests", "Lucy.Assembler.Tests\Lucy.Assembler.Tests.csproj", "{746FD145-4DAE-43B3-A541-4BD03ABF5352}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lucy.Assembler.TestCaseGenerator", "Lucy.Assembler.TestCaseGenerator\Lucy.Assembler.TestCaseGenerator.csproj", "{0C79F718-02E4-458F-A7CE-1E669CDDC90F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Lucy.Assembler.TestCaseGenerator", "Lucy.Assembler.TestCaseGenerator\Lucy.Assembler.TestCaseGenerator.csproj", "{0C79F718-02E4-458F-A7CE-1E669CDDC90F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lucy.Core.TestApp", "Lucy.Core.TestApp\Lucy.Core.TestApp.csproj", "{ABE0DF50-1E5B-42B2-8789-240255E289B1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -68,6 +70,10 @@ Global
 		{0C79F718-02E4-458F-A7CE-1E669CDDC90F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0C79F718-02E4-458F-A7CE-1E669CDDC90F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0C79F718-02E4-458F-A7CE-1E669CDDC90F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ABE0DF50-1E5B-42B2-8789-240255E289B1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ABE0DF50-1E5B-42B2-8789-240255E289B1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ABE0DF50-1E5B-42B2-8789-240255E289B1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ABE0DF50-1E5B-42B2-8789-240255E289B1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

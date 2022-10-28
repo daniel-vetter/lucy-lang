@@ -10,17 +10,20 @@ namespace Lucy.Core.SemanticAnalysis
     //Requires: Scopes
     internal class TypeDiscovery
     {
-        internal static void Run(SyntaxTreeNode node, SemanticModel semanticModel)
+        internal static void Run(SyntaxTreeNode node, SemanticAnalyzer semanticModel)
         {
+            /*
             if (node is FunctionDeclarationStatementSyntaxNode functionDeclarationStatementSyntaxNode)
             {
                 var functionInfo = new FunctionInfo(Guid.NewGuid().ToString(), functionDeclarationStatementSyntaxNode);
                 semanticModel.SetFunctionInfo(functionDeclarationStatementSyntaxNode, functionInfo);
                 semanticModel.GetScope(node).AddSymbol(functionInfo);
+                //semanticModel.AddExportedFunction(functionInfo);
             }
 
             foreach (var child in node.GetChildNodes())
                 Run(child, semanticModel);
+            */
         }
     }
 

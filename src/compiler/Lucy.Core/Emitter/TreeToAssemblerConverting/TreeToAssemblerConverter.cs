@@ -10,7 +10,7 @@ namespace Lucy.Core.Compiler.TreeToAssemblerConverting
 {
     public static class TreeToAssemblerConverter
     {
-        public static void Run(SyntaxTreeNode node, SemanticModel semanticModel, WinExecutableEmitterContext ctx)
+        public static void Run(SyntaxTreeNode node, SemanticAnalyzer semanticModel, WinExecutableEmitterContext ctx)
         {
             switch (node)
             {

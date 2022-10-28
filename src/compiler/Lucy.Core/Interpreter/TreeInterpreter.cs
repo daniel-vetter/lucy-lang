@@ -15,9 +15,12 @@ namespace Lucy.Core.Interpreter
     {
         public static Value Run(SyntaxTreeNode node, InterpreterContext ctx)
         {
+            return new VoidValue();
+
+            /*
             return node switch
             {
-                DocumentSyntaxNode dsn => Handle(dsn, ctx),
+                DocumentRootSyntaxNode dsn => Handle(dsn, ctx),
                 FunctionDeclarationStatementSyntaxNode fdsn => Handle(fdsn, ctx),
                 FunctionCallExpressionSyntaxNode fcesn => Handle(fcesn, ctx),
                 StringConstantExpressionSyntaxNode sc => new StringValue(sc.Value),
@@ -31,9 +34,10 @@ namespace Lucy.Core.Interpreter
                 ExpressionStatementSyntaxNode esn => Handle(esn, ctx),
                 _ => throw new NotSupportedException("Unsupported node type: " + node.GetType().Name)
             };
+            */
         }
-
-        private static Value Handle(DocumentSyntaxNode documentSyntaxNode, InterpreterContext ctx)
+        /*
+        private static Value Handle(DocumentRootSyntaxNode documentSyntaxNode, InterpreterContext ctx)
         {
             var entryPoint = documentSyntaxNode.StatementList
                 .Statements
@@ -145,16 +149,17 @@ namespace Lucy.Core.Interpreter
 
             return new NumberValue(leftNumber.Value + rightNumber.Value);
         }
+        */
     }
 
     public class InterpreterContext
     {
-        public InterpreterContext(SemanticModel semanticModel)
+        public InterpreterContext(SemanticAnalyzer semanticModel)
         {
             SemanticModel = semanticModel;
         }
         
-        public SemanticModel SemanticModel { get; }
+        public SemanticAnalyzer SemanticModel { get; }
         public Dictionary<string, Value> Variables = new Dictionary<string, Value>();
     }
 

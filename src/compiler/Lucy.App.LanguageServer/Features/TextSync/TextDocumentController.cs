@@ -48,7 +48,7 @@ namespace Lucy.Feature.LanguageServer.RpcController
             if (document == null)
                 throw new Exception("Could not find document: " + textDocument.Uri);
 
-            var fileContent = document.Content;
+            var fileContent = document.SourceCode;
             foreach(var change in contentChanges)
             {
                 if (change.Range == null)

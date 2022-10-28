@@ -42,13 +42,13 @@ namespace Lucy.Core.Compiler
 
             foreach (var doc in workspace.Documents)
             {
-                if (doc.SyntaxTree == null)
-                    throw new Exception($"Could not find a syntax tree for workspace document '{doc.Path}'.");
+                //if (doc.SyntaxTree == null)
+                    //throw new Exception($"Could not find a syntax tree for workspace document '{doc.Path}'.");
 
-                if (doc.SemanticModel == null)
-                    throw new Exception($"Could not find a sementic model for workspace document '{doc.Path}'.");
+                //if (doc.SemanticModel == null)
+                    //throw new Exception($"Could not find a sementic model for workspace document '{doc.Path}'.");
 
-                TreeToAssemblerConverter.Run(doc.SyntaxTree, doc.SemanticModel, ctx);
+                //TreeToAssemblerConverter.Run(doc.SyntaxTree, doc.SemanticModel, ctx);
             }
 
             return ctx;

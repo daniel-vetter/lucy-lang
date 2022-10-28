@@ -6,8 +6,9 @@ namespace Lucy.Core.SemanticAnalysis
 {
     internal class EntryPointFinder
     {
-        internal static void Run(SyntaxTreeNode node, SemanticModel semanticModel)
+        internal static void Run(SyntaxTreeNode node, SemanticAnalyzer semanticModel)
         {
+            /*
             if (node is FunctionDeclarationStatementSyntaxNode function)
             {
                 var info = semanticModel.GetFunctionInfo(function);
@@ -17,6 +18,7 @@ namespace Lucy.Core.SemanticAnalysis
             
             foreach (var child in node.GetChildNodes())
                 Run(child, semanticModel);
+            */
         }
     }
 }
