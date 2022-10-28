@@ -4,7 +4,7 @@ using Lucy.Core.Parsing.Nodes.Statements.FunctionDeclaration;
 using Lucy.Core.SemanticAnalysis;
 using System;
 
-namespace Lucy.Core.Compiler.TreeToAssemblerConverting
+namespace Lucy.Core.Emitter.TreeToAssemblerConverting
 {
     internal class FunctionDeclarationToAssemblerConverter
     {

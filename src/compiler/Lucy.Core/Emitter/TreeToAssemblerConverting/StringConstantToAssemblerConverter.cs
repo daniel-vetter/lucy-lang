@@ -5,7 +5,7 @@ using Lucy.Core.Parsing.Nodes.Expressions.Unary;
 using System.Linq;
 using System.Text;
 
-namespace Lucy.Core.Compiler.TreeToAssemblerConverting
+namespace Lucy.Core.Emitter.TreeToAssemblerConverting
 {
     internal class StringConstantToAssemblerConverter
     {

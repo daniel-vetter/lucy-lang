@@ -2,7 +2,7 @@
 using Lucy.Assembler.Operations;
 using Lucy.Core.Parsing.Nodes.Expressions.Unary;
 
-namespace Lucy.Core.Compiler.TreeToAssemblerConverting
+namespace Lucy.Core.Emitter.TreeToAssemblerConverting
 {
     internal class NumberConstantToAssemblerConverter
     {

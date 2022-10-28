@@ -1,12 +1,12 @@
 ﻿using Lucy.Assembler;
 using Lucy.Assembler.ContainerFormats.PE;
-using Lucy.Core.Compiler.TreeToAssemblerConverting;
+using Lucy.Core.Emitter.TreeToAssemblerConverting;
 using Lucy.Core.ProjectManagement;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Lucy.Core.Compiler
+namespace Lucy.Core.Emitter
 {
     public class WinExecutableEmitter
     {
@@ -43,10 +43,10 @@ namespace Lucy.Core.Compiler
             foreach (var doc in workspace.Documents)
             {
                 //if (doc.SyntaxTree == null)
-                    //throw new Exception($"Could not find a syntax tree for workspace document '{doc.Path}'.");
+                //throw new Exception($"Could not find a syntax tree for workspace document '{doc.Path}'.");
 
                 //if (doc.SemanticModel == null)
-                    //throw new Exception($"Could not find a sementic model for workspace document '{doc.Path}'.");
+                //throw new Exception($"Could not find a sementic model for workspace document '{doc.Path}'.");
 
                 //TreeToAssemblerConverter.Run(doc.SyntaxTree, doc.SemanticModel, ctx);
             }

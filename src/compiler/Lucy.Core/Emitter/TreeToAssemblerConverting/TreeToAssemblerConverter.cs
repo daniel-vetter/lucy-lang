@@ -6,7 +6,7 @@ using Lucy.Core.Parsing.Nodes.Statements.FunctionDeclaration;
 using Lucy.Core.Parsing;
 using Lucy.Core.SemanticAnalysis;
 
-namespace Lucy.Core.Compiler.TreeToAssemblerConverting
+namespace Lucy.Core.Emitter.TreeToAssemblerConverting
 {
     public static class TreeToAssemblerConverter
     {

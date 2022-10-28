@@ -5,7 +5,7 @@ using Lucy.Core.Parsing.Nodes.Expressions.Unary;
 using Lucy.Core.SemanticAnalysis;
 using System;
 
-namespace Lucy.Core.Compiler.TreeToAssemblerConverting
+namespace Lucy.Core.Emitter.TreeToAssemblerConverting
 {
     internal class FunctionCallToAssemblerConverter
     {
