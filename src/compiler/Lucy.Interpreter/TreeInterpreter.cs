@@ -1,15 +1,7 @@
-﻿using Lucy.Core.Parsing.Nodes.Expressions.Nested;
-using Lucy.Core.Parsing.Nodes.Expressions.Unary;
-using Lucy.Core.Parsing.Nodes.Statements;
-using Lucy.Core.Parsing;
-using System;
-using System.Collections.Generic;
-using Lucy.Core.Parsing.Nodes;
-using Lucy.Core.Parsing.Nodes.Statements.FunctionDeclaration;
-using System.Linq;
+﻿using Lucy.Core.Parsing;
 using Lucy.Core.SemanticAnalysis;
 
-namespace Lucy.Core.Interpreter
+namespace Lucy.Interpreter
 {
     public static class TreeInterpreter
     {
@@ -158,7 +150,7 @@ namespace Lucy.Core.Interpreter
         {
             SemanticModel = semanticModel;
         }
-        
+
         public SemanticAnalyzer SemanticModel { get; }
         public Dictionary<string, Value> Variables = new Dictionary<string, Value>();
     }

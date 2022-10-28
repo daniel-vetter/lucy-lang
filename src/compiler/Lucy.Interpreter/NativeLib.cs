@@ -5,7 +5,7 @@ using System.Reflection.Emit;
 using System.Reflection;
 using System.Runtime.InteropServices;
 
-namespace Lucy.Core.Interpreter
+namespace Lucy.Interpreter
 {
     public static class NativeLib
     {
@@ -67,7 +67,7 @@ namespace Lucy.Core.Interpreter
 
         private static string GetName(string libraryPath, string functionName, NativeType? returnType, IEnumerable<NativeType> parameters)
         {
-            return $"{libraryPath}!{(returnType?.ToString() ?? "void")} {functionName}({string.Join(", ", parameters)})";
+            return $"{libraryPath}!{returnType?.ToString() ?? "void"} {functionName}({string.Join(", ", parameters)})";
         }
 
         private static Type NativeToManagedType(NativeType type)
@@ -75,7 +75,7 @@ namespace Lucy.Core.Interpreter
             if (type == NativeType.String)
                 return typeof(string);
             else if (type == NativeType.Int32)
-                return typeof(Int32);
+                return typeof(int);
             else if (type == NativeType.Ref)
                 return typeof(string);
             else throw new Exception("Unsupported native type: " + type);
@@ -89,7 +89,7 @@ namespace Lucy.Core.Interpreter
                 return NativeType.String;
             else if (!type.IsValueType)
                 return NativeType.Ref;
-            else if (type == typeof(Int32))
+            else if (type == typeof(int))
                 return NativeType.Int32;
             else throw new Exception($"Could not convert managed type {type} to a native type.");
         }
