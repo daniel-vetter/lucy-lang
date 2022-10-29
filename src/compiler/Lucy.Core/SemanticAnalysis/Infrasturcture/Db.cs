@@ -1,16 +1,17 @@
-﻿using System;
+﻿using Lucy.Common;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 
-namespace Lucy.Core.SemanticAnalysis
+namespace Lucy.Core.SemanticAnalysis.Infrasturcture
 {
     public class Db
     {
         private CallContext? _callContext = null;
         private Dictionary<IQuery, Entry> _entries = new();
         private Dictionary<Type, QueryHandler> _handlers = new();
-        public Action<IDbEvent>? OnEvent { get; set; }
+        private Subscriptions<IDbEvent> _subscriptions = new();
         private int _currentRevision;
         //TODO: Garbage collection
 
@@ -19,6 +20,11 @@ namespace Lucy.Core.SemanticAnalysis
         public void RegisterHandler(QueryHandler handler)
         {
             _handlers.Add(handler.GetType().BaseType!.GetGenericArguments()[0], handler);
+        }
+
+        public IDisposable AddEventHandler(Action<IDbEvent> handler)
+        {
+            return _subscriptions.AddHandler(handler);
         }
 
         public void SetInput<TQueryResult>(IQuery<TQueryResult> query, TQueryResult result) where TQueryResult : notnull
@@ -36,7 +42,9 @@ namespace Lucy.Core.SemanticAnalysis
             {
                 _entries.Add(query, new Entry(result, _currentRevision, _currentRevision, true));
             }
-            OnEvent?.Invoke(new InputWasChanged(query, result));
+
+            if (_subscriptions.HasSubscriptions)
+                _subscriptions.Publish(new InputWasChanged(query, result));
         }
 
         public void RemoveInput<TQueryResult>(IQuery<TQueryResult> query) where TQueryResult : notnull
@@ -46,7 +54,9 @@ namespace Lucy.Core.SemanticAnalysis
 
             _currentRevision++;
             _entries.Remove(query);
-            OnEvent?.Invoke(new InputWasRemoved(query));
+
+            if (_subscriptions.HasSubscriptions)
+                _subscriptions.Publish(new InputWasRemoved(query));
         }
 
         private Entry EnsureEntryIsUpToDate(IQuery query)
@@ -69,10 +79,12 @@ namespace Lucy.Core.SemanticAnalysis
 
         public TQueryResult Query<TQueryResult>(IQuery<TQueryResult> query) where TQueryResult : notnull
         {
-            OnEvent?.Invoke(new QueryReceived(query, _callContext?.Query));
+            if (_subscriptions.HasSubscriptions)
+                _subscriptions.Publish(new QueryReceived(query, _callContext?.Query));
             _callContext?.Dependencies.Add(query);
             var entry = EnsureEntryIsUpToDate(query);
-            OnEvent?.Invoke(new QueryAnswered(query, _callContext?.Query));
+            if (_subscriptions.HasSubscriptions)
+                _subscriptions.Publish(new QueryAnswered(query, _callContext?.Query));
             return (TQueryResult)entry.Value;
         }
 
@@ -81,7 +93,8 @@ namespace Lucy.Core.SemanticAnalysis
             if (!_handlers.TryGetValue(query.GetType(), out var handler))
                 throw new Exception($"For a query of type '{query.GetType().Name}' is no input provided and no query handler registered.");
 
-            OnEvent?.Invoke(new CalculationStarted(query));
+            if (_subscriptions.HasSubscriptions)
+                _subscriptions.Publish(new CalculationStarted(query));
             var stopwatch = Stopwatch.StartNew();
             var dependencies = new List<IQuery>();
             _callContext = new CallContext(_callContext, query, dependencies);
@@ -116,7 +129,8 @@ namespace Lucy.Core.SemanticAnalysis
                 entry.LastChecked = _currentRevision;
             }
 
-            OnEvent?.Invoke(new CalculationFinished(query, entry.Value, stopwatch.Elapsed, resultWasSame));
+            if (_subscriptions.HasSubscriptions)
+                _subscriptions.Publish(new CalculationFinished(query, entry.Value, stopwatch.Elapsed, resultWasSame));
             return entry;
         }
 
@@ -146,7 +160,7 @@ namespace Lucy.Core.SemanticAnalysis
 
     public abstract class QueryHandler<TQuery, TQueryResult> : QueryHandler where TQuery : notnull, IQuery<TQueryResult> where TQueryResult : notnull
     {
-        public abstract TQueryResult Handle(Db runner, TQuery query);
+        public abstract TQueryResult Handle(Db db, TQuery query);
 
         [DebuggerStepThrough]
         public override object Handle(Db db, object query)

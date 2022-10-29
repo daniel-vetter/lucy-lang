@@ -12,14 +12,12 @@ namespace Lucy.Core.ProjectManagement
 
     public class Workspace
     {
-        private Dictionary<string, WorkspaceDocument> _documents = new();
-        private ImmutableList<string> _paths = ImmutableList<string>.Empty;
-
+        private ImmutableDictionary<string, WorkspaceDocument> _documents = ImmutableDictionary<string, WorkspaceDocument>.Empty;
+        
         private Subscriptions<IWorkspaceEvent> _eventSubscriptions = new();
 
-        public IEnumerable<WorkspaceDocument> Documents => _documents.Values;
-        public ImmutableList<string> Paths => _paths;
-
+        public ImmutableDictionary<string, WorkspaceDocument> Documents => _documents;
+        
         public IDisposable AddEventHandler(Action<IWorkspaceEvent> handler) => _eventSubscriptions.AddHandler(handler);
 
 
@@ -43,8 +41,7 @@ namespace Lucy.Core.ProjectManagement
 
         public void AddDocument(WorkspaceDocument document)
         {
-            _documents.Add(document.Path, document);
-            _paths = _paths.Add(document.Path);
+            _documents = _documents.Add(document.Path, document);            
             _eventSubscriptions.Publish(new DocumentAdded(document));
         }
 
@@ -52,7 +49,7 @@ namespace Lucy.Core.ProjectManagement
         {
             if (_documents.TryGetValue(document.Path, out var oldDocument))
             {
-                _documents[document.Path] = document;
+                _documents = _documents.SetItem(document.Path, document);
                 _eventSubscriptions.Publish(new DocumentChanged(oldDocument, document));
             }
             else
@@ -66,7 +63,6 @@ namespace Lucy.Core.ProjectManagement
             if (!_documents.TryGetValue(path, out var document))
                 throw new Exception("This workspace does not contain a document with the path: " + path);
             _documents.Remove(path);
-            _paths.Remove(path);
             _eventSubscriptions.Publish(new DocumentRemoved(document));
         }
 

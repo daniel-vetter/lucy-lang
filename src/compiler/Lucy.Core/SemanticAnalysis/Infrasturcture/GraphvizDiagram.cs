@@ -1,0 +1,205 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
+using System.Text;
+
+namespace Lucy.Core.SemanticAnalysis.Infrasturcture
+{
+    public class GraphvizDiagram
+    {
+        public string? NodeShape { get; set; }
+        public string? NodeFontName { get; set; }
+        public int? NodeFontSize { get; set; }
+
+        public string? EdgeFontName { get; set; }
+        public int? EdgeFontSize { get; set; }
+
+        private int _lastId = 0;
+        private Dictionary<NullableKey, Node> _nodesByKey = new();
+        private List<Edge> _edges = new();
+        private record NullableKey(object? Value);
+
+        string BuildProps(Dictionary<string, object> values)
+        {
+            var converted = new Dictionary<string, string>();
+            foreach (var (key, value) in values)
+            {
+                if (value is string str)
+                    converted.Add(key, $"\"{value}\"");
+                else if (value is int i)
+                    converted.Add(key, i.ToString());
+                else if (value is float f)
+                    converted.Add(key, f.ToString(CultureInfo.InvariantCulture));
+                else if (value is float d)
+                    converted.Add(key, d.ToString(CultureInfo.InvariantCulture));
+                else
+                    converted.Add(key, value.ToString() ?? "");
+            }
+            return "[" + string.Join(", ", converted.Select(x => $"{x.Key}={x.Value}").ToArray()) + "]";
+        }
+
+
+        public Node CreateNodeFor(object? key)
+        {
+            var nullableKey = new NullableKey(key);
+            if (_nodesByKey.ContainsKey(nullableKey))
+                throw new Exception("A node for this key already exists.");
+
+            var node = new Node("n" + ++_lastId);
+            _nodesByKey.Add(nullableKey, node);
+            return node;
+        }
+
+        public bool HasNodeFor(object? key)
+        {
+            return _nodesByKey.ContainsKey(new NullableKey(key));
+        }
+
+        public string Build()
+        {
+            var sb = new StringBuilder();
+            sb.AppendLine("digraph D {");
+            WriteHeader(sb);
+            WriteNodes(sb);
+            WriteEdges(sb);
+
+            sb.AppendLine();
+            sb.AppendLine("}");
+
+            return sb.ToString();
+        }
+
+        private void WriteEdges(StringBuilder sb)
+        {
+            foreach (var edge in _edges)
+            {
+                sb.Append($"    {edge.From.Id} -> {edge.To.Id} ");
+                var props = new Dictionary<string, object>();
+                if (edge.Label != null)
+                    props["label"] = edge.Label;
+                if (edge.Color != null)
+                    props["color"] = edge.Color;
+                if (edge.Style != null)
+                    props["style"] = edge.Style;
+                if (edge.PenWidth.HasValue)
+                    props["penwidth"] = edge.PenWidth.Value;
+                sb.AppendLine(BuildProps(props));
+            }
+        }
+
+        private void WriteHeader(StringBuilder sb)
+        {
+            sb.AppendLine();
+            var dict = new Dictionary<string, object>();
+            if (NodeShape != null) dict["shape"] = NodeShape;
+            if (NodeFontName != null) dict["fontname"] = NodeFontName;
+            if (NodeFontSize.HasValue) dict["fontsize"] = NodeFontSize.Value;
+            if (dict.Count > 0)
+                sb.AppendLine("    node " + BuildProps(dict));
+
+            dict.Clear();
+            if (EdgeFontName != null) dict["fontname"] = EdgeFontName;
+            if (EdgeFontSize.HasValue) dict["fontsize"] = EdgeFontSize;
+            if (dict.Count > 0)
+                sb.AppendLine("    edge " + BuildProps(dict));
+        }
+
+        private void WriteNodes(StringBuilder sb)
+        {
+            sb.AppendLine();
+            foreach (var node in _nodesByKey.Values.OrderBy(x => x.Id))
+            {
+                sb.Append($"    {node.Id} ");
+                var props = new Dictionary<string, object>();
+                props["label"] = node.Label;
+                if (node.Color != null) props["color"] = node.Color;
+                if (node.FontColor != null) props["fontcolor"] = node.FontColor;
+                if (node.NodeShape != null) props["shape"] = node.NodeShape;
+                if (node.Style != null) props["style"] = node.Style;
+                if (node.FillColor != null) props["fillcolor"] = node.FillColor;
+                sb.AppendLine(BuildProps(props));
+            }
+        }
+
+        internal Edge CreateEdgeFor(object? from, object? to)
+        {
+            if (!_nodesByKey.TryGetValue(new NullableKey(from), out var fromNode))
+                throw new Exception("'from' key is unknown.");
+            if (!_nodesByKey.TryGetValue(new NullableKey(to), out var toNode))
+                throw new Exception("'to' key is unknown.");
+
+            var edge = new Edge(fromNode, toNode);
+            _edges.Add(edge);
+            return edge;
+        }
+    }
+
+    public class Node
+    {
+        public string Id { get; set; }
+        public object Label { get; set; } = "";
+        public string? NodeShape { get; set; }
+        public string? NodeFontName { get; set; }
+        public int? NodeFontSize { get; set; }
+        public string? Color { get; set; }
+        public string? FontColor { get; set; }
+        public string? FillColor { get; internal set; }
+        public string? Style { get; internal set; }
+
+        public Node(string id)
+        {
+            Id = id;
+        }
+    }
+
+    public class Edge
+    {
+        public Node From { get; }
+        public Node To { get; }
+        public string? Label { get; set; }
+        public string? Color { get; set; }
+        public string? Style { get; set; }
+        public int? PenWidth { get; set; }
+
+        public Edge(Node from, Node to)
+        {
+            From = from;
+            To = to;
+        }
+    }
+
+    public class KeyValueTable
+    {
+        private string _title;
+        private Dictionary<string, string> _props = new();
+
+        public KeyValueTable(string title)
+        {
+            _title = title;
+        }
+
+        public void Set(string key, string value)
+        {
+            _props[key] = value;
+        }
+
+        public override string ToString()
+        {
+            var sb = new StringBuilder();
+            sb.AppendLine("<<table border=\"0\">");
+            sb.AppendLine("            <tr>");
+            sb.AppendLine($"                <td align=\"left\" colspan=\"2\"><b>{_title}</b></td>");
+            sb.AppendLine("            </tr>");
+            foreach (var (key, value) in _props)
+            {
+                sb.AppendLine("            <tr>");
+                sb.AppendLine($"                <td align=\"left\">{key}:</td>");
+                sb.AppendLine($"                <td align=\"left\">{value}</td>");
+                sb.AppendLine("            </tr>");
+            }
+            sb.Append("        </table>>");
+            return sb.ToString();
+        }
+    }
+}

@@ -1,0 +1,17 @@
+﻿using Lucy.Core.Parsing;
+using Lucy.Core.SemanticAnalysis.Infrasturcture;
+
+namespace Lucy.Core.SemanticAnalysis.Handler
+{
+    public record GetNodeById(NodeId NodeId) : IQuery<GetNodeByIdResult>;
+    public record GetNodeByIdResult(SyntaxTreeNode Node);
+
+    internal class GetNodeByIdHandler : QueryHandler<GetNodeById, GetNodeByIdResult>
+    {
+        public override GetNodeByIdResult Handle(Db db, GetNodeById query)
+        {
+            var nodes = db.Query(new GetNodesMap(query.NodeId.DocumentPath)).NodesById;
+            return new GetNodeByIdResult(nodes[query.NodeId]);
+        }
+    }
+}

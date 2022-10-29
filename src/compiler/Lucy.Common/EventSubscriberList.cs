@@ -27,5 +27,7 @@ namespace Lucy.Common
             public DelegateDisposable(Action onDispose) => _onDispose = onDispose;
             public void Dispose() => _onDispose();
         }
+
+        public bool HasSubscriptions => _handler.Count > 0;
     }
 }
