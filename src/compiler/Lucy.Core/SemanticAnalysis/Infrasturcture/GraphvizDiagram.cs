@@ -187,19 +187,40 @@ namespace Lucy.Core.SemanticAnalysis.Infrasturcture
         public override string ToString()
         {
             var sb = new StringBuilder();
-            sb.AppendLine("<<table border=\"0\">");
-            sb.AppendLine("            <tr>");
-            sb.AppendLine($"                <td align=\"left\" colspan=\"2\"><b>{_title}</b></td>");
-            sb.AppendLine("            </tr>");
+            sb.Append("<<table border=\"0\">");
+            sb.Append("<tr>");
+            sb.Append($"<td align=\"left\" colspan=\"2\"><b><font point-size=\"24\">{_title}</font></b></td>");
+            sb.Append("</tr>");
             foreach (var (key, value) in _props)
             {
-                sb.AppendLine("            <tr>");
-                sb.AppendLine($"                <td align=\"left\">{key}:</td>");
-                sb.AppendLine($"                <td align=\"left\">{value}</td>");
-                sb.AppendLine("            </tr>");
+                foreach(var (valuePart, isFirst) in Split(value))
+                {
+                    sb.Append("<tr>");
+                    if (isFirst)
+                        sb.Append($"<td align=\"left\"><b>{key}:</b></td>");
+                    else
+                        sb.Append($"<td></td>");
+                    sb.Append($"<td align=\"left\">{valuePart}</td>");
+                    sb.Append("</tr>");
+                }
             }
-            sb.Append("        </table>>");
+            sb.Append("</table>>");
             return sb.ToString();
+        }
+
+        private IEnumerable<(string, bool)> Split(string value)
+        {
+            bool isFirst = true;
+            var max = 40;
+            while (value.Length > max)
+            {
+                var part = value[..max];
+                value = value[max..];
+                yield return (part, isFirst);
+                isFirst = false;
+            }
+            if (value.Length > 0)
+                yield return (value, isFirst);
         }
     }
 }

@@ -22,7 +22,7 @@ namespace Lucy.Core.SemanticAnalysis
             _workspaceEventSubscription = workspace.AddEventHandler(OnWorkspaceEvent);
             _workspace = workspace;
 
-            _db.RegisterHandler(new GetNodesByIdMapHandler());
+            _db.RegisterHandler(new GetNodesMapHandler());
             _db.RegisterHandler(new GetNodeByIdHandler());
 
             foreach(var codeFile in workspace.Documents.Values.OfType<CodeFile>())

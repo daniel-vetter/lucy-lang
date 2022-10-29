@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
@@ -80,41 +81,7 @@ namespace Lucy.Core.SemanticAnalysis.Infrasturcture
                 if (d.HasNodeFor(query))
                     continue;
 
-                var node = d.CreateNodeFor(query);
-                node.Label = query?.GetType().Name ?? "root";
-                node.NodeShape = "rectangle";
-                if (query != null)
-                {
-                    var isCalculated = _calculatedQueries.ContainsKey(query);
-                    var isInput = _inputs.ContainsKey(query);
-                    var isUsed = isCalculated || isInput;
-
-                    if (_calculatedQueries.ContainsKey(query))
-                    {
-                        node.Color = "#008000";
-                        node.FontColor = "#008000";
-                        node.Style = "filled";
-                        node.FillColor = "#00800010";
-                    }
-                    else if (_inputs.TryGetValue(query, out var inputStats))
-                    {
-                        node.Color = "#A0A0ff";
-                        node.FontColor = "#A0A0ff";
-                        node.Style = "filled";
-                        node.FillColor = "#8080FF10";
-
-                        if (inputStats.Removed)
-                        {
-                            node.Color = "#FF0000";
-                            node.FontColor = "#FF0000";
-                        }
-                        else if (inputStats.Changed)
-                        {
-                            node.Color = "#0000FF";
-                            node.FontColor = "#0000FF";
-                        }
-                    }
-                }
+                CretaeNode(d, query);
             }
 
             foreach (var ((from, to), stats) in _dependencies)
@@ -125,13 +92,59 @@ namespace Lucy.Core.SemanticAnalysis.Infrasturcture
             }
 
             var fileContent = d.Build();
-            File.WriteAllText(Path.Combine(_outputDirectory, "last.dot"), fileContent);
+            File.WriteAllText(Path.Combine(_outputDirectory, "_last.dot"), fileContent);
+            File.WriteAllText(Path.Combine(_outputDirectory, DateTime.Now.ToString("O").Replace(":", "-") + ".dot"), fileContent);
 
             _calculatedQueries.Clear();
             foreach (var stats in _dependencies.Values)
                 stats.CallCount = 0;
             foreach (var stats in _inputs.Values)
                 stats.Changed = false;
+        }
+
+        private void CretaeNode(GraphvizDiagram d, IQuery? query)
+        {
+            var node = d.CreateNodeFor(query);
+            node.NodeShape = "rectangle";
+            if (query == null)
+            {
+                node.Label = "root";
+                return;
+            }
+            
+            var label = new KeyValueTable(query.GetType().Name ?? "root");
+            foreach(var props in query.GetType().GetProperties())
+            {
+                label.Set(props.Name, props.GetValue(query)?.ToString() ?? "");
+            }
+            node.Label = label;
+
+            if (_calculatedQueries.ContainsKey(query))
+            {
+                node.Color = "#008000";
+                node.FontColor = "#008000";
+                node.Style = "filled";
+                node.FillColor = "#00800010";
+            }
+            else if (_inputs.TryGetValue(query, out var inputStats))
+            {
+                node.Color = "#A0A0ff";
+                node.FontColor = "#A0A0ff";
+                node.Style = "filled";
+                node.FillColor = "#8080FF10";
+
+                if (inputStats.Removed)
+                {
+                    node.Color = "#FF0000";
+                    node.FontColor = "#FF0000";
+                }
+                else if (inputStats.Changed)
+                {
+                    node.Color = "#0000FF";
+                    node.FontColor = "#0000FF";
+                }
+            }
+
         }
     }
 }

@@ -1,8 +1,10 @@
 ﻿using Lucy.Core.Helper;
 using Lucy.Core.Parsing;
 using Lucy.Core.SemanticAnalysis.Infrasturcture;
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Linq;
 
 namespace Lucy.Core.SemanticAnalysis.Handler
 {
@@ -11,16 +13,20 @@ namespace Lucy.Core.SemanticAnalysis.Handler
     /// </summary>
     /// <param name="DocumentPath"></param>
     public record GetNodesMap(string DocumentPath) : IQuery<GetNodesMapResult>;
-    public record GetNodesMapResult(ImmutableDictionary<NodeId, SyntaxTreeNode> NodesById);
+    public record GetNodesMapResult(ImmutableDictionary<NodeId, SyntaxTreeNode> NodesById, ImmutableDictionary<Type, ImmutableArray<SyntaxTreeNode>> NodesByType);
 
-    public class GetNodesByIdMapHandler : QueryHandler<GetNodesMap, GetNodesMapResult>
+    public class GetNodesMapHandler : QueryHandler<GetNodesMap, GetNodesMapResult>
     {
         public override GetNodesMapResult Handle(Db db, GetNodesMap query)
         {
             var rootNode = db.Query(new GetSyntaxTree(query.DocumentPath)).RootNode;
-            var dictionary = new Dictionary<NodeId, SyntaxTreeNode>();
-            Traverse(rootNode, dictionary);
-            return new GetNodesMapResult(dictionary.ToImmutableDictionary());
+            var nodesById = new Dictionary<NodeId, SyntaxTreeNode>();
+            
+            Traverse(rootNode, nodesById);
+            var nodesByType = nodesById.Values
+                .GroupBy(x => x.GetType())
+                .ToImmutableDictionary(x => x.Key, x => x.ToImmutableArray());
+            return new GetNodesMapResult(nodesById.ToImmutableDictionary(), nodesByType);
         }
 
         private void Traverse(SyntaxTreeNode node, Dictionary<NodeId, SyntaxTreeNode> nodesById)
