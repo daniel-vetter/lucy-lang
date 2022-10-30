@@ -5,6 +5,7 @@ namespace Lucy.Core.Helper
 {
     public static class SyntaxTreeNodeExtensions
     {
+        //TODO: measure if this is slow and maybe find something faster (source generator?)
         public static IEnumerable<SyntaxTreeNode> GetChildNodes(this SyntaxTreeNode node)
         {
             var props = node.GetType().GetProperties();

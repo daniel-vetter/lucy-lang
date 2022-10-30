@@ -1,18 +1,10 @@
 ﻿using Lucy.Core.Parsing.Nodes.Token;
-using Lucy.Core.Parsing;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Lucy.Core.Parsing.Nodes.Statements.FunctionDeclaration
 {
-    public class TypeReferenceSyntaxNode : SyntaxTreeNode
+    public record TypeReferenceSyntaxNode(SyntaxElement typeName) : SyntaxTreeNode
     {
-        public TypeReferenceSyntaxNode(SyntaxElement typeName)
-        {
-            TypeName = typeName;
-        }
-
-        public SyntaxElement TypeName { get; set; }
-
         public static bool TryRead(Code code, [NotNullWhen(true)] out TypeReferenceSyntaxNode? result)
         {
             if (!SyntaxElement.TryReadIdentifier(code, out var token))

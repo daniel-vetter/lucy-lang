@@ -3,19 +3,8 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Lucy.Core.Parsing.Nodes.Expressions.Nested
 {
-    internal class AndExpressionSyntaxNode : ExpressionSyntaxNode
+    internal record AndExpressionSyntaxNode(ExpressionSyntaxNode Left, SyntaxElement AndKeyword, ExpressionSyntaxNode Right) : ExpressionSyntaxNode
     {
-        public AndExpressionSyntaxNode(ExpressionSyntaxNode left, SyntaxElement andKeyword, ExpressionSyntaxNode right)
-        {
-            Left = left;
-            AndKeyword = andKeyword;
-            Right = right;
-        }
-
-        public ExpressionSyntaxNode Left { get; }
-        public SyntaxElement AndKeyword { get; }
-        public ExpressionSyntaxNode Right { get; }
-
         public static bool TryReadOrInner(Code code, [NotNullWhen(true)] out ExpressionSyntaxNode? result)
         {
             if (!OrExpressionSyntaxNode.TryReadOrInner(code, out result))

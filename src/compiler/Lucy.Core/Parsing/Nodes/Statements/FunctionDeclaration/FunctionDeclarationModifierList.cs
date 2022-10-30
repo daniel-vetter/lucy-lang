@@ -1,13 +1,12 @@
 ﻿using Lucy.Core.Parsing.Nodes.Token;
-using System.Collections.Generic;
 
 namespace Lucy.Core.Parsing.Nodes.Statements.FunctionDeclaration
 {
     internal static class FunctionDeclarationModifierList
     {
-        public static List<SyntaxElement> Read(Code code)
+        public static ComparableReadOnlyList<SyntaxElement> Read(Code code)
         {
-            var l = new List<SyntaxElement>();
+            var l = new ComparableReadOnlyList<SyntaxElement>.Builder();
 
             while (true)
             {
@@ -32,7 +31,7 @@ namespace Lucy.Core.Parsing.Nodes.Statements.FunctionDeclaration
                 break;
             }
 
-            return l;
+            return l.Build();
         }
     }
 }

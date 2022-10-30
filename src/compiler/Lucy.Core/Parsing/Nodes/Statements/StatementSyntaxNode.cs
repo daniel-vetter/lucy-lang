@@ -3,12 +3,8 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Lucy.Core.Parsing.Nodes.Statements
 {
-    public abstract class StatementSyntaxNode : SyntaxTreeNode
+    public abstract record StatementSyntaxNode : SyntaxTreeNode
     {
-        public StatementSyntaxNode()
-        {
-        }
-
         public static bool TryRead(Code code, [NotNullWhen(true)] out StatementSyntaxNode? result)
         {
             result =

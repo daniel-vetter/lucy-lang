@@ -10,6 +10,7 @@ namespace Lucy.Core.Parsing
     {
         private string _code;
         private int _pos = 0;
+        private Stack<NodeId> _stack = new Stack<NodeId>();
 
         public Code(string code)
         {

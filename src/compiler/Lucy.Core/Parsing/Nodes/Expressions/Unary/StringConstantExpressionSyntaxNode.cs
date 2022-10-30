@@ -1,21 +1,11 @@
-﻿using Lucy.Core.Parsing;
-using Lucy.Core.Parsing.Nodes.Token;
+﻿using Lucy.Core.Parsing.Nodes.Token;
 using Lucy.Core.Parsing.Nodes.Trivia;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Lucy.Core.Parsing.Nodes.Expressions.Unary
 {
-    public class StringConstantExpressionSyntaxNode : ExpressionSyntaxNode
+    public record StringConstantExpressionSyntaxNode(string Value, SyntaxElement String) : ExpressionSyntaxNode
     {
-        public StringConstantExpressionSyntaxNode(string value, SyntaxElement str)
-        {
-            Value = value;
-            String = str;
-        }
-
-        public string Value { get; }
-        public SyntaxElement String { get; }
-
         public static bool TryRead(Code code, [NotNullWhen(true)] out StringConstantExpressionSyntaxNode? result)
         {
             var start = code.Position;

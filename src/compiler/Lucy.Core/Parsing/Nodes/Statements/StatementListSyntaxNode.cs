@@ -1,31 +1,19 @@
 ﻿using Lucy.Core.Parsing.Nodes.Token;
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Lucy.Core.Parsing.Nodes.Statements
 {
-    public class StatementListSyntaxNode : StatementSyntaxNode
+    public record StatementListSyntaxNode(SyntaxElement? BlockStart, ComparableReadOnlyList<StatementSyntaxNode> Statements, SyntaxElement? BlockEnd) : StatementSyntaxNode
     {
-        public StatementListSyntaxNode(SyntaxElement? blockStart, List<StatementSyntaxNode> statements, SyntaxElement? blockEnd)
-        {
-            BlockStart = blockStart;
-            Statements = statements;
-            BlockEnd = blockEnd;
-        }
-
-        public SyntaxElement? BlockStart { get; }
-        public List<StatementSyntaxNode> Statements { get; }
-        public SyntaxElement? BlockEnd { get; }
-
         public static StatementListSyntaxNode ReadStatementsWithoutBlock(Code code)
         {
-            var result = new List<StatementSyntaxNode>();
+            var result = new ComparableReadOnlyList<StatementSyntaxNode>.Builder();
             while (TryRead(code, out var statement))
             {
                 result.Add(statement);
             }
 
-            return new StatementListSyntaxNode(null, result, null);
+            return new StatementListSyntaxNode(null, result.Build(), null);
         }
 
         public static bool TryReadStatementBlock(Code code, [NotNullWhen(true)] out StatementListSyntaxNode? result)
@@ -36,7 +24,7 @@ namespace Lucy.Core.Parsing.Nodes.Statements
                 return false;
             }
             
-            var list = new List<StatementSyntaxNode>();
+            var list = new ComparableReadOnlyList<StatementSyntaxNode>.Builder();
             while (TryRead(code, out var statement))
             {
                 list.Add(statement);
@@ -45,7 +33,7 @@ namespace Lucy.Core.Parsing.Nodes.Statements
             if (!SyntaxElement.TryReadExact(code, "}", out var blockEnd))
                 code.ReportError("Code block end '}' expected.");
 
-            result = new StatementListSyntaxNode(blockStart, list, blockEnd);
+            result = new StatementListSyntaxNode(blockStart, list.Build(), blockEnd);
             return true;
         }
     }

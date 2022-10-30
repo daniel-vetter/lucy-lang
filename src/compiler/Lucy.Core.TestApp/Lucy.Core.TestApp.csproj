@@ -12,6 +12,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="SampleApp\helper.lucy">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="SampleApp\main_2.lucy">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="SampleApp\main.lucy">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

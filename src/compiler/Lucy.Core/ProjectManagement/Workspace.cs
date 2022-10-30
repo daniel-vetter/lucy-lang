@@ -1,7 +1,6 @@
 ﻿using Lucy.Common;
 using Lucy.Core.Parsing;
 using System;
-using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
@@ -13,13 +12,9 @@ namespace Lucy.Core.ProjectManagement
     public class Workspace
     {
         private ImmutableDictionary<string, WorkspaceDocument> _documents = ImmutableDictionary<string, WorkspaceDocument>.Empty;
-        
         private Subscriptions<IWorkspaceEvent> _eventSubscriptions = new();
-
         public ImmutableDictionary<string, WorkspaceDocument> Documents => _documents;
-        
         public IDisposable AddEventHandler(Action<IWorkspaceEvent> handler) => _eventSubscriptions.AddHandler(handler);
-
 
         public static async Task<Workspace> CreateFromPath(string path)
         {
@@ -34,12 +29,17 @@ namespace Lucy.Core.ProjectManagement
             foreach (var file in await Task.WhenAll(tasks))
             {
                 var subPath = file.Path.Substring(path.Length).Replace("\\", "/");
-                ws.AddDocument(new CodeFile(subPath, file.Content, Parser.Parse(subPath, file.Content)));
+                ws.AddCodeFile(subPath, file.Content);
             }
             return ws;
         }
 
-        public void AddDocument(WorkspaceDocument document)
+        public void AddCodeFile(string path, string content)
+        {
+            AddDocument(new CodeFile(path, content, Parser.Parse(path, content)));
+        }
+
+        private void AddDocument(WorkspaceDocument document)
         {
             _documents = _documents.Add(document.Path, document);            
             _eventSubscriptions.Publish(new DocumentAdded(document));
@@ -58,7 +58,7 @@ namespace Lucy.Core.ProjectManagement
             }
         }
 
-        public void RemoveDocument(string path)
+        public void Remove(string path)
         {
             if (!_documents.TryGetValue(path, out var document))
                 throw new Exception("This workspace does not contain a document with the path: " + path);
@@ -66,13 +66,17 @@ namespace Lucy.Core.ProjectManagement
             _eventSubscriptions.Publish(new DocumentRemoved(document));
         }
 
-        public bool ContainsDocument(string path) => _documents.ContainsKey(path);
+        public bool Contains(string path) => _documents.TryGetValue(path, out var document);
 
-        public WorkspaceDocument? Get(string path)
+        public CodeFile GetCodeFile(string path)
         {
-            if (_documents.TryGetValue(path, out var document))
-                return document;
-            return null;
+            if (!_documents.TryGetValue(path, out var document))
+                throw new Exception("This workspace does not contain a code file with path: " + path);
+
+            if (document is not CodeFile cf)
+                throw new Exception("This workspace does contain a file with path " + path + " but it is not a code file.");
+
+            return cf;
         }
     }
 

@@ -1,23 +1,12 @@
 ﻿using Lucy.Core.Parsing.Nodes.Token;
-using Lucy.Core.Parsing;
-using System.Collections.Generic;
 
 namespace Lucy.Core.Parsing.Nodes.Expressions.Unary
 {
-    public class FunctionCallArgumentSyntaxNode : SyntaxTreeNode
+    public record FunctionCallArgumentSyntaxNode(ExpressionSyntaxNode expression, SyntaxElement? seperator) : SyntaxTreeNode
     {
-        public FunctionCallArgumentSyntaxNode(ExpressionSyntaxNode expression, SyntaxElement? seperator)
+        public static ComparableReadOnlyList<FunctionCallArgumentSyntaxNode> Read(Code code)
         {
-            Expression = expression;
-            Seperator = seperator;
-        }
-
-        public ExpressionSyntaxNode Expression { get; }
-        public SyntaxElement? Seperator { get; }
-
-        public static List<FunctionCallArgumentSyntaxNode> Read(Code code)
-        {
-            var result = new List<FunctionCallArgumentSyntaxNode>();
+            var result = new ComparableReadOnlyList<FunctionCallArgumentSyntaxNode>.Builder();
             while (true)
             {
                 if (!ExpressionSyntaxNode.TryRead(code, out var expression))
@@ -31,7 +20,7 @@ namespace Lucy.Core.Parsing.Nodes.Expressions.Unary
                     break;
             }
 
-            return result;
+            return result.Build();
         }
     }
 }

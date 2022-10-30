@@ -4,6 +4,7 @@
     "projects": [
       "Lucy.Common\\Lucy.Common.csproj",
       "Lucy.Core.TestApp\\Lucy.Core.TestApp.csproj",
+      "Lucy.Core.Tests\\Lucy.Core.Tests.csproj",
       "Lucy.Core\\Lucy.Core.csproj"
     ]
   }

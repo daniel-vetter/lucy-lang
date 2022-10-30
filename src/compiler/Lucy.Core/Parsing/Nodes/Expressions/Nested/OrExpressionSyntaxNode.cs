@@ -1,23 +1,10 @@
 ﻿using Lucy.Core.Parsing.Nodes.Token;
-using Lucy.Core.Parsing;
-using Lucy.Core.Parsing.Nodes.Expressions;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Lucy.Core.Parsing.Nodes.Expressions.Nested
 {
-    internal class OrExpressionSyntaxNode : ExpressionSyntaxNode
+    internal record OrExpressionSyntaxNode(ExpressionSyntaxNode Left, SyntaxElement Token, ExpressionSyntaxNode Right) : ExpressionSyntaxNode
     {
-        public OrExpressionSyntaxNode(ExpressionSyntaxNode left, SyntaxElement token, ExpressionSyntaxNode right)
-        {
-            Left = left;
-            Token = token;
-            Right = right;
-        }
-
-        public ExpressionSyntaxNode Left { get; }
-        public SyntaxElement Token { get; }
-        public ExpressionSyntaxNode Right { get; }
-
         public static bool TryReadOrInner(Code code, [NotNullWhen(true)] out ExpressionSyntaxNode? result)
         {
             result = null;

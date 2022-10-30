@@ -1,12 +1,16 @@
 ﻿using Lucy.Core.ProjectManagement;
 using Lucy.Core.SemanticAnalysis;
+using Lucy.Core.SemanticAnalysis.Handler;
+using Lucy.Core.TestApp;
 
-var ws = await Workspace.CreateFromPath("SampleApp");
-using var sa = new SemanticAnalyzer(ws, "./graphOutput");
+var ws = new Workspace();
+var changeReader = new FileChangeReader(ws, "./SampleApp");
+using var sa = new SemanticDatabase(ws, "./graphOutput");
 
-var firstDoc = (CodeFile)ws.Documents.First().Value;
-var firstStatement = firstDoc.SyntaxTree.StatementList.Statements[0];
-var secondStatement = firstDoc.SyntaxTree.StatementList.Statements[1];
-
-Console.WriteLine(sa.GetNodeById(firstStatement.NodeId));
-Console.WriteLine(sa.GetNodeById(secondStatement.NodeId));
+while (changeReader.NextVersion())
+{
+    var mainFile = ws.GetCodeFile("/main.lucy");
+    var firstStatement = mainFile.SyntaxTree.StatementList.Statements[0];
+    
+    Console.WriteLine(sa.Query(new GetNodeById(firstStatement.NodeId)));
+}

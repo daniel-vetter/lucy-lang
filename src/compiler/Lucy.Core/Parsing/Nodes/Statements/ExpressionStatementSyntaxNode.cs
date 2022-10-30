@@ -2,15 +2,8 @@
 
 namespace Lucy.Core.Parsing.Nodes.Statements
 {
-    public class ExpressionStatementSyntaxNode : StatementSyntaxNode
+    public record ExpressionStatementSyntaxNode(ExpressionSyntaxNode expression) : StatementSyntaxNode
     {
-        public ExpressionStatementSyntaxNode(ExpressionSyntaxNode expression)
-        {
-            Expression = expression;
-        }
-
-        public ExpressionSyntaxNode Expression { get; set; }
-
         public static ExpressionStatementSyntaxNode? Read(Code code)
         {
             if (ExpressionSyntaxNode.TryRead(code, out var result))

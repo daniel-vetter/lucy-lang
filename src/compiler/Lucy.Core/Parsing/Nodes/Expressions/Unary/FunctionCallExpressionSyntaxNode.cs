@@ -1,24 +1,12 @@
 ﻿using Lucy.Core.Parsing.Nodes.Token;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Lucy.Core.Parsing.Nodes.Expressions.Unary
 {
-    public class FunctionCallExpressionSyntaxNode : ExpressionSyntaxNode
+    public record FunctionCallExpressionSyntaxNode(SyntaxElement FunctionName, SyntaxElement OpenBraket, ComparableReadOnlyList<FunctionCallArgumentSyntaxNode> ArgumentList, SyntaxElement CloseBraket) : ExpressionSyntaxNode
     {
-        public FunctionCallExpressionSyntaxNode(SyntaxElement functionName, SyntaxElement openBraket, List<FunctionCallArgumentSyntaxNode> argumentList, SyntaxElement closeBraket)
-        {
-            FunctionName = functionName;
-            OpenBraket = openBraket;
-            ArgumentList = argumentList;
-            CloseBraket = closeBraket;
-        }
-
-        public SyntaxElement FunctionName { get; }
-        public SyntaxElement OpenBraket { get; }
-        public List<FunctionCallArgumentSyntaxNode> ArgumentList { get; }
-        public SyntaxElement CloseBraket { get; }
-
         public static bool TryRead(Code code, [NotNullWhen(true)] out FunctionCallExpressionSyntaxNode? result)
         {
             using var t = code.BeginTransaction();

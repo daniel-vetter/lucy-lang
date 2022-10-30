@@ -3,15 +3,8 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Lucy.Core.Parsing.Nodes.Expressions.Unary
 {
-    public class VariableReferenceExpressionSyntaxNode : ExpressionSyntaxNode
+    public record VariableReferenceExpressionSyntaxNode(SyntaxElement Token) : ExpressionSyntaxNode
     {
-        public VariableReferenceExpressionSyntaxNode(SyntaxElement token)
-        {
-            Token = token;
-        }
-
-        public SyntaxElement Token { get; }
-
         public static bool TryRead(Code code, [NotNullWhen(true)] out VariableReferenceExpressionSyntaxNode? result)
         {
             if (SyntaxElement.TryReadIdentifier(code, out var token))

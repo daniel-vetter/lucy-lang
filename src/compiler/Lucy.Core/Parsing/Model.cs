@@ -1,49 +1,39 @@
 ﻿namespace Lucy.Core.Parsing
 {
-    public abstract class SyntaxTreeNode
+    public abstract record SyntaxTreeNode
     {
         public NodeId NodeId { get; set; } = NodeId.Uninitalized;
-        public SyntaxTreeNodeSource Source { get; set; } = new SourceCode();
+        public SyntaxTreeNodeSource Source { get; init; } = new SourceCode();
     }
 
-    public abstract class SyntaxTreeNodeSource
+    public abstract record SyntaxTreeNodeSource
     {
     }
 
-    public class Syntetic : SyntaxTreeNodeSource
+    public record Syntetic : SyntaxTreeNodeSource
     {
-        public Syntetic(string? errorMessage, Position? position)
+        public Syntetic(string? errorMessage)
         {
             ErrorMessage = errorMessage;
-            Position = position;
         }
 
         public string? ErrorMessage { get; }
-        public Position? Position { get; set; }
     }
 
-    public class SourceCode : SyntaxTreeNodeSource
-    {
-        public Range? Range { get; set; }
-    }
-
-    public class Generated : SyntaxTreeNodeSource
+    public record SourceCode : SyntaxTreeNodeSource
     {
     }
 
-    public class TokenNode : SyntaxTreeNode
+    public record Generated : SyntaxTreeNodeSource
     {
-        public TokenNode(string text = "")
-        {
-            Text = text;
-        }
+    }
 
+    public record TokenNode(string Text) : SyntaxTreeNode
+    {
         public static TokenNode Missing(string? errorMessage = null)
         {
-            return new TokenNode("") { Source = new Syntetic(errorMessage, null) };
+            return new TokenNode("") { Source = new Syntetic(errorMessage) };
         }
-
-        public string Text { get; }
     }
 
     public record Range(Position Start, Position End)

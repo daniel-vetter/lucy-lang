@@ -7,12 +7,6 @@ namespace Lucy.Core.Parsing
 {
     public class NodeId
     {
-        private NodeId()
-        {
-            DocumentPath = "";
-            NodePath = "";
-        }
-
         public NodeId(string documentPath, string nodePath)
         {
             DocumentPath = documentPath;
@@ -27,9 +21,6 @@ namespace Lucy.Core.Parsing
 
         public override bool Equals(object? obj)
         {
-            if (DocumentPath == "" && NodePath == "")
-                throw new Exception("Can not compare unitialized node id.");
-
             return obj is NodeId id && DocumentPath == id.DocumentPath && NodePath == id.NodePath;
         }
 

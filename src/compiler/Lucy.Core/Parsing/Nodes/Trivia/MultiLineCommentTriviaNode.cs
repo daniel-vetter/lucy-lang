@@ -1,20 +1,7 @@
-﻿using Lucy.Core.Parsing;
-
-namespace Lucy.Core.Parsing.Nodes.Trivia
+﻿namespace Lucy.Core.Parsing.Nodes.Trivia
 {
-    internal class MultiLineCommentTriviaNode : TriviaNode
+    public record MultiLineCommentTriviaNode(TokenNode Start, TokenNode Content, TokenNode? End) : TriviaNode
     {
-        public MultiLineCommentTriviaNode(TokenNode start, TokenNode content, TokenNode? end)
-        {
-            Start = start;
-            Content = content;
-            End = end;
-        }
-
-        public TokenNode Start { get; }
-        public TokenNode Content { get; }
-        public TokenNode? End { get; }
-
         public static MultiLineCommentTriviaNode? Read(Code code)
         {
             if (code.Peek() != '/' || code.Peek(1) != '*')

@@ -16,6 +16,7 @@ namespace Lucy.Core.SemanticAnalysis.Infrasturcture
         private Dictionary<IQuery, object> _calculatedQueries = new Dictionary<IQuery, object>();
         private Dictionary<Dependency, DependencyStats> _dependencies = new();
         private Dictionary<IQuery, InputStats> _inputs = new();
+        private int _counter;
         private readonly string _outputDirectory;
 
         private record Dependency(IQuery? From, IQuery To);
@@ -93,7 +94,7 @@ namespace Lucy.Core.SemanticAnalysis.Infrasturcture
 
             var fileContent = d.Build();
             File.WriteAllText(Path.Combine(_outputDirectory, "_last.dot"), fileContent);
-            File.WriteAllText(Path.Combine(_outputDirectory, DateTime.Now.ToString("O").Replace(":", "-") + ".dot"), fileContent);
+            File.WriteAllText(Path.Combine(_outputDirectory, ++_counter + ".dot"), fileContent);
 
             _calculatedQueries.Clear();
             foreach (var stats in _dependencies.Values)

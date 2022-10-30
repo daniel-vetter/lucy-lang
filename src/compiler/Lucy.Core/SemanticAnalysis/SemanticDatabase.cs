@@ -1,37 +1,55 @@
-﻿using Lucy.Core.Parsing;
-using Lucy.Core.Parsing.Nodes;
+﻿using Lucy.Core.Parsing.Nodes;
 using Lucy.Core.ProjectManagement;
-using Lucy.Core.SemanticAnalysis.Handler;
 using Lucy.Core.SemanticAnalysis.Infrasturcture;
+using Lucy.Core.SemanticAnalysis.Inputs;
 using System;
-using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Linq;
 
 namespace Lucy.Core.SemanticAnalysis
 {
-    public class SemanticAnalyzer : IDisposable
+    public class SemanticDatabase : IDisposable
     {
         private readonly Workspace _workspace;
         private IDisposable _workspaceEventSubscription;
         private IDisposable? _exporterEventSubscription;
         private Db _db = new();
         
-        public SemanticAnalyzer(Workspace workspace, string? graphOutputDir)
+        public SemanticDatabase(Workspace workspace, string? traceOutputDir)
         {
             _workspaceEventSubscription = workspace.AddEventHandler(OnWorkspaceEvent);
             _workspace = workspace;
 
-            _db.RegisterHandler(new GetNodesMapHandler());
-            _db.RegisterHandler(new GetNodeByIdHandler());
+            RegisterHandler();
+            AddWorkspaceAsInputs(workspace);
+            RegisterTraceListener(traceOutputDir);
+        }
 
-            foreach(var codeFile in workspace.Documents.Values.OfType<CodeFile>())
-                _db.SetInput(new GetSyntaxTree(codeFile.Path), new GetSyntaxTreeResult(codeFile.SyntaxTree));
-
+        private void RegisterTraceListener(string? graphOutputDir)
+        {
             if (graphOutputDir != null)
             {
                 var exporter = new GraphExport(graphOutputDir);
                 _exporterEventSubscription = _db.AddEventHandler(exporter.ProcessDbEvent);
+            }
+        }
+
+        private void AddWorkspaceAsInputs(Workspace workspace)
+        {
+            foreach (var codeFile in workspace.Documents.Values.OfType<CodeFile>())
+                _db.SetInput(new GetSyntaxTree(codeFile.Path), new GetSyntaxTreeResult(codeFile.SyntaxTree));
+        }
+
+        private void RegisterHandler()
+        {
+            var handlerTypes = typeof(SemanticDatabase)
+                .Assembly
+                .GetTypes()
+                .Where(x => x.IsSubclassOf(typeof(QueryHandler)) && x.IsAbstract == false)
+                .ToArray();
+
+            foreach (var type in handlerTypes)
+            {
+                _db.RegisterHandler((QueryHandler)(Activator.CreateInstance(type) ?? throw new Exception("Could not create handler")));
             }
         }
 
@@ -41,16 +59,16 @@ namespace Lucy.Core.SemanticAnalysis
             _exporterEventSubscription?.Dispose();
         }
 
-        public SyntaxTreeNode GetNodeById(NodeId nodeId)
+        public TQueryResult Query<TQueryResult>(IQuery<TQueryResult> query) where TQueryResult : notnull
         {
-            return _db.Query(new GetNodeById(nodeId)).Node;
+            return _db.Query(query);
         }
 
         private void OnWorkspaceEvent(IWorkspaceEvent @event)
         {
             if (@event is DocumentAdded documentAdded)
             {
-                _db.SetInput(new GetDocumentList(), new GetDocumentListResult(_workspace.Documents.Keys.ToImmutableList()));
+                _db.SetInput(new GetDocumentList(), new GetDocumentListResult(_workspace.Documents.Keys.ToComparableReadOnlyList()));
                 if (documentAdded.Document is CodeFile codeFile)
                     _db.SetInput(new GetSyntaxTree(codeFile.Path), new GetSyntaxTreeResult(codeFile.SyntaxTree));
                 else
@@ -63,26 +81,9 @@ namespace Lucy.Core.SemanticAnalysis
             }
             if (@event is DocumentRemoved documentRemoved)
             {
-                _db.SetInput(new GetDocumentList(), new GetDocumentListResult(_workspace.Documents.Keys.ToImmutableList()));
+                _db.SetInput(new GetDocumentList(), new GetDocumentListResult(_workspace.Documents.Keys.ToComparableReadOnlyList()));
                 _db.RemoveInput(new GetSyntaxTree(documentRemoved.Document.Path));
             }
         }
     }
-
-    public record GetDocumentList() : IQuery<GetDocumentListResult>;
-    public class GetDocumentListResult
-    {
-        public GetDocumentListResult(ImmutableList<string> paths)
-        {
-            Paths = paths;
-        }
-
-        public ImmutableList<string> Paths { get; }
-
-        public override bool Equals(object? obj) => obj is GetDocumentListResult result && EqualityComparer<ImmutableList<string>>.Default.Equals(Paths, result.Paths);
-        public override int GetHashCode() => HashCode.Combine(Paths);
-    }
-
-    public record GetSyntaxTree(string DocumentPath) : IQuery<GetSyntaxTreeResult>;
-    public record GetSyntaxTreeResult(DocumentRootSyntaxNode RootNode);
 }

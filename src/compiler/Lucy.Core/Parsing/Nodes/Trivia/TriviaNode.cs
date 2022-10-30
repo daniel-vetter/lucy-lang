@@ -1,13 +1,10 @@
-﻿using Lucy.Core.Parsing;
-using System.Collections.Generic;
-
-namespace Lucy.Core.Parsing.Nodes.Trivia
+﻿namespace Lucy.Core.Parsing.Nodes.Trivia
 {
-    public abstract class TriviaNode : SyntaxTreeNode
+    public abstract record TriviaNode : SyntaxTreeNode
     {
-        public static List<TriviaNode> ReadList(Code code)
+        public static ComparableReadOnlyList<TriviaNode> ReadList(Code code)
         {
-            var l = new List<TriviaNode>();
+            var l = new ComparableReadOnlyList<TriviaNode>.Builder();
 
             while (!code.IsDone)
             {
@@ -22,7 +19,7 @@ namespace Lucy.Core.Parsing.Nodes.Trivia
                 l.Add(next);
             }
 
-            return l;
+            return l.Build();
         }
     }
 }

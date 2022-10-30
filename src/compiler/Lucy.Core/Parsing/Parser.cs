@@ -9,7 +9,6 @@ namespace Lucy.Core.Parsing
         {
             var reader = new Code(code);
             var rootNode = DocumentRootSyntaxNode.ReadDocumentSyntaxNode(reader);
-            RangeAssigner.Run(rootNode);
             IdAssigner.Run(documentPath, rootNode);
             return rootNode;
         }
