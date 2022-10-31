@@ -1,5 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 
@@ -18,6 +18,7 @@ namespace Lucy.Core.SemanticAnalysis.Infrasturcture
         private Dictionary<IQuery, InputStats> _inputs = new();
         private int _counter;
         private readonly string _outputDirectory;
+        private Stopwatch _lastQueryStopwatch = new Stopwatch();
 
         private record Dependency(IQuery? From, IQuery To);
 
@@ -41,6 +42,12 @@ namespace Lucy.Core.SemanticAnalysis.Infrasturcture
 
         public void ProcessDbEvent(IDbEvent @event)
         {
+            if (@event is QueryReceived queryReceived)
+            {
+                if (queryReceived.ParentQuery == null)
+                    _lastQueryStopwatch.Restart();
+            }
+
             if (@event is QueryAnswered queryAnsweredEvent)
             {
                 var key = new Dependency(queryAnsweredEvent.ParentQuery, queryAnsweredEvent.Query);
@@ -48,7 +55,11 @@ namespace Lucy.Core.SemanticAnalysis.Infrasturcture
                 _dependencies[key].CallCount++;
 
                 if (queryAnsweredEvent.ParentQuery == null)
+                {
+                    _lastQueryStopwatch.Stop();
                     Flush();
+                }
+                    
             }
 
             if (@event is CalculationFinished cf)
@@ -109,7 +120,9 @@ namespace Lucy.Core.SemanticAnalysis.Infrasturcture
             node.NodeShape = "rectangle";
             if (query == null)
             {
-                node.Label = "root";
+                var rootData = new KeyValueTable("root");
+                rootData.Set("Total duration", _lastQueryStopwatch.Elapsed.TotalMilliseconds + "ms");
+                node.Label = rootData;
                 return;
             }
             
