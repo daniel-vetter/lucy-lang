@@ -30,7 +30,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Lucy.Core.TestApp", "Lucy.C
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lucy.Interpreter", "Lucy.Interpreter\Lucy.Interpreter.csproj", "{569362C0-5976-4017-BF93-1E409B6256DD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lucy.Core.Tests", "Lucy.Core.Tests\Lucy.Core.Tests.csproj", "{22A7DD8B-ED0E-49ED-896D-B4F00ECE04C6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Lucy.Core.Tests", "Lucy.Core.Tests\Lucy.Core.Tests.csproj", "{22A7DD8B-ED0E-49ED-896D-B4F00ECE04C6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lucy.Emitter", "Lucy.Emitter\Lucy.Emitter.csproj", "{0545FC19-4CAB-4C65-AA00-230FEB8E419B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -86,6 +88,10 @@ Global
 		{22A7DD8B-ED0E-49ED-896D-B4F00ECE04C6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{22A7DD8B-ED0E-49ED-896D-B4F00ECE04C6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{22A7DD8B-ED0E-49ED-896D-B4F00ECE04C6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0545FC19-4CAB-4C65-AA00-230FEB8E419B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0545FC19-4CAB-4C65-AA00-230FEB8E419B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0545FC19-4CAB-4C65-AA00-230FEB8E419B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0545FC19-4CAB-4C65-AA00-230FEB8E419B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
