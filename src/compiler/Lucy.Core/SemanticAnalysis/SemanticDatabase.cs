@@ -3,6 +3,7 @@ using Lucy.Core.ProjectManagement;
 using Lucy.Core.SemanticAnalysis.Infrasturcture;
 using Lucy.Core.SemanticAnalysis.Inputs;
 using System;
+using System.Diagnostics;
 using System.Linq;
 
 namespace Lucy.Core.SemanticAnalysis
@@ -14,7 +15,7 @@ namespace Lucy.Core.SemanticAnalysis
         private IDisposable? _exporterEventSubscription;
         private Db _db = new();
         
-        public SemanticDatabase(Workspace workspace, string? traceOutputDir)
+        public SemanticDatabase(Workspace workspace, string? traceOutputDir = null)
         {
             _workspaceEventSubscription = workspace.AddEventHandler(OnWorkspaceEvent);
             _workspace = workspace;
@@ -35,6 +36,7 @@ namespace Lucy.Core.SemanticAnalysis
 
         private void AddWorkspaceAsInputs(Workspace workspace)
         {
+            _db.SetInput(new GetDocumentList(), new GetDocumentListResult(_workspace.Documents.Keys.ToComparableReadOnlyList()));
             foreach (var codeFile in workspace.Documents.Values.OfType<CodeFile>())
                 _db.SetInput(new GetSyntaxTree(codeFile.Path), new GetSyntaxTreeResult(codeFile.SyntaxTree));
         }
@@ -61,7 +63,10 @@ namespace Lucy.Core.SemanticAnalysis
 
         public TQueryResult Query<TQueryResult>(IQuery<TQueryResult> query) where TQueryResult : notnull
         {
-            return _db.Query(query);
+            var sw = Stopwatch.StartNew();
+            var result = _db.Query(query);
+          //  Console.WriteLine(sw.Elapsed.TotalMilliseconds);
+            return result;
         }
 
         private void OnWorkspaceEvent(IWorkspaceEvent @event)
