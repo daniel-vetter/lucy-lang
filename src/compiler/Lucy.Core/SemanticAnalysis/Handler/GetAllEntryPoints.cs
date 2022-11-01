@@ -6,14 +6,14 @@ using Lucy.Core.SemanticAnalysis.Inputs;
 namespace Lucy.Core.SemanticAnalysis.Handler
 {
     public record GetAllEntryPoints() : IQuery<GetAllEntryPointsFunctionsResult>;
-    public record GetAllEntryPointsFunctionsResult(ComparableReadOnlyList<NodeId> EntryPoints);
+    public record GetAllEntryPointsFunctionsResult(ComparableReadOnlyList<FunctionInfo> EntryPoints);
 
     public class GetAllMainFunctionsHandler : QueryHandler<GetAllEntryPoints, GetAllEntryPointsFunctionsResult>
     {
-        public override GetAllEntryPointsFunctionsResult Handle(Db db, GetAllEntryPoints query)
+        public override GetAllEntryPointsFunctionsResult Handle(IDb db, GetAllEntryPoints query)
         {
             var paths = db.Query(new GetDocumentList()).Paths;
-            var result = new ComparableReadOnlyList<NodeId>.Builder();
+            var result = new ComparableReadOnlyList<FunctionInfo>.Builder();
             foreach (var path in paths)
             {
                 var ids = db.Query(new GetEntryPointsInDocument(path)).EntryPoints;

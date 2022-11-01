@@ -11,7 +11,7 @@ namespace Lucy.Core.SemanticAnalysis.Handler
 
     public class GetNodesByTypesHandler : QueryHandler<GetNodesByType, GetNodesByTypeResult>
     {
-        public override GetNodesByTypeResult Handle(Db db, GetNodesByType query)
+        public override GetNodesByTypeResult Handle(IDb db, GetNodesByType query)
         {
             var nodesByType = db.Query(new GetNodeMap(query.DocumentPath)).NodesByType;
             if (nodesByType.TryGetValue(query.Type, out var nodes))       

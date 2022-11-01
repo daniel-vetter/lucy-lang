@@ -18,7 +18,7 @@ namespace Lucy.Core.SemanticAnalysis.Handler
 
     public class GetNodeMapHandler : QueryHandler<GetNodeMap, GetNodeMapResult>
     {
-        public override GetNodeMapResult Handle(Db db, GetNodeMap query)
+        public override GetNodeMapResult Handle(IDb db, GetNodeMap query)
         {
             var rootNode = db.Query(new GetSyntaxTree(query.DocumentPath)).RootNode;
             var nodesById = new Dictionary<NodeId, SyntaxTreeNode>();

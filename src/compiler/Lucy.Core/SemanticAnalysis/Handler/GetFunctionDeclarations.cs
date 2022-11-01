@@ -11,7 +11,7 @@ namespace Lucy.Core.SemanticAnalysis.Handler
 
     public class GetFunctionDeclarationsHandler : QueryHandler<GetFunctionDeclarations, GetFunctionDeclarationsResult>
     {
-        public override GetFunctionDeclarationsResult Handle(Db db, GetFunctionDeclarations query)
+        public override GetFunctionDeclarationsResult Handle(IDb db, GetFunctionDeclarations query)
         {
             var nodes = db.Query(new GetNodesByType(query.DocumentPath, typeof(FunctionDeclarationStatementSyntaxNode))).Nodes;
             return new GetFunctionDeclarationsResult(nodes.Select(x => x).ToComparableReadOnlyList());

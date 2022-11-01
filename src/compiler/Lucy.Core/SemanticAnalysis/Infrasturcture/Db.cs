@@ -2,20 +2,16 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 
 namespace Lucy.Core.SemanticAnalysis.Infrasturcture
 {
     public class Db
     {
-        private CallContext? _callContext = null;
         private Dictionary<IQuery, Entry> _entries = new();
         private Dictionary<Type, QueryHandler> _handlers = new();
         private Subscriptions<IDbEvent> _subscriptions = new();
         private int _currentRevision;
         //TODO: Garbage collection
-
-        private record CallContext(CallContext? ParentContext, IQuery Query, List<IQuery> Dependencies);
 
         public void RegisterHandler(QueryHandler handler)
         {
@@ -36,7 +32,7 @@ namespace Lucy.Core.SemanticAnalysis.Infrasturcture
                     throw new Exception("The result of this query was already set by an query handle. It can not be changed to an input.");
 
                 existingEntry.LastChanged = _currentRevision;
-                existingEntry.Value = result;
+                existingEntry.Result = result;
             }
             else
             {
@@ -53,7 +49,6 @@ namespace Lucy.Core.SemanticAnalysis.Infrasturcture
                 throw new Exception("The input could not be removed because it did not exist.");
 
             _currentRevision++;
-            _entries.Remove(query);
 
             if (_subscriptions.HasSubscriptions)
                 _subscriptions.Publish(new InputWasRemoved(query));
@@ -61,31 +56,62 @@ namespace Lucy.Core.SemanticAnalysis.Infrasturcture
 
         private Entry EnsureEntryIsUpToDate(IQuery query)
         {
-            if (!_entries.TryGetValue(query, out var entry))
-                return Recalculate(query);
-
-            if (entry.LastChecked == _currentRevision)
+            if (_entries.TryGetValue(query, out var entry) && entry.LastChecked == _currentRevision)
                 return entry;
 
-            foreach (var dependency in entry.Dependencies)
-                EnsureEntryIsUpToDate(dependency);
+            while (true)
+            {
+                var outOfData = GetFirstOutOfDateEntry(query);
+                if (outOfData == null)
+                    break;
 
-            if (entry.Dependencies.Any(x => _entries[x].LastChanged > entry.LastChanged))
-                Recalculate(query);
+                Recalculate(outOfData);
+            }
+
+            return _entries[query];
+        }
+
+        private IQuery? GetFirstOutOfDateEntry(IQuery query)
+        {
+            if (!_entries.TryGetValue(query, out var entry))
+                return query;
+
+            if (entry.LastChecked == _currentRevision)
+                return null;
+
+            for (int i=0;i<entry.Dependencies.Count;i++)
+            {
+                if (!_entries.TryGetValue(entry.Dependencies[i], out var dependencyEntry) || dependencyEntry.LastChanged > entry.LastChanged)
+                    return query;
+            }
+
+            foreach(var dep in entry.Dependencies)
+            {
+                var match = GetFirstOutOfDateEntry(dep);
+                if (match != null)
+                    return match;
+            }
 
             entry.LastChecked = _currentRevision;
-            return entry;
+            return null;
         }
 
         public TQueryResult Query<TQueryResult>(IQuery<TQueryResult> query) where TQueryResult : notnull
         {
+            return (TQueryResult)Query(query, null);
+        }
+
+        private object Query(IQuery query, IQuery? parentQuery)
+        {
             if (_subscriptions.HasSubscriptions)
-                _subscriptions.Publish(new QueryReceived(query, _callContext?.Query));
-            _callContext?.Dependencies.Add(query);
+                _subscriptions.Publish(new QueryReceived(query, parentQuery));
+
             var entry = EnsureEntryIsUpToDate(query);
+
             if (_subscriptions.HasSubscriptions)
-                _subscriptions.Publish(new QueryAnswered(query, _callContext?.Query));
-            return (TQueryResult)entry.Value;
+                _subscriptions.Publish(new QueryAnswered(query, parentQuery));
+
+            return entry.Result;
         }
 
         private Entry Recalculate(IQuery query)
@@ -95,50 +121,48 @@ namespace Lucy.Core.SemanticAnalysis.Infrasturcture
 
             if (_subscriptions.HasSubscriptions)
                 _subscriptions.Publish(new CalculationStarted(query));
-            var stopwatch = Stopwatch.StartNew();
-            var dependencies = new List<IQuery>();
-            _callContext = new CallContext(_callContext, query, dependencies);
-            object result;
-            try
-            {
-                result = handler.Handle(this, query);
-            }
-            finally
-            {
-                _callContext = _callContext.ParentContext;
-            }
 
-            var resultWasSame = false;
+            var callContext = new QueryExecutionContext(this, query);
+            var handlerStopwatch = Stopwatch.StartNew();
+            var result = handler.Handle(callContext, query);
+            handlerStopwatch.Stop();
+
+            var overheadStopwatch = Stopwatch.StartNew();
+            var resultChanged = false;
             _entries.TryGetValue(query, out var entry);
             if (entry == null)
             {
-                entry = new Entry(result, _currentRevision, _currentRevision, false, dependencies); ;
+                entry = new Entry(result, _currentRevision, _currentRevision, false, callContext.Dependencies); ;
                 _entries[query] = entry;
+                resultChanged = true;
             }
             else
             {
                 if (entry.IsInput)
                     throw new Exception("The result of this query was already set as an input. It can not be changed to an result of an query handler.");
-                if (!result.Equals(entry.Value))
+
+                if (!result.Equals(entry.Result))
                 {
-                    resultWasSame = true;
+                    resultChanged = true;
                     entry.LastChanged = _currentRevision;
-                    entry.Value = result;
+                    entry.Result = result;
                 }
-                entry.Dependencies = dependencies;
+                entry.Dependencies = callContext.Dependencies;
                 entry.LastChecked = _currentRevision;
             }
+            overheadStopwatch.Stop();
 
             if (_subscriptions.HasSubscriptions)
-                _subscriptions.Publish(new CalculationFinished(query, entry.Value, stopwatch.Elapsed, resultWasSame));
+                _subscriptions.Publish(new CalculationFinished(query, entry.Result, handlerStopwatch.Elapsed - callContext.TotalTimeInSubQueries, overheadStopwatch.Elapsed, resultChanged));
+
             return entry;
         }
 
         private class Entry
         {
-            public Entry(object value, int lastChanged, int lastChecked, bool isInput, List<IQuery>? dependencies = null)
+            public Entry(object result, int lastChanged, int lastChecked, bool isInput, List<IQuery>? dependencies = null)
             {
-                Value = value;
+                Result = result;
                 LastChanged = lastChanged;
                 LastChecked = lastChecked;
                 IsInput = isInput;
@@ -149,34 +173,33 @@ namespace Lucy.Core.SemanticAnalysis.Infrasturcture
             public int LastChecked { get; set; }
             public bool IsInput { get; }
             public List<IQuery> Dependencies { get; set; }
-            public object Value { get; set; }
+            public object Result { get; set; }
         }
-    }
 
-    public abstract class QueryHandler
-    {
-        public abstract object Handle(Db runner, object query);
-    }
-
-    public abstract class QueryHandler<TQuery, TQueryResult> : QueryHandler where TQuery : notnull, IQuery<TQueryResult> where TQueryResult : notnull
-    {
-        public abstract TQueryResult Handle(Db db, TQuery query);
-
-        [DebuggerStepThrough]
-        public override object Handle(Db db, object query)
+        private class QueryExecutionContext : IDb
         {
-            return Handle(db, (TQuery)query);
+            public QueryExecutionContext(Db db, IQuery parentQuery)
+            {
+                _db = db;
+                _parentQuery = parentQuery;
+            }
+
+            public List<IQuery> Dependencies = new();
+            public TimeSpan TotalTimeInSubQueries => _totalTimeInSubQueries;
+
+            private IQuery _parentQuery;
+            private readonly Db _db;
+            private TimeSpan _totalTimeInSubQueries = TimeSpan.Zero;
+
+            public TQueryResult Query<TQueryResult>(IQuery<TQueryResult> query) where TQueryResult : notnull
+            {
+                Dependencies.Add(query);
+                var sw = Stopwatch.StartNew();
+                var result = (TQueryResult)_db.Query(query, _parentQuery);
+                sw.Stop();
+                _totalTimeInSubQueries = _totalTimeInSubQueries + sw.Elapsed;
+                return result;
+            }
         }
     }
-
-    public interface IQuery { }
-    public interface IQuery<TQueryResult> : IQuery { }
-
-    public interface IDbEvent { }
-    public record InputWasChanged(IQuery Query, object Value) : IDbEvent;
-    public record InputWasRemoved(IQuery Query) : IDbEvent;
-    public record CalculationStarted(IQuery Query) : IDbEvent;
-    public record CalculationFinished(IQuery Query, object Result, TimeSpan Duration, bool ResultWasSame) : IDbEvent;
-    public record QueryReceived(IQuery Query, IQuery? ParentQuery) : IDbEvent;
-    public record QueryAnswered(IQuery Query, IQuery? ParentQuery) : IDbEvent;
 }

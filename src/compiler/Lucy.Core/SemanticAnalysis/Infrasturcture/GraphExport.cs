@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -13,7 +14,7 @@ namespace Lucy.Core.SemanticAnalysis.Infrasturcture
 
     public class GraphExport
     {
-        private Dictionary<IQuery, object> _calculatedQueries = new Dictionary<IQuery, object>();
+        private Dictionary<IQuery, CalculationStats> _calculatedQueries = new();
         private Dictionary<Dependency, DependencyStats> _dependencies = new();
         private Dictionary<IQuery, InputStats> _inputs = new();
         private int _counter;
@@ -21,6 +22,14 @@ namespace Lucy.Core.SemanticAnalysis.Infrasturcture
         private Stopwatch _lastQueryStopwatch = new Stopwatch();
 
         private record Dependency(IQuery? From, IQuery To);
+
+        private class CalculationStats
+        {
+            public int Index { get; set; } = -1;
+            public bool ResultChanged { get; set; } = false;
+            public TimeSpan ExclusiveHandlerExecutionTime { get; set; } = TimeSpan.Zero;
+            public TimeSpan OverheadExecutionTime { get; set; } = TimeSpan.Zero;
+        }
 
         private class DependencyStats
         {
@@ -59,12 +68,23 @@ namespace Lucy.Core.SemanticAnalysis.Infrasturcture
                     _lastQueryStopwatch.Stop();
                     Flush();
                 }
-                    
+            }
+
+            if (@event is CalculationStarted cs)
+            {
+                _calculatedQueries.Add(cs.Query, new CalculationStats
+                {
+                    Index = _calculatedQueries.Count,
+                });
             }
 
             if (@event is CalculationFinished cf)
             {
-                _calculatedQueries.Add(cf.Query, new object());
+                var entry = _calculatedQueries[cf.Query];
+                entry.ResultChanged = cf.ResultChanged;
+                entry.ExclusiveHandlerExecutionTime = cf.ExlusiveHandlerExecutionTime;
+                entry.OverheadExecutionTime = cf.OverheadExecutionTime;
+
             }
 
             if (@event is InputWasChanged ic)
@@ -93,7 +113,7 @@ namespace Lucy.Core.SemanticAnalysis.Infrasturcture
                 if (d.HasNodeFor(query))
                     continue;
 
-                CretaeNode(d, query);
+                CreateNode(d, query);
             }
 
             foreach (var ((from, to), stats) in _dependencies)
@@ -114,7 +134,7 @@ namespace Lucy.Core.SemanticAnalysis.Infrasturcture
                 stats.Changed = false;
         }
 
-        private void CretaeNode(GraphvizDiagram d, IQuery? query)
+        private void CreateNode(GraphvizDiagram d, IQuery? query)
         {
             var node = d.CreateNodeFor(query);
             node.NodeShape = "rectangle";
@@ -127,18 +147,22 @@ namespace Lucy.Core.SemanticAnalysis.Infrasturcture
             }
             
             var label = new KeyValueTable(query.GetType().Name ?? "root");
-            foreach(var props in query.GetType().GetProperties())
+            if (_calculatedQueries.TryGetValue(query, out var calculationStats))
             {
-                label.Set(props.Name, props.GetValue(query)?.ToString() ?? "");
-            }
-            node.Label = label;
-
-            if (_calculatedQueries.ContainsKey(query))
-            {
-                node.Color = "#008000";
-                node.FontColor = "#008000";
+                label.Set("Execution", (calculationStats.Index + 1).ToString() + ", " + calculationStats.ExclusiveHandlerExecutionTime.TotalMilliseconds + "ms + " + calculationStats.OverheadExecutionTime.TotalMilliseconds + "ms");
+                if (calculationStats.ResultChanged)
+                {
+                    node.Color = "#008000";
+                    node.FontColor = "#008000";
+                    node.FillColor = "#00800010";
+                }
+                else
+                {
+                    node.Color = "#808000";
+                    node.FontColor = "#808000";
+                    node.FillColor = "#80800010";
+                }
                 node.Style = "filled";
-                node.FillColor = "#00800010";
             }
             else if (_inputs.TryGetValue(query, out var inputStats))
             {
@@ -159,6 +183,11 @@ namespace Lucy.Core.SemanticAnalysis.Infrasturcture
                 }
             }
 
+            foreach (var props in query.GetType().GetProperties())
+            {
+                label.Set(props.Name, props.GetValue(query)?.ToString() ?? "");
+            }
+            node.Label = label;
         }
     }
 }

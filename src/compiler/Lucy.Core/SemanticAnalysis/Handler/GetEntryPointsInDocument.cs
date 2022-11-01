@@ -1,24 +1,21 @@
-﻿using Lucy.Core.Parsing;
-using Lucy.Core.Parsing.Nodes;
-using Lucy.Core.Parsing.Nodes.Statements.FunctionDeclaration;
+﻿using Lucy.Core.Parsing.Nodes;
 using Lucy.Core.SemanticAnalysis.Infrasturcture;
 
 namespace Lucy.Core.SemanticAnalysis.Handler
 {
     public record GetEntryPointsInDocument(string DocumentPath) : IQuery<GetEntryPointsInDocumentResult>;
-    public record GetEntryPointsInDocumentResult(ComparableReadOnlyList<NodeId> EntryPoints);
+    public record GetEntryPointsInDocumentResult(ComparableReadOnlyList<FunctionInfo> EntryPoints);
 
     public class GetMainFunctionsInDocumentHandler : QueryHandler<GetEntryPointsInDocument, GetEntryPointsInDocumentResult>
     {
-        public override GetEntryPointsInDocumentResult Handle(Db db, GetEntryPointsInDocument query)
+        public override GetEntryPointsInDocumentResult Handle(IDb db, GetEntryPointsInDocument query)
         {
-            var ids = db.Query(new GetFunctionDeclarations(query.DocumentPath)).Ids;
-            var result = new ComparableReadOnlyList<NodeId>.Builder();
-            foreach(var id in ids)
+            var infos = db.Query(new GetFunctionInfosInDocument(query.DocumentPath)).FunctionInfos;
+            var result = new ComparableReadOnlyList<FunctionInfo>.Builder();
+            foreach(var info in infos)
             {
-                var node = (FunctionDeclarationStatementSyntaxNode)db.Query(new GetNodeById(id)).Node;
-                if (node.FunctionName.Token.Text == "main")
-                    result.Add(id);
+                if (info.Name == "main")
+                    result.Add(info);
             }
             return new GetEntryPointsInDocumentResult(result.Build());
         }

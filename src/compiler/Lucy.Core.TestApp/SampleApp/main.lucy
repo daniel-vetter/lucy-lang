@@ -1,6 +1,12 @@
-﻿fun main() {
+﻿fun doStuff1() {
+}
+
+fun main() {
 	
 }
 
-fun doStuff() {
+fun doStuff2() {
+}
+
+fun doStuff3() {
 }

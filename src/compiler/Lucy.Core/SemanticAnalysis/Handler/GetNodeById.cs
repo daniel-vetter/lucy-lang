@@ -8,7 +8,7 @@ namespace Lucy.Core.SemanticAnalysis.Handler
 
     public class GetNodeByIdHandler : QueryHandler<GetNodeById, GetNodeByIdResult>
     {
-        public override GetNodeByIdResult Handle(Db db, GetNodeById query)
+        public override GetNodeByIdResult Handle(IDb db, GetNodeById query)
         {
             var nodes = db.Query(new GetNodeMap(query.NodeId.DocumentPath)).NodesById;
             return new GetNodeByIdResult(nodes[query.NodeId]);
