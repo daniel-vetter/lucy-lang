@@ -6,9 +6,25 @@ using System.Linq;
 
 namespace Lucy.Core.Parsing.Nodes
 {
+    public static class ComparableReadOnlyDictionaryExtensionMethods
+    {
+        public static ComparableReadOnlyDictionary<TKey, TValue> ToComparableReadOnlyDictionary<TSource, TKey, TValue>(this IEnumerable<TSource> source, Func<TSource, TKey> keySelector, Func<TSource, TValue> valueSelector) where TKey : notnull
+        {
+            var b = new ComparableReadOnlyDictionary<TKey, TValue>.Builder();
+            foreach (var entry in source)
+                b.Add(keySelector(entry), valueSelector(entry));
+            return b.Build();
+        }
+    }
+
     public class ComparableReadOnlyDictionary<TKey, TValue> : IReadOnlyDictionary<TKey, TValue>, IEquatable<ComparableReadOnlyDictionary<TKey, TValue>> where TKey : notnull
     {
         private Dictionary<TKey, TValue> _dict;
+
+        public ComparableReadOnlyDictionary()
+        {
+            _dict = new Dictionary<TKey, TValue>();
+        }
 
         public ComparableReadOnlyDictionary(IDictionary<TKey, TValue> entries)
         {
@@ -38,7 +54,7 @@ namespace Lucy.Core.Parsing.Nodes
 
             value = default;
             return false;
-                
+
         }
 
         public bool Equals(ComparableReadOnlyDictionary<TKey, TValue>? other)
@@ -49,7 +65,7 @@ namespace Lucy.Core.Parsing.Nodes
             if (Count != other.Count)
                 return false;
 
-            foreach(var (key, value) in _dict)
+            foreach (var (key, value) in _dict)
             {
                 if (!other._dict.TryGetValue(key, out var otherValue))
                     return false;
@@ -73,6 +89,23 @@ namespace Lucy.Core.Parsing.Nodes
             foreach (var value in _dict.Values.OrderBy(x => x))
                 hc.Add(value);
             return hc.ToHashCode();
+        }
+
+        public class Builder
+        {
+            Dictionary<TKey, TValue> _builderDict = new();
+
+            public void Add(TKey key, TValue value)
+            {
+                _builderDict.Add(key, value);
+            }
+
+            public ComparableReadOnlyDictionary<TKey, TValue> Build()
+            {
+                var r = new ComparableReadOnlyDictionary<TKey, TValue>();
+                r._dict = _builderDict;
+                return r;
+            }
         }
 
         public bool ContainsKey(TKey key) => _dict.ContainsKey(key);

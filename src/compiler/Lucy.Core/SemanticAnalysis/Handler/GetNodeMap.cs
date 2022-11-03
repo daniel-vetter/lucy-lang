@@ -4,7 +4,6 @@ using Lucy.Core.Parsing.Nodes;
 using Lucy.Core.SemanticAnalysis.Infrasturcture;
 using Lucy.Core.SemanticAnalysis.Inputs;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace Lucy.Core.SemanticAnalysis.Handler
@@ -14,27 +13,38 @@ namespace Lucy.Core.SemanticAnalysis.Handler
     /// </summary>
     /// <param name="DocumentPath"></param>
     public record GetNodeMap(string DocumentPath) : IQuery<GetNodeMapResult>;
-    public record GetNodeMapResult(ComparableReadOnlyDictionary<NodeId, SyntaxTreeNode> NodesById, ComparableReadOnlyDictionary<Type, ComparableReadOnlyList<SyntaxTreeNode>> NodesByType);
+    public record GetNodeMapResult(
+        ComparableReadOnlyDictionary<NodeId, SyntaxTreeNode> NodesById, 
+        ComparableReadOnlyDictionary<Type, ComparableReadOnlyList<SyntaxTreeNode>> NodesByType,
+        ComparableReadOnlyDictionary<NodeId, NodeId> ParentNodes);
 
     public class GetNodeMapHandler : QueryHandler<GetNodeMap, GetNodeMapResult>
     {
         public override GetNodeMapResult Handle(IDb db, GetNodeMap query)
         {
             var rootNode = db.Query(new GetSyntaxTree(query.DocumentPath)).RootNode;
-            var nodesById = new Dictionary<NodeId, SyntaxTreeNode>();
+            var nodesByIdBuilder = new ComparableReadOnlyDictionary<NodeId, SyntaxTreeNode>.Builder();
+            var parentNodeIds = new ComparableReadOnlyDictionary<NodeId, NodeId>.Builder();
             
-            Traverse(rootNode, nodesById);
+            Traverse(rootNode, nodesByIdBuilder, parentNodeIds);
+
+            var nodesById = nodesByIdBuilder.Build();
             var nodesByType = nodesById.Values
                 .GroupBy(x => x.GetType())
-                .ToDictionary(x => x.Key, x => new ComparableReadOnlyList<SyntaxTreeNode>(x));
-            return new GetNodeMapResult(new ComparableReadOnlyDictionary<NodeId, SyntaxTreeNode>(nodesById), new ComparableReadOnlyDictionary<Type, ComparableReadOnlyList<SyntaxTreeNode>>(nodesByType));
+                .ToComparableReadOnlyDictionary(x => x.Key, x => x.ToComparableReadOnlyList());
+
+            return new GetNodeMapResult(nodesById, nodesByType, parentNodeIds.Build());
         }
 
-        private void Traverse(SyntaxTreeNode node, Dictionary<NodeId, SyntaxTreeNode> nodesById)
+        private void Traverse(SyntaxTreeNode node, ComparableReadOnlyDictionary<NodeId, SyntaxTreeNode>.Builder nodesById, ComparableReadOnlyDictionary<NodeId, NodeId>.Builder parentNodeIds)
         {
             nodesById.Add(node.NodeId, node);
+            
             foreach (var child in node.GetChildNodes())
-                Traverse(child, nodesById);
+            {
+                parentNodeIds.Add(child.NodeId, node.NodeId);
+                Traverse(child, nodesById, parentNodeIds);
+            }
         }
     }
 }

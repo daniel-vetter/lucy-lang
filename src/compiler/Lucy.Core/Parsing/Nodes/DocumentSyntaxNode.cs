@@ -3,8 +3,10 @@ using Lucy.Core.Parsing.Nodes.Trivia;
 
 namespace Lucy.Core.Parsing.Nodes
 {
-    public record DocumentRootSyntaxNode(StatementListSyntaxNode StatementList, ComparableReadOnlyList<TriviaNode> TrailingTrivia) : SyntaxTreeNode
+    public record DocumentRootSyntaxNode(StatementListSyntaxNode StatementList, ComparableReadOnlyList<TriviaNode> TrailingTrivia) : SyntaxTreeNode, ICustomIdElementName
     {
+        string ICustomIdElementName.CustomIdElementName => "root";
+
         public static DocumentRootSyntaxNode ReadDocumentSyntaxNode(Code code)
         {
             var statementList = StatementListSyntaxNode.ReadStatementsWithoutBlock(code);

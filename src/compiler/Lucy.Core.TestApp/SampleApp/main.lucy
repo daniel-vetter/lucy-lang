@@ -1,7 +1,7 @@
 ﻿fun doStuff1() {
 }
 
-fun main() {
+fun main(n1: number, n2: number) {
 	
 }
 

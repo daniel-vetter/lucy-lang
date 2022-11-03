@@ -1,16 +1,15 @@
 ﻿using Lucy.Core.Parsing;
 using Lucy.Core.ProjectManagement;
-using System.Runtime.CompilerServices;
 
 namespace Lucy.Core.TestApp;
 
-internal class FileChangeReader
+internal class TestCaseReader
 {
     private readonly Workspace _workspace;
     private Dictionary<int, List<CodeFile>> _versions;
     private int _currentVersion = 0;
 
-    public FileChangeReader(Workspace workspace, string dir)
+    public TestCaseReader(Workspace workspace, string dir)
     {
         dir = Path.GetFullPath(dir);
         var files = Directory.GetFiles(dir, "*.lucy", SearchOption.AllDirectories);

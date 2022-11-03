@@ -2,7 +2,7 @@
 
 namespace Lucy.Core.Parsing.Nodes.Statements.FunctionDeclaration;
 
-public record FunctionDeclarationParameterSyntaxNode(VariableNameWithTypeDeclarationSyntaxNode VariableDeclaration, SyntaxElement? Seperator) : SyntaxTreeNode
+public record FunctionDeclarationParameterSyntaxNode(VariableNameWithTypeDeclarationSyntaxNode VariableDeclaration, SyntaxElement? Seperator) : SyntaxTreeNode, ICustomIdElementName
 {
     public static ComparableReadOnlyList<FunctionDeclarationParameterSyntaxNode> ReadList(Code code)
     {
@@ -22,4 +22,6 @@ public record FunctionDeclarationParameterSyntaxNode(VariableNameWithTypeDeclara
 
         return l.Build();
     }
+
+    string ICustomIdElementName.CustomIdElementName => VariableDeclaration.VariableName.Token.Text;
 }

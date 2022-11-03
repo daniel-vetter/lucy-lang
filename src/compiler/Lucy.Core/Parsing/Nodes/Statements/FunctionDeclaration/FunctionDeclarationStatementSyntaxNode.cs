@@ -16,7 +16,7 @@ namespace Lucy.Core.Parsing.Nodes.Statements.FunctionDeclaration
             SyntaxElement CloseBraket,
             SyntaxElement ReturnTypeSeperator,
             TypeReferenceSyntaxNode ReturnType,
-            StatementListSyntaxNode? Body) : StatementSyntaxNode
+            StatementListSyntaxNode? Body) : StatementSyntaxNode, ICustomIdElementName
     {
         public static FunctionDeclarationStatementSyntaxNode? Read(Code code)
         {
@@ -65,5 +65,7 @@ namespace Lucy.Core.Parsing.Nodes.Statements.FunctionDeclaration
                 Body: body
             );
         }
+
+        string ICustomIdElementName.CustomIdElementName => FunctionName.Token.Text;
     }
 }

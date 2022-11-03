@@ -6,6 +6,11 @@
         public SyntaxTreeNodeSource Source { get; init; } = new SourceCode();
     }
 
+    public interface ICustomIdElementName
+    {
+        string CustomIdElementName { get; }
+    }
+
     public abstract record SyntaxTreeNodeSource
     {
     }

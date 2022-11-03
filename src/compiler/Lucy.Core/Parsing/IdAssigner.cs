@@ -41,12 +41,28 @@ namespace Lucy.Core.Parsing
 
         private static void Traverse(SyntaxTreeNode node, NodeIdFactory nodeIdFactory)
         {
-            var name = node.GetType().Name;
-            if (name.EndsWith("SyntaxNode"))
-                name = name.Substring(0, name.Length - "SyntaxNode".Length);
+            string name = "";
+            if (node is ICustomIdElementName namedNode)
+            {
+                name = namedNode.CustomIdElementName;
+                if (string.IsNullOrWhiteSpace(name))
+                    name = "unknown";
+            }
+            else
+            {
+                name = node.GetType().Name;
+                if (name.EndsWith("SyntaxNode"))
+                    name = name.Substring(0, name.Length - "SyntaxNode".Length);
+                if (name.EndsWith("TriviaNode"))
+                    name = name.Substring(0, name.Length - "TriviaNode".Length);
+                if (name.EndsWith("Node"))
+                    name = name.Substring(0, name.Length - "Node".Length);
+                name = name[0..1].ToLowerInvariant() + name[1..];
+
+            }
             node.NodeId = nodeIdFactory.CreateId(name);
             var subFactory = new NodeIdFactory(node.NodeId);
-            foreach(var child in node.GetChildNodes())
+            foreach (var child in node.GetChildNodes())
             {
                 Traverse(child, subFactory);
             }
