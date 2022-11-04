@@ -9,15 +9,8 @@ using System.Diagnostics;
 namespace Lucy.Core.SemanticAnalysis.Handler
 {
     public record GetScopeTree(string DocumentPath) : IQuery<GetScopeTreeResult>;
-    public record GetScopeTreeResult(DocumentScope DocumentScope);
-
-
-    
-    public record DocumentScope(NodeId NodeId, ComparableReadOnlyList<ScopeItem> Items) : ScopeItem(NodeId);
-
-    public abstract record ScopeItem(NodeId NodeId);
-    public record VariableDeclarationScopeItem(NodeId NodeId) : ScopeItem(NodeId);
-    public record FunctionDeclarationScopeItem(NodeId NodeId, ComparableReadOnlyList<ScopeItem> Items) : ScopeItem(NodeId);
+    public record GetScopeTreeResult(ScopeItem DocumentScope);
+    public record ScopeItem(NodeId NodeId, ComparableReadOnlyList<ScopeItem> Items);
     
     public class GetScopeMapHandler : QueryHandler<GetScopeTree, GetScopeTreeResult>
     {
@@ -27,7 +20,7 @@ namespace Lucy.Core.SemanticAnalysis.Handler
 
             var items = new ComparableReadOnlyList<ScopeItem>.Builder();
             Find(rootNode, items);
-            var documentScope = new DocumentScope(rootNode.NodeId, items.Build());
+            var documentScope = new ScopeItem(rootNode.NodeId, items.Build());
             return new GetScopeTreeResult(documentScope);
         }
 
@@ -38,11 +31,11 @@ namespace Lucy.Core.SemanticAnalysis.Handler
                 var subItems = new ComparableReadOnlyList<ScopeItem>.Builder();
                 foreach (var childNode in node.GetChildNodes())
                     Find(childNode, subItems);
-                items.Add(new FunctionDeclarationScopeItem(node.NodeId, subItems.Build()));
+                items.Add(new ScopeItem(node.NodeId, subItems.Build()));
             }
             if (node is FunctionDeclarationParameterSyntaxNode)
             {
-                items.Add(new VariableDeclarationScopeItem(node.NodeId));
+                items.Add(new ScopeItem(node.NodeId, new ComparableReadOnlyList<ScopeItem>()));
             }
             else
             {

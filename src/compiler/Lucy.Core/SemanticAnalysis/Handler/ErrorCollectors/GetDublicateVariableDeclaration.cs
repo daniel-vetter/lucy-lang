@@ -1,24 +1,64 @@
-﻿using Lucy.Core.SemanticAnalysis.Infrasturcture;
-using Lucy.Core.SemanticAnalysis.Inputs;
+﻿using Lucy.Core.Parsing;
+using Lucy.Core.Parsing.Nodes;
+using Lucy.Core.Parsing.Nodes.Statements.FunctionDeclaration;
+using Lucy.Core.SemanticAnalysis.Infrasturcture;
+using System;
+using System.Collections.Generic;
 
 namespace Lucy.Core.SemanticAnalysis.Handler.ErrorCollectors
 {
-    /*
-    public record GetDublicateVariableDeclarations() : IQuery<GetDublicateVariableDeclarationsResult>;
-    public record GetDublicateVariableDeclarationsResult();
+    public record GetDublicateDeclarations(string DocumentPath) : IQuery<GetDublicateVariableDeclarationsResult>;
+    public record GetDublicateVariableDeclarationsResult(ComparableReadOnlyList<Error> Errors);
 
-    public class GetDublicateVariableDeclarationsHandler : QueryHandler<GetDublicateVariableDeclarations, GetDublicateVariableDeclarationsResult>
+    public record Error(NodeId NodeId, string Message);
+
+    public class GetDublicateVariableDeclarationsHandler : QueryHandler<GetDublicateDeclarations, GetDublicateVariableDeclarationsResult>
     {
-        public override GetDublicateVariableDeclarationsResult Handle(IDb db, GetDublicateVariableDeclarations query)
+        public override GetDublicateVariableDeclarationsResult Handle(IDb db, GetDublicateDeclarations query)
         {
-            
-            foreach (var documentPath in db.Query(new GetDocumentList()).Paths)
+            var root = db.Query(new GetScopeTree(query.DocumentPath)).DocumentScope;
+            var result = new ComparableReadOnlyList<Error>.Builder();
+            Traverse(db, root, new HashSet<string>(), result);
+            return new GetDublicateVariableDeclarationsResult(result.Build());
+        }
+
+        private void Traverse(IDb db, ScopeItem scopeItem, HashSet<string> knownNames, ComparableReadOnlyList<Error>.Builder errors)
+        {
+            var node = db.Query(new GetNodeById(scopeItem.NodeId)).Node;
+            if (node is FunctionDeclarationStatementSyntaxNode functionDeclarationStatementSyntaxNode)
             {
-                int i = 0;
-                
+                var name = functionDeclarationStatementSyntaxNode.FunctionName.Token.Text;
+                if (knownNames.Contains(name))
+                {
+                    errors.Add(new Error(node.NodeId, $"A symbol named '{name}' was already defined in this or a parent scope."));
+                }
+                else
+                {
+                    knownNames.Add(name);
+                }
             }
-            
+            else if (node is FunctionDeclarationParameterSyntaxNode functionDeclarationParameterSyntaxNode)
+            {
+                var name = functionDeclarationParameterSyntaxNode.VariableDeclaration.VariableName.Token.Text;
+                if (knownNames.Contains(name))
+                {
+                    errors.Add(new Error(node.NodeId, $"A symbol named '{name}' was already defined in this or a parent scope."));
+                }
+                else
+                {
+                    knownNames.Add(name);
+                }
+            }
+            else if (node is DocumentRootSyntaxNode)
+            {
+
+            }
+            else throw new NotImplementedException("Unsupported node type: " + node.GetType().Name);
+
+            foreach (var subScope in scopeItem.Items)
+            {
+                Traverse(db, subScope, knownNames, errors);
+            }
         }
     }
-    */
 }
