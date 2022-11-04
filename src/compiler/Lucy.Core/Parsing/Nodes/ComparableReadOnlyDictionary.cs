@@ -2,7 +2,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 
 namespace Lucy.Core.Parsing.Nodes
 {
@@ -20,15 +19,11 @@ namespace Lucy.Core.Parsing.Nodes
     public class ComparableReadOnlyDictionary<TKey, TValue> : IReadOnlyDictionary<TKey, TValue>, IEquatable<ComparableReadOnlyDictionary<TKey, TValue>> where TKey : notnull
     {
         private Dictionary<TKey, TValue> _dict;
+        private List<KeyValuePair<TKey, TValue>> _stableList = new();
 
         public ComparableReadOnlyDictionary()
         {
             _dict = new Dictionary<TKey, TValue>();
-        }
-
-        public ComparableReadOnlyDictionary(IDictionary<TKey, TValue> entries)
-        {
-            _dict = new Dictionary<TKey, TValue>(entries);
         }
 
         public int Count => _dict.Count;
@@ -54,7 +49,6 @@ namespace Lucy.Core.Parsing.Nodes
 
             value = default;
             return false;
-
         }
 
         public bool Equals(ComparableReadOnlyDictionary<TKey, TValue>? other)
@@ -65,17 +59,13 @@ namespace Lucy.Core.Parsing.Nodes
             if (Count != other.Count)
                 return false;
 
-            foreach (var (key, value) in _dict)
+            for(int i=0;i<_stableList.Count;i++)
             {
-                if (!other._dict.TryGetValue(key, out var otherValue))
+                if (_stableList[i].GetHashCode() != other._stableList[i].GetHashCode())
                     return false;
 
-                if (value == null ^ otherValue == null)
+                if (!_stableList[i].Equals(other._stableList[i]))
                     return false;
-
-                if (value != null)
-                    if (!value.Equals(otherValue))
-                        return false;
             }
 
             return true;
@@ -84,26 +74,30 @@ namespace Lucy.Core.Parsing.Nodes
         public override int GetHashCode()
         {
             var hc = new HashCode();
-            foreach (var key in _dict.Keys.OrderBy(x => x))
+            foreach(var (key, value) in _stableList)
+            {
                 hc.Add(key);
-            foreach (var value in _dict.Values.OrderBy(x => x))
                 hc.Add(value);
+            }
             return hc.ToHashCode();
         }
 
         public class Builder
         {
-            Dictionary<TKey, TValue> _builderDict = new();
+            private Dictionary<TKey, TValue> _builderDict = new();
+            private List<KeyValuePair<TKey,TValue>> _stableList = new();
 
             public void Add(TKey key, TValue value)
             {
                 _builderDict.Add(key, value);
+                _stableList.Add(KeyValuePair.Create(key, value));
             }
 
             public ComparableReadOnlyDictionary<TKey, TValue> Build()
             {
                 var r = new ComparableReadOnlyDictionary<TKey, TValue>();
                 r._dict = _builderDict;
+                r._stableList = _stableList;
                 return r;
             }
         }
