@@ -1,16 +1,17 @@
-﻿using Lucy.Core.Parsing.Nodes.Token;
+﻿using Lucy.Core.Model;
 using Lucy.Core.Parsing.Nodes.Trivia;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 
 namespace Lucy.Core.Parsing.Nodes.Expressions.Unary
 {
-    public record NumberConstantExpressionSyntaxNode(double Value, SyntaxElement Token) : ExpressionSyntaxNode
+    public class NumberConstantExpressionSyntaxNodeParser
     {
         public static bool TryRead(Code code, [NotNullWhen(true)] out NumberConstantExpressionSyntaxNode? result)
         {
             var start = code.Position;
-            var leadingTrivia = TriviaNode.ReadList(code);
+            var leadingTrivia = TriviaNodeParser.ReadList(code);
 
             if (!CountDigits(code, out var beforeDigitCount))
             {
@@ -35,7 +36,7 @@ namespace Lucy.Core.Parsing.Nodes.Expressions.Unary
             return true;
         }
 
-        private static NumberConstantExpressionSyntaxNode CreateNode(Code code, ComparableReadOnlyList<TriviaNode> leadingTrivia, int count)
+        private static NumberConstantExpressionSyntaxNode CreateNode(Code code, List<TriviaNode> leadingTrivia, int count)
         {
             var str = code.Read(count);
             var num = double.Parse(str, CultureInfo.InvariantCulture);

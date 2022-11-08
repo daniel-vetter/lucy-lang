@@ -1,36 +1,11 @@
-﻿using Lucy.Core.Helper;
-using Lucy.Core.Parsing.Nodes;
+﻿using Lucy.Core.Model;
 using System;
 using System.Collections.Generic;
+using System.Text;
 
 namespace Lucy.Core.Parsing
 {
-    public class NodeId
-    {
-        public NodeId(string documentPath, string nodePath)
-        {
-            DocumentPath = documentPath;
-            NodePath = nodePath;
-        }
-
-        private static NodeId _unitialized = new NodeId("!", "Uninitalized");
-        public static NodeId Uninitalized => _unitialized;
-
-        public string DocumentPath { get; }
-        public string NodePath { get; }
-
-        public override bool Equals(object? obj)
-        {
-            return obj is NodeId id && DocumentPath == id.DocumentPath && NodePath == id.NodePath;
-        }
-
-        public override int GetHashCode()
-        {
-            return HashCode.Combine(DocumentPath, NodePath);
-        }
-
-        public override string ToString() => $"{DocumentPath}!{NodePath}";
-    }
+    
 
     internal class IdAssigner
     {
@@ -41,25 +16,15 @@ namespace Lucy.Core.Parsing
 
         private static void Traverse(SyntaxTreeNode node, NodeIdFactory nodeIdFactory)
         {
-            string name = "";
-            if (node is ICustomIdElementName namedNode)
-            {
-                name = namedNode.CustomIdElementName;
-                if (string.IsNullOrWhiteSpace(name))
-                    name = "unknown";
-            }
-            else
-            {
-                name = node.GetType().Name;
-                if (name.EndsWith("SyntaxNode"))
-                    name = name.Substring(0, name.Length - "SyntaxNode".Length);
-                if (name.EndsWith("TriviaNode"))
-                    name = name.Substring(0, name.Length - "TriviaNode".Length);
-                if (name.EndsWith("Node"))
-                    name = name.Substring(0, name.Length - "Node".Length);
-                name = name[0..1].ToLowerInvariant() + name[1..];
+            var name = node.GetType().Name;
+            if (name.EndsWith("SyntaxNode"))
+                name = name.Substring(0, name.Length - "SyntaxNode".Length);
+            if (name.EndsWith("TriviaNode"))
+                name = name.Substring(0, name.Length - "TriviaNode".Length);
+            if (name.EndsWith("Node"))
+                name = name.Substring(0, name.Length - "Node".Length);
+            name = name[0..1].ToLowerInvariant() + name[1..];
 
-            }
             node.NodeId = nodeIdFactory.CreateId(name);
             var subFactory = new NodeIdFactory(node.NodeId);
             foreach (var child in node.GetChildNodes())

@@ -1,6 +1,8 @@
-﻿namespace Lucy.Core.Parsing.Nodes.Trivia
+﻿using Lucy.Core.Model;
+
+namespace Lucy.Core.Parsing.Nodes.Trivia
 {
-    internal record WhitespaceTriviaNode(TokenNode token) : TriviaNode
+    internal class WhitespaceTriviaNodeParser
     {
         public static WhitespaceTriviaNode? Read(Code code)
         {

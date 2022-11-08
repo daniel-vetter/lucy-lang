@@ -1,15 +1,15 @@
-﻿using Lucy.Core.Parsing.Nodes.Token;
-using Lucy.Core.Parsing.Nodes.Trivia;
+﻿using Lucy.Core.Parsing.Nodes.Trivia;
 using System.Diagnostics.CodeAnalysis;
+using Lucy.Core.Model;
 
 namespace Lucy.Core.Parsing.Nodes.Expressions.Unary
 {
-    public record StringConstantExpressionSyntaxNode(string Value, SyntaxElement String) : ExpressionSyntaxNode
+    public class StringConstantExpressionSyntaxNodeParser
     {
         public static bool TryRead(Code code, [NotNullWhen(true)] out StringConstantExpressionSyntaxNode? result)
         {
             var start = code.Position;
-            var leadingTrivia = TriviaNode.ReadList(code);
+            var leadingTrivia = TriviaNodeParser.ReadList(code);
 
             if (code.Peek() != '\"')
             {
@@ -23,9 +23,9 @@ namespace Lucy.Core.Parsing.Nodes.Expressions.Unary
             {
                 if (code.Peek(len) == '\0')
                 {
-                    code.ReportError("Unterminated string detected. Missing '\"'");
                     var str = code.Read(len);
                     var token = new SyntaxElement(leadingTrivia, new TokenNode(str));
+                    token.SyntaxErrors.Add("Unterminated string detected. Missing '\"'");
                     result = new StringConstantExpressionSyntaxNode(str.Substring(1), token);
                     return true;
                 }

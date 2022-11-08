@@ -1,33 +1,32 @@
-﻿using Lucy.Core.Parsing.Nodes.Token;
+﻿using Lucy.Core.Model;
+using Lucy.Core.Parsing;
+using Lucy.Core.Parsing.Nodes.Expressions;
+using Lucy.Core.Parsing.Nodes.Token;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Lucy.Core.Parsing.Nodes.Expressions.Nested
 {
-    internal record OrExpressionSyntaxNode(ExpressionSyntaxNode Left, SyntaxElement Token, ExpressionSyntaxNode Right) : ExpressionSyntaxNode
+    internal class OrExpressionSyntaxNodeParser
     {
         public static bool TryReadOrInner(Code code, [NotNullWhen(true)] out ExpressionSyntaxNode? result)
         {
-            result = null;
-
-            if (!AdditionExpressionSyntaxNode.TryReadOrInner(code, out var left))
+            if (!AdditionExpressionSyntaxNodeParser.TryReadOrInner(code, out result))
                 return false;
             
             while (true)
             {
-                if (!SyntaxElement.TryReadKeyword(code, "or", out var orToken))
+                if (!SyntaxElementParser.TryReadKeyword(code, "or", out var orToken))
                 {
-                    result = left;
                     return true;
                 }
                 
-                if (!AdditionExpressionSyntaxNode.TryReadOrInner(code, out var right))
+                if (!AdditionExpressionSyntaxNodeParser.TryReadOrInner(code, out var right))
                 {
-                    result = left;
-                    code.ReportError("Expression expected", code.Position);
+                    result = new OrExpressionSyntaxNode(result, orToken, ExpressionSyntaxNodeParser.Missing("Expression expected"));
                     return true;
                 }
 
-                left = new OrExpressionSyntaxNode(left, orToken, right);
+                result = new OrExpressionSyntaxNode(result, orToken, right);
             }
         }
     }

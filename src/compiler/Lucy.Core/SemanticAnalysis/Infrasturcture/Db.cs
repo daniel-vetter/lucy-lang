@@ -1,4 +1,5 @@
 ﻿using Lucy.Common;
+using Lucy.Core.SemanticAnalysis.Handler;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -127,14 +128,15 @@ namespace Lucy.Core.SemanticAnalysis.Infrasturcture
             var result = handler.Handle(callContext, query);
             handlerStopwatch.Stop();
 
-            var overheadStopwatch = Stopwatch.StartNew();
-            var resultChanged = false;
+
+            ResultType resultType;
             _entries.TryGetValue(query, out var entry);
+            var overheadStopwatch = Stopwatch.StartNew();
             if (entry == null)
             {
                 entry = new Entry(result, _currentRevision, _currentRevision, false, callContext.Dependencies); ;
                 _entries[query] = entry;
-                resultChanged = true;
+                resultType = ResultType.InitialCalculation;
             }
             else
             {
@@ -143,9 +145,13 @@ namespace Lucy.Core.SemanticAnalysis.Infrasturcture
 
                 if (!result.Equals(entry.Result))
                 {
-                    resultChanged = true;
+                    resultType = ResultType.HasChanged;
                     entry.LastChanged = _currentRevision;
                     entry.Result = result;
+                }
+                else
+                {
+                    resultType = ResultType.WasTheSame;
                 }
                 entry.Dependencies = callContext.Dependencies;
                 entry.LastChecked = _currentRevision;
@@ -153,7 +159,7 @@ namespace Lucy.Core.SemanticAnalysis.Infrasturcture
             overheadStopwatch.Stop();
 
             if (_subscriptions.HasSubscriptions)
-                _subscriptions.Publish(new CalculationFinished(query, entry.Result, handlerStopwatch.Elapsed - callContext.TotalTimeInSubQueries, overheadStopwatch.Elapsed, resultChanged));
+                _subscriptions.Publish(new CalculationFinished(query, entry.Result, handlerStopwatch.Elapsed - callContext.TotalTimeInSubQueries, overheadStopwatch.Elapsed, resultType));
 
             return entry;
         }

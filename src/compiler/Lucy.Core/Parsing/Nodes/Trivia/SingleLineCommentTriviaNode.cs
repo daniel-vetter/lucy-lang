@@ -1,6 +1,8 @@
-﻿namespace Lucy.Core.Parsing.Nodes.Trivia
+﻿using Lucy.Core.Model;
+
+namespace Lucy.Core.Parsing.Nodes.Trivia
 {
-    internal record SingleLineCommentTriviaNode(TokenNode Start, TokenNode Content) : TriviaNode
+    internal class SingleLineCommentTriviaNodeParser
     {
         public static SingleLineCommentTriviaNode? Read(Code code)
         {

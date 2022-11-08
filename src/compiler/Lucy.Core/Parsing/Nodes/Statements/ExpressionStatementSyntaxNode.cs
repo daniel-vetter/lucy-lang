@@ -1,12 +1,13 @@
 ﻿using Lucy.Core.Parsing.Nodes.Expressions;
+using Lucy.Core.Model;
 
 namespace Lucy.Core.Parsing.Nodes.Statements
 {
-    public record ExpressionStatementSyntaxNode(ExpressionSyntaxNode expression) : StatementSyntaxNode
+    public class ExpressionStatementSyntaxNodeParser
     {
         public static ExpressionStatementSyntaxNode? Read(Code code)
         {
-            if (ExpressionSyntaxNode.TryRead(code, out var result))
+            if (ExpressionSyntaxNodeParser.TryRead(code, out var result))
                 return new ExpressionStatementSyntaxNode(result);
             return null;
         }

@@ -1,4 +1,5 @@
 ﻿using Lucy.Core.Parsing.Nodes;
+using Lucy.Core.Model;
 
 namespace Lucy.Core.ProjectManagement
 {

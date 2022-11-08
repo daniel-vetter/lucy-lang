@@ -65,7 +65,6 @@ namespace Lucy.Core.SemanticAnalysis
         {
             var sw = Stopwatch.StartNew();
             var result = _db.Query(query);
-          //  Console.WriteLine(sw.Elapsed.TotalMilliseconds);
             return result;
         }
 

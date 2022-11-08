@@ -26,7 +26,7 @@ namespace Lucy.Core.SemanticAnalysis.Infrasturcture
         private class CalculationStats
         {
             public int Index { get; set; } = -1;
-            public bool ResultChanged { get; set; } = false;
+            public ResultType ResultType { get; set; } = ResultType.WasTheSame;
             public TimeSpan ExclusiveHandlerExecutionTime { get; set; } = TimeSpan.Zero;
             public TimeSpan OverheadExecutionTime { get; set; } = TimeSpan.Zero;
         }
@@ -81,7 +81,7 @@ namespace Lucy.Core.SemanticAnalysis.Infrasturcture
             if (@event is CalculationFinished cf)
             {
                 var entry = _calculatedQueries[cf.Query];
-                entry.ResultChanged = cf.ResultChanged;
+                entry.ResultType = cf.ResultType;
                 entry.ExclusiveHandlerExecutionTime = cf.ExlusiveHandlerExecutionTime;
                 entry.OverheadExecutionTime = cf.OverheadExecutionTime;
 
@@ -149,8 +149,8 @@ namespace Lucy.Core.SemanticAnalysis.Infrasturcture
             var label = new KeyValueTable(query.GetType().Name ?? "root");
             if (_calculatedQueries.TryGetValue(query, out var calculationStats))
             {
-                label.Set("Execution", (calculationStats.Index + 1).ToString() + ", " + calculationStats.ExclusiveHandlerExecutionTime.TotalMilliseconds + "ms + " + calculationStats.OverheadExecutionTime.TotalMilliseconds + "ms");
-                if (calculationStats.ResultChanged)
+                label.Set("Execution", "#" + (calculationStats.Index + 1).ToString() + ", Calc: " + calculationStats.ExclusiveHandlerExecutionTime.TotalMilliseconds + "ms, Equal: " + calculationStats.OverheadExecutionTime.TotalMilliseconds + "ms");
+                if (calculationStats.ResultType is ResultType.InitialCalculation or ResultType.HasChanged)
                 {
                     node.Color = "#008000";
                     node.FontColor = "#008000";

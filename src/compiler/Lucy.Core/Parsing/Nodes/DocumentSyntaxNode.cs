@@ -1,17 +1,17 @@
 ﻿using Lucy.Core.Parsing.Nodes.Statements;
 using Lucy.Core.Parsing.Nodes.Trivia;
+using System.Collections.Generic;
+using Lucy.Core.Model;
 
 namespace Lucy.Core.Parsing.Nodes
 {
-    public record DocumentRootSyntaxNode(StatementListSyntaxNode StatementList, ComparableReadOnlyList<TriviaNode> TrailingTrivia) : SyntaxTreeNode, ICustomIdElementName
+    public class DocumentRootSyntaxNodeParser
     {
-        string ICustomIdElementName.CustomIdElementName => "root";
-
         public static DocumentRootSyntaxNode ReadDocumentSyntaxNode(Code code)
         {
-            var statementList = StatementListSyntaxNode.ReadStatementsWithoutBlock(code);
-            var trailingTrivia = TriviaNode.ReadList(code);
-
+            var statementList = StatementListSyntaxNodeParser.ReadStatementsWithoutBlock(code);
+            var trailingTrivia = TriviaNodeParser.ReadList(code);
+            
             return new DocumentRootSyntaxNode(statementList, trailingTrivia);
         }
     }

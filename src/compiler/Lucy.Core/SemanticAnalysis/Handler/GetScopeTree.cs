@@ -1,10 +1,10 @@
-﻿using Lucy.Core.Helper;
-using Lucy.Core.Parsing;
-using Lucy.Core.Parsing.Nodes;
+﻿using Lucy.Core.Parsing;
+using Lucy.Core.Model;
 using Lucy.Core.Parsing.Nodes.Statements.FunctionDeclaration;
 using Lucy.Core.SemanticAnalysis.Infrasturcture;
 using Lucy.Core.SemanticAnalysis.Inputs;
 using System.Diagnostics;
+using Lucy.Core.Parsing.Nodes;
 
 namespace Lucy.Core.SemanticAnalysis.Handler
 {

@@ -1,6 +1,6 @@
 ﻿using System.Collections;
-using Lucy.Core.Parsing;
 using System.Reflection;
+using Lucy.Core.Model;
 
 public class Dumper
 {

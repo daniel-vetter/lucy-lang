@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using Lucy.Core.Model;
 
 namespace Lucy.Core.Parsing.Nodes.Expressions.Unary
 {
@@ -6,25 +7,25 @@ namespace Lucy.Core.Parsing.Nodes.Expressions.Unary
     {
         public static bool TryRead(Code code, [NotNullWhen(true)] out ExpressionSyntaxNode? result)
         {
-            if (FunctionCallExpressionSyntaxNode.TryRead(code, out var functionCallExpressionSyntaxNode))
+            if (FunctionCallExpressionSyntaxNodeParser.TryRead(code, out var functionCallExpressionSyntaxNode))
             {
                 result = functionCallExpressionSyntaxNode;
                 return true;
             }
             
-            if (StringConstantExpressionSyntaxNode.TryRead(code, out var stringConstantExpressionSyntaxNode))
+            if (StringConstantExpressionSyntaxNodeParser.TryRead(code, out var stringConstantExpressionSyntaxNode))
             {
                 result = stringConstantExpressionSyntaxNode;
                 return true;
             }
 
-            if (NumberConstantExpressionSyntaxNode.TryRead(code, out var numberConstantExpressionSyntaxNode))
+            if (NumberConstantExpressionSyntaxNodeParser.TryRead(code, out var numberConstantExpressionSyntaxNode))
             {
                 result = numberConstantExpressionSyntaxNode;
                 return true;
             }
             
-            if (VariableReferenceExpressionSyntaxNode.TryRead(code, out var variableReferenceExpressionSyntaxNode))
+            if (VariableReferenceExpressionSyntaxNodeParser.TryRead(code, out var variableReferenceExpressionSyntaxNode))
             {
                 result = variableReferenceExpressionSyntaxNode;
                 return true;

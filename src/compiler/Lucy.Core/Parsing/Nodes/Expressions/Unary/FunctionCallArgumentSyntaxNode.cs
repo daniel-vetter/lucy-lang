@@ -1,18 +1,21 @@
-﻿using Lucy.Core.Parsing.Nodes.Token;
+﻿using Lucy.Core.Model;
+using Lucy.Core.Parsing;
+using Lucy.Core.Parsing.Nodes.Token;
+using System.Collections.Generic;
 
 namespace Lucy.Core.Parsing.Nodes.Expressions.Unary
 {
-    public record FunctionCallArgumentSyntaxNode(ExpressionSyntaxNode expression, SyntaxElement? seperator) : SyntaxTreeNode
+    public class FunctionCallArgumentSyntaxNodeParser
     {
-        public static ComparableReadOnlyList<FunctionCallArgumentSyntaxNode> Read(Code code)
+        public static List<FunctionCallArgumentSyntaxNode> Read(Code code)
         {
-            var result = new ComparableReadOnlyList<FunctionCallArgumentSyntaxNode>.Builder();
+            var result = new List<FunctionCallArgumentSyntaxNode>();
             while (true)
             {
-                if (!ExpressionSyntaxNode.TryRead(code, out var expression))
+                if (!ExpressionSyntaxNodeParser.TryRead(code, out var expression))
                     break;
 
-                SyntaxElement.TryReadExact(code, ",", out var seperator);
+                SyntaxElementParser.TryReadExact(code, ",", out var seperator);
 
                 result.Add(new FunctionCallArgumentSyntaxNode(expression, seperator));
 
@@ -20,7 +23,7 @@ namespace Lucy.Core.Parsing.Nodes.Expressions.Unary
                     break;
             }
 
-            return result.Build();
+            return result;
         }
     }
 }

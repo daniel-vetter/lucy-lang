@@ -1,5 +1,5 @@
-﻿using Lucy.Core.Parsing.Nodes;
-using System;
+﻿using Lucy.Core.Model;
+using Lucy.Core.Parsing.Nodes;
 
 namespace Lucy.Core.Parsing
 {
@@ -8,8 +8,9 @@ namespace Lucy.Core.Parsing
         public static DocumentRootSyntaxNode Parse(string documentPath, string code)
         {
             var reader = new Code(code);
-            var rootNode = DocumentRootSyntaxNode.ReadDocumentSyntaxNode(reader);
+            var rootNode = DocumentRootSyntaxNodeParser.ReadDocumentSyntaxNode(reader);
             IdAssigner.Run(documentPath, rootNode);
+
             return rootNode;
         }
     }

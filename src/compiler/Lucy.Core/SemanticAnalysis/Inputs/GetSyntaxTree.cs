@@ -1,4 +1,4 @@
-﻿using Lucy.Core.Parsing.Nodes;
+﻿using Lucy.Core.Model;
 using Lucy.Core.SemanticAnalysis.Infrasturcture;
 
 namespace Lucy.Core.SemanticAnalysis.Inputs

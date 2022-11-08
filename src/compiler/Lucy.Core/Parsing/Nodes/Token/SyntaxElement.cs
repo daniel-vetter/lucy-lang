@@ -1,19 +1,18 @@
 ﻿using Lucy.Core.Parsing.Nodes.Trivia;
-using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using Lucy.Core.Model;
 
 namespace Lucy.Core.Parsing.Nodes.Token
 {
-    public record SyntaxElement(ComparableReadOnlyList<TriviaNode> LeadingTrivia, TokenNode Token) : SyntaxTreeNode
+    public class SyntaxElementParser
     {
-        public static SyntaxElement Synthesize(string? errorMessage = null) => new SyntaxElement(new ComparableReadOnlyList<TriviaNode>(), TokenNode.Missing()) { Source = new Syntetic(errorMessage) };
-
+        public static SyntaxElement Missing(string? errorMessage = null) => new SyntaxElement(new List<TriviaNode>(), TokenNodeParser.Missing(errorMessage));
 
         public static bool TryReadExact(Code code, string text, [NotNullWhen(true)] out SyntaxElement? result)
         {
             var start = code.Position;
-            var leadingTrivia = TriviaNode.ReadList(code);
+            var leadingTrivia = TriviaNodeParser.ReadList(code);
 
             for (int i = 0; i < text.Length; i++)
                 if (code.Peek(i) != text[i])
@@ -32,7 +31,7 @@ namespace Lucy.Core.Parsing.Nodes.Token
         public static bool TryReadIdentifier(Code code, [NotNullWhen(true)] out SyntaxElement? result)
         {
             var start = code.Position;
-            var trivia = TriviaNode.ReadList(code);
+            var trivia = TriviaNodeParser.ReadList(code);
 
             int length = 0;
             while (IsIdentifierChar(code.Peek(length), length == 0))
@@ -75,6 +74,8 @@ namespace Lucy.Core.Parsing.Nodes.Token
 
             return isValid;
         }
+
+        
     }
 }
 

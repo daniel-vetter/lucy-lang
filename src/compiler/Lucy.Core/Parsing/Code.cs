@@ -10,14 +10,11 @@ namespace Lucy.Core.Parsing
     {
         private string _code;
         private int _pos = 0;
-        private Stack<NodeId> _stack = new Stack<NodeId>();
 
         public Code(string code)
         {
             _code = code;
         }
-
-        public List<Issue> Issues { get; set; } = new List<Issue>();
 
         public char Read() => _pos < _code.Length ? _code[_pos++] : '\0';
         public char Read(out char ch)
@@ -45,9 +42,6 @@ namespace Lucy.Core.Parsing
         {
             get => _code.Substring(_pos);
         }
-
-        public void ReportError(string message, int position) => Issues.Add(new Issue(IssueSeverity.Error, message));
-        public void ReportError(string message) => Issues.Add(new Issue(IssueSeverity.Error, message));
     }
 
     public struct PositionTransaction : IDisposable

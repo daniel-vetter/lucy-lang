@@ -1,12 +1,18 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
-    <Nullable>enable</Nullable>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net6.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\Lucy.Common\Lucy.Common.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\Lucy.Common\Lucy.Common.csproj" />
+		<ProjectReference Include="..\Lucy.Core.SourceGenerator\Lucy.Core.SourceGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+
+		<AdditionalFiles Include="Parsing\model.xml"></AdditionalFiles>
+	</ItemGroup>
+
+
 
 </Project>

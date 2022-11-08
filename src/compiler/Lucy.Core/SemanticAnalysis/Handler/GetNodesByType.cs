@@ -1,4 +1,5 @@
-﻿using Lucy.Core.Parsing;
+﻿using Lucy.Core.Model;
+using Lucy.Core.Parsing;
 using Lucy.Core.Parsing.Nodes;
 using Lucy.Core.SemanticAnalysis.Infrasturcture;
 using System;

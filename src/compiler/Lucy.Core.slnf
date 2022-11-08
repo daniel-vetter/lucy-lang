@@ -3,8 +3,8 @@
     "path": "Lucy.sln",
     "projects": [
       "Lucy.Common\\Lucy.Common.csproj",
+      "Lucy.Core.SourceGenerator\\Lucy.Core.SourceGenerator.csproj",
       "Lucy.Core.TestApp\\Lucy.Core.TestApp.csproj",
-      "Lucy.Core.Tests\\Lucy.Core.Tests.csproj",
       "Lucy.Core\\Lucy.Core.csproj"
     ]
   }
