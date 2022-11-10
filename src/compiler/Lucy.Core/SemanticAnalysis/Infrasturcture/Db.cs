@@ -55,45 +55,41 @@ namespace Lucy.Core.SemanticAnalysis.Infrasturcture
                 _subscriptions.Publish(new InputWasRemoved(query));
         }
 
-        private void EnsureEntryIsUpToDate(Entry entry)
+        private bool EnsureEntryIsUpToDate(Entry entry)
         {
             if (entry.LastChecked == _currentRevision)
-                return;
+                return false;
 
-            while (true)
-            {
-                var outOfDate = GetFirstOutOfDateEntry(entry);
-                if (outOfDate == null)
-                    break;
-
-                Recalculate(outOfDate);
-            }
-        }
-
-        private Entry? GetFirstOutOfDateEntry(Entry entry)
-        {
-            if (entry.LastChecked == _currentRevision)
-            {
-                return null;
-            }
-            
-            for (int i=0;i<entry.Dependencies.Count;i++)
+            // First check the dependencies of the current entry.
+            // If the current entry is out of date, we need to recalculate.
+            for (int i = 0; i < entry.Dependencies.Count; i++)
             {
                 if (entry.Dependencies[i].LastChanged > entry.LastChanged)
-                    return entry;
+                {
+                    // Since we recalculated, the current node and all its dependencies
+                    // will be update to date, so we dont need to check further.
+                    return Recalculate(entry);
+                }
             }
 
-            foreach(var dep in entry.Dependencies)
+            // We now know that the current entry thinks it is up to date.
+            // But transitive dependencies can still be out of date.
+
+            foreach (var dep in entry.Dependencies)
             {
-                var match = GetFirstOutOfDateEntry(dep);
-                if (match != null)
-                    return match;
+                // Recusivly check for all dependencies, if there dependencies are up to date
+                if (EnsureEntryIsUpToDate(dep))
+                {
+                    // If something has changed, out current entry will also
+                    // no longer be up to date, so we need to recalculate.
+                    return Recalculate(entry);
+                }
             }
-
+            
             entry.LastChecked = _currentRevision;
-            return null;
+            return false;
         }
-
+        
         public TQueryResult Query<TQueryResult>(IQuery<TQueryResult> query) where TQueryResult : notnull
         {
             return (TQueryResult)(Query(query, null).Result ?? throw new Exception("Query was not executed."));
@@ -119,7 +115,7 @@ namespace Lucy.Core.SemanticAnalysis.Infrasturcture
             return entry;
         }
 
-        private Entry Recalculate(Entry entry)
+        private bool Recalculate(Entry entry)
         {
             if (!_handlers.TryGetValue(entry.Query.GetType(), out var handler))
                 throw new Exception($"For a query of type '{entry.Query.GetType().Name}' is no input provided and no query handler registered.");
@@ -135,7 +131,7 @@ namespace Lucy.Core.SemanticAnalysis.Infrasturcture
 
             ResultType resultType;
             var overheadStopwatch = Stopwatch.StartNew();
-            
+
             if (entry.IsInput)
                 throw new Exception("The result of this query was already set as an input. It can not be changed to an result of an query handler.");
 
@@ -151,13 +147,13 @@ namespace Lucy.Core.SemanticAnalysis.Infrasturcture
             }
             entry.Dependencies = callContext.Dependencies;
             entry.LastChecked = _currentRevision;
-            
+
             overheadStopwatch.Stop();
 
             if (_subscriptions.HasSubscriptions)
                 _subscriptions.Publish(new CalculationFinished(entry.Query, entry.Result, handlerStopwatch.Elapsed - callContext.TotalTimeInSubQueries, handlerStopwatch.Elapsed, overheadStopwatch.Elapsed, resultType));
 
-            return entry;
+            return resultType != ResultType.WasTheSame;
         }
 
         private class Entry
@@ -197,7 +193,7 @@ namespace Lucy.Core.SemanticAnalysis.Infrasturcture
 
             public TQueryResult Query<TQueryResult>(IQuery<TQueryResult> query) where TQueryResult : notnull
             {
-                
+
                 var sw = Stopwatch.StartNew();
                 var resultEntry = _db.Query(query, _parentQuery);
                 Dependencies.Add(resultEntry);

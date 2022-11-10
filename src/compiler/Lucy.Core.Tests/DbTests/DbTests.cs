@@ -194,6 +194,7 @@ namespace Lucy.Core.Tests.DbTests
             db.Query(new MultiplySumQuery("A", "B", "C", "D")).Value.ShouldBe(21);
 
             db.SetInput(new ValueQuery("C"), new ValueResult(10));
+            Console.WriteLine("START");
             db.Query(new MultiplySumQuery("A", "B", "C", "D")).Value.ShouldBe(42);
 
             var calcs = events.OfType<CalculationFinished>().ToArray();
@@ -236,6 +237,35 @@ namespace Lucy.Core.Tests.DbTests
         }
 
         [Test]
+        public void If_the_result_of_an_subquery_is_the_same_as_the_already_cached_result_it_should_not_reexecute_dependent_handler3()
+        {
+            var db = new Db();
+            var events = new EventListener(db);
+            db.RegisterHandler(new SumHandler());
+            db.RegisterHandler(new MultiplySumHandler());
+
+            db.SetInput(new ValueQuery("A"), new ValueResult(1));
+            db.SetInput(new ValueQuery("B"), new ValueResult(2));
+            db.SetInput(new ValueQuery("C"), new ValueResult(3));
+            db.SetInput(new ValueQuery("D"), new ValueResult(4));
+
+            //This will calculate (1+2)*(3+4)=3 and put it in the cache
+            db.Query(new MultiplySumQuery("A", "B", "C", "D")).Value.ShouldBe(21);
+
+            //Reversing A and B
+            db.SetInput(new ValueQuery("C"), new ValueResult(4));
+            db.SetInput(new ValueQuery("D"), new ValueResult(3));
+
+            //This will calculate (2+1)*(3+4)=3
+            //Since 2+1 is still the same as 1+2, the MultiplySumQuery handle should not be executed.
+            events.Clear();
+            db.Query(new MultiplySumQuery("A", "B", "C", "D")).Value.ShouldBe(21);
+
+            events.OfType<CalculationFinished>().Count().ShouldBe(1);
+            events.OfType<CalculationFinished>().Single().Query.ShouldBe(new SumQuery("C", "D"));
+        }
+
+        [Test]
         public void If_the_result_of_an_subquery_is_the_same_as_the_already_cached_result_it_should_not_reexecute_dependent_handler()
         {
             var db = new Db();
@@ -263,6 +293,40 @@ namespace Lucy.Core.Tests.DbTests
             events.OfType<CalculationFinished>().Count().ShouldBe(1);
             events.OfType<CalculationFinished>().Single().Query.ShouldBe(new SumQuery("A", "B"));
         }
+
+
+        [Test]
+        public void If_the_result_of_an_subquery_is_the_same_as_the_already_cached_result_it_should_not_reexecute_dependent_handler2()
+        {
+            var db = new Db();
+            var events = new EventListener(db);
+            db.RegisterHandler(new SumHandler());
+            db.RegisterHandler(new MultiplySumHandler());
+
+            db.SetInput(new ValueQuery("A"), new ValueResult(1));
+            db.SetInput(new ValueQuery("B"), new ValueResult(2));
+            db.SetInput(new ValueQuery("C"), new ValueResult(3));
+            db.SetInput(new ValueQuery("D"), new ValueResult(4));
+
+            //This will calculate (1+2)*(3+4)=3 and put it in the cache
+            db.Query(new MultiplySumQuery("A", "B", "C", "D")).Value.ShouldBe(21);
+
+            //Reversing A and B
+            db.SetInput(new ValueQuery("A"), new ValueResult(2));
+            db.SetInput(new ValueQuery("B"), new ValueResult(1));
+            db.SetInput(new ValueQuery("C"), new ValueResult(4));
+            db.SetInput(new ValueQuery("D"), new ValueResult(3));
+
+            //This will calculate (2+1)*(3+4)=3
+            //Since 2+1 is still the same as 1+2, the MultiplySumQuery handle should not be executed.
+            events.Clear();
+            db.Query(new MultiplySumQuery("A", "B", "C", "D")).Value.ShouldBe(21);
+
+            events.OfType<CalculationFinished>().Count().ShouldBe(2);
+            events.OfType<CalculationFinished>().First().Query.ShouldBe(new SumQuery("A", "B"));
+            events.OfType<CalculationFinished>().Skip(1).First().Query.ShouldBe(new SumQuery("C", "D"));
+        }
+
 
         [Test]
         public void If_the_result_of_an_query_is_the_same_as_the_cached_version_it_should_throw_away_the_new_result_instance()
