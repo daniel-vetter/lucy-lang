@@ -4,27 +4,6 @@ using System.Text;
 
 namespace Lucy.Core.SourceGenerator
 {
-    public class Stuff : IEquatable<Stuff?>
-    {
-        private string _T = "";
-
-        public override bool Equals(object? obj)
-        {
-            return Equals(obj as Stuff);
-        }
-
-        public bool Equals(Stuff? other)
-        {
-            return other is not null &&
-                   _T == other._T;
-        }
-
-        public override int GetHashCode()
-        {
-            return 1716394110 + EqualityComparer<string>.Default.GetHashCode(_T);
-        }
-    }
-
     internal class ImmutableModelGenerator
     {
         internal static void Generate(SourceProductionContext productionContext, string name, Config config)
@@ -68,9 +47,10 @@ namespace Lucy.Core.SourceGenerator
 
         private static void WriteEqualsMethods(StringBuilder sb, Node node)
         {
+            
             sb.AppendLine("    public bool Equals(Immutable" + node.Name + "? other)");
             sb.AppendLine("    {");
-            sb.AppendLine("        return other is not null && GetFullHash() == other.GetFullHash();");
+            sb.AppendLine("        return other is not null && _hash.AsSpan().SequenceEqual(other._hash);");
             sb.AppendLine("    }");
             sb.AppendLine();
             
@@ -84,7 +64,7 @@ namespace Lucy.Core.SourceGenerator
 
                 sb.AppendLine("    public override int GetHashCode()");
                 sb.AppendLine("    {");
-                sb.AppendLine("        return GetFullHash().GetHashCode();");
+                sb.AppendLine("        return _hashShort;");
                 sb.AppendLine("    }");
                 sb.AppendLine();
             }
@@ -95,7 +75,8 @@ namespace Lucy.Core.SourceGenerator
             if (!node.IsRoot)
                 return;
 
-            sb.AppendLine("    private string _hash;");
+            sb.AppendLine("    protected byte[] _hash;");
+            sb.AppendLine("    protected int _hashShort;");
             sb.AppendLine();
         }
 
@@ -103,39 +84,46 @@ namespace Lucy.Core.SourceGenerator
         {
             if (node.IsRoot)
             {
-                sb.AppendLine("    protected abstract string BuildHash();");
+                sb.AppendLine("    protected abstract byte[] BuildHash();");
                 sb.AppendLine();
-                sb.AppendLine("    public string GetFullHash()");
+                sb.AppendLine("    protected void EnsureHashIsBuild()");
                 sb.AppendLine("    {");
-                sb.AppendLine("        if (_hash == null)");
-                sb.AppendLine("            _hash = BuildHash();");
+                sb.AppendLine("        _hash = BuildHash();");
+                sb.AppendLine();
+                sb.AppendLine("        var hc = new HashCode();");
+                sb.AppendLine("        hc.AddBytes(GetFullHash());");
+                sb.AppendLine("        _hashShort = hc.ToHashCode();");
+                sb.AppendLine("    }");
+                sb.AppendLine();
+                sb.AppendLine("    public byte[] GetFullHash()");
+                sb.AppendLine("    {");
                 sb.AppendLine("        return _hash;");
                 sb.AppendLine("    }");
+                sb.AppendLine();
             }
                 
 
-            if (!node.IsTopMost)
-                return;
-
-            sb.AppendLine("    protected override string BuildHash()");
-            sb.AppendLine("    {");
-            sb.AppendLine("        using var b = new HashBuilder();");
-            sb.AppendLine("        b.Add(" + node.Index + ");");
-            foreach(var property in node.AllProperties)
+            if (node.IsTopMost)
             {
-                if (property.IsList)
+                sb.AppendLine("    protected override byte[] BuildHash()");
+                sb.AppendLine("    {");
+                sb.AppendLine("        using var b = new HashBuilder();");
+                sb.AppendLine("        b.Add(" + node.Index + ");");
+                foreach (var property in node.AllProperties)
                 {
-                    sb.AppendLine("        b.BeginList();");
-                    sb.AppendLine("        foreach(var entry in " + property.Name + ")");
-                    sb.AppendLine("            b.Add(entry);");
+                    if (property.IsList)
+                    {
+                        sb.AppendLine("        b.BeginList();");
+                        sb.AppendLine("        foreach(var entry in " + property.Name + ")");
+                        sb.AppendLine("            b.Add(entry);");
+                    }
+                    else
+                        sb.AppendLine("        b.Add(" + property.Name + ");");
                 }
-                else
-                    sb.AppendLine("        b.Add(" + property.Name + ");");
+                sb.AppendLine("        return b.Build();");
+                sb.AppendLine("    }");
+                sb.AppendLine();
             }
-            sb.AppendLine("        return b.Build();");
-            sb.AppendLine("    }");
-            sb.AppendLine();
-
         }
 
         private static void WriteConstructor(StringBuilder sb, Config config, Node node)
@@ -160,7 +148,7 @@ namespace Lucy.Core.SourceGenerator
                 sb.AppendLine($"        {prop.Name} = {ToLower(prop.Name)};");
             }
             if (node.IsTopMost)
-                sb.AppendLine("    GetFullHash();");
+                sb.AppendLine("        EnsureHashIsBuild();");
             sb.AppendLine("    }");
             sb.AppendLine();
         }

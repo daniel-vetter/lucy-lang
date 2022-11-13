@@ -7,7 +7,7 @@ namespace Lucy.Core.Model
 {
     public interface IHashable
     {
-        string GetFullHash();
+        byte[] GetFullHash();
     }
 
     public class HashBuilder : IDisposable
@@ -61,7 +61,7 @@ namespace Lucy.Core.Model
             _bw.Write(number);
         }
 
-        public string Build() => Convert.ToBase64String(SHA256.HashData(_ms.GetBuffer().AsSpan()[..(int)_ms.Length]));
+        public byte[] Build() => SHA256.HashData(_ms.GetBuffer().AsSpan()[..(int)_ms.Length]);
         public void Dispose()
         {
             _bw.Dispose();

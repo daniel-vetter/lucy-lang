@@ -18,6 +18,7 @@ namespace Lucy.Core.Model
             DocumentPath = documentPath;
             NodePath = nodePath;
             _str = DocumentPath + "!" + NodePath;
+            _hash = Encoding.UTF8.GetBytes(_str);
         }
 
         private static NodeId _unitialized = new NodeId("!", "Uninitalized");
@@ -27,8 +28,9 @@ namespace Lucy.Core.Model
         public string NodePath { get; }
 
         private string _str;
+        private byte[] _hash;
 
-        public string GetFullHash() => _str;
+        public byte[] GetFullHash() => _hash;
 
         public override bool Equals(object? obj)
         {
