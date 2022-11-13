@@ -36,7 +36,7 @@ namespace Lucy.Core.SourceGenerator
 
         public Node AddNode(string name)
         {
-            var node = new Node(this, name);
+            var node = new Node(this, name, _nodes.Count);
             _nodes.Add(node);
             _nodesByName.Add(name, node);
             return node;
@@ -51,16 +51,18 @@ namespace Lucy.Core.SourceGenerator
 
     public class Node
     {
-        public Node(Config config, string name)
+        public Node(Config config, string name, int index)
         {
             Config = config;
             Name = name;
+            Index = index;
         }
 
         private List<NodeProperty> _props = new();
 
         public Config Config { get; }
         public string Name { get; }
+        public int Index { get; }
         public string? BasedOn { get; set; }
         public bool IsRoot => BasedOn == null;
         public bool IsTopMost => !Config.Nodes.Any(x => x.BasedOn == Name);

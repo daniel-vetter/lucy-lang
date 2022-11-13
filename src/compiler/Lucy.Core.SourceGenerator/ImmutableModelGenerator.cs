@@ -4,6 +4,27 @@ using System.Text;
 
 namespace Lucy.Core.SourceGenerator
 {
+    public class Stuff : IEquatable<Stuff?>
+    {
+        private string _T = "";
+
+        public override bool Equals(object? obj)
+        {
+            return Equals(obj as Stuff);
+        }
+
+        public bool Equals(Stuff? other)
+        {
+            return other is not null &&
+                   _T == other._T;
+        }
+
+        public override int GetHashCode()
+        {
+            return 1716394110 + EqualityComparer<string>.Default.GetHashCode(_T);
+        }
+    }
+
     internal class ImmutableModelGenerator
     {
         internal static void Generate(SourceProductionContext productionContext, string name, Config config)
@@ -22,17 +43,99 @@ namespace Lucy.Core.SourceGenerator
 
             foreach (var node in config.Nodes)
             {
-                sb.AppendLine($"public {(node.IsTopMost ? "" : "abstract ")}class Immutable{node.Name}" + (node.BasedOn == null ? "" : " : Immutable" + node.BasedOn));
+                var basedOn = new List<string>();
+                if (node.BasedOn != null)
+                    basedOn.Add("Immutable" + node.BasedOn);
+                if (node.IsRoot)
+                    basedOn.Add("IHashable");
+                basedOn.Add("IEquatable<Immutable" + node.Name + "?>");
+
+                sb.AppendLine($"public {(node.IsTopMost ? "" : "abstract ")}class Immutable{node.Name} : " + string.Join(", ", basedOn));
                 sb.AppendLine("{");
                 WriteConstructor(sb, config, node);
                 WriteProperties(sb, config, node);
+                WriteMemberVariables(sb, node);
                 WriteGetChildNodesMethod(config, sb, node);
                 WriteToFlatMethod(config, sb, node);
+                WriteHashBuilder(sb, node);
+                WriteEqualsMethods(sb, node);
                 sb.AppendLine("}");
                 sb.AppendLine();
             }
 
             productionContext.AddSource("Immutable" + name + ".g.cs", sb.ToString());
+        }
+
+        private static void WriteEqualsMethods(StringBuilder sb, Node node)
+        {
+            sb.AppendLine("    public bool Equals(Immutable" + node.Name + "? other)");
+            sb.AppendLine("    {");
+            sb.AppendLine("        return other is not null && GetFullHash() == other.GetFullHash();");
+            sb.AppendLine("    }");
+            sb.AppendLine();
+            
+            if (node.IsRoot)
+            {
+                sb.AppendLine("    public override bool Equals(object? obj)");
+                sb.AppendLine("    {");
+                sb.AppendLine($"        return Equals(obj as Immutable{node.Name});");
+                sb.AppendLine("    }");
+                sb.AppendLine();
+
+                sb.AppendLine("    public override int GetHashCode()");
+                sb.AppendLine("    {");
+                sb.AppendLine("        return GetFullHash().GetHashCode();");
+                sb.AppendLine("    }");
+                sb.AppendLine();
+            }
+        }
+
+        private static void WriteMemberVariables(StringBuilder sb, Node node)
+        {
+            if (!node.IsRoot)
+                return;
+
+            sb.AppendLine("    private string _hash;");
+            sb.AppendLine();
+        }
+
+        private static void WriteHashBuilder(StringBuilder sb, Node node)
+        {
+            if (node.IsRoot)
+            {
+                sb.AppendLine("    protected abstract string BuildHash();");
+                sb.AppendLine();
+                sb.AppendLine("    public string GetFullHash()");
+                sb.AppendLine("    {");
+                sb.AppendLine("        if (_hash == null)");
+                sb.AppendLine("            _hash = BuildHash();");
+                sb.AppendLine("        return _hash;");
+                sb.AppendLine("    }");
+            }
+                
+
+            if (!node.IsTopMost)
+                return;
+
+            sb.AppendLine("    protected override string BuildHash()");
+            sb.AppendLine("    {");
+            sb.AppendLine("        using var b = new HashBuilder();");
+            sb.AppendLine("        b.Add(" + node.Index + ");");
+            foreach(var property in node.AllProperties)
+            {
+                if (property.IsList)
+                {
+                    sb.AppendLine("        b.BeginList();");
+                    sb.AppendLine("        foreach(var entry in " + property.Name + ")");
+                    sb.AppendLine("            b.Add(entry);");
+                }
+                else
+                    sb.AppendLine("        b.Add(" + property.Name + ");");
+            }
+            sb.AppendLine("        return b.Build();");
+            sb.AppendLine("    }");
+            sb.AppendLine();
+
         }
 
         private static void WriteConstructor(StringBuilder sb, Config config, Node node)
@@ -56,6 +159,8 @@ namespace Lucy.Core.SourceGenerator
             {
                 sb.AppendLine($"        {prop.Name} = {ToLower(prop.Name)};");
             }
+            if (node.IsTopMost)
+                sb.AppendLine("    GetFullHash();");
             sb.AppendLine("    }");
             sb.AppendLine();
         }
@@ -101,6 +206,7 @@ namespace Lucy.Core.SourceGenerator
                     sb.AppendLine("    }");
                 }
             }
+            sb.AppendLine();
         }
 
 
@@ -195,6 +301,7 @@ namespace Lucy.Core.SourceGenerator
 
                 sb.AppendLine("    }");
             }
+            sb.AppendLine();
         }
 
         private static ImmutableArray<NodeProperty> GetBaseProperties(Config config, Node node)
