@@ -1,7 +1,9 @@
+using Lucy.Core.Model;
 using Lucy.Core.Parsing;
 
 namespace Lucy.Core.Tests
 {
+    [Ignore("No longer relevant")]
     public class EqualityTests
     {
         [SetUp]

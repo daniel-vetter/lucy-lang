@@ -8,14 +8,14 @@ using System.Linq;
 namespace Lucy.Core.SemanticAnalysis.Handler
 {
     public record GetFunctionDeclarations(string DocumentPath) : IQuery<GetFunctionDeclarationsResult>;
-    public record GetFunctionDeclarationsResult(ComparableReadOnlyList<NodeId> Ids);
+    public record GetFunctionDeclarationsResult(ComparableReadOnlyList<FlatFunctionDeclarationStatementSyntaxNode> Ids);
 
     public class GetFunctionDeclarationsHandler : QueryHandler<GetFunctionDeclarations, GetFunctionDeclarationsResult>
     {
         public override GetFunctionDeclarationsResult Handle(IDb db, GetFunctionDeclarations query)
         {
-            var nodes = db.Query(new GetNodesByType(query.DocumentPath, typeof(FunctionDeclarationStatementSyntaxNode))).Nodes;
-            return new GetFunctionDeclarationsResult(nodes.Select(x => x).ToComparableReadOnlyList());
+            var r = db.Query(new GetFlatNodesByType(query.DocumentPath, typeof(FlatFunctionDeclarationStatementSyntaxNode)));
+            return new GetFunctionDeclarationsResult(r.Nodes.Cast<FlatFunctionDeclarationStatementSyntaxNode>().ToComparableReadOnlyList());
         }
     }
 }

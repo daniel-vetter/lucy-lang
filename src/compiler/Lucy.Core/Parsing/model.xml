@@ -1,10 +1,15 @@
 ﻿<Model namespace="Lucy.Core.Model">
 
-	<StatementSyntaxNode basedOn="SyntaxTreeNode" abstract="true" />
-	<ExpressionSyntaxNode basedOn="SyntaxTreeNode" abstract="true" />
-	<TriviaNode basedOn="SyntaxTreeNode" abstract="true" />
+	<StatementSyntaxNode basedOn="SyntaxTreeNode" />
+	<ExpressionSyntaxNode basedOn="SyntaxTreeNode" />
+	<TriviaNode basedOn="SyntaxTreeNode" />
 
 	<MissingExpressionSyntaxNode basedOn="ExpressionSyntaxNode" />
+
+	<SyntaxTreeNode>
+		<NodeId type="NodeId" init="NodeId.Uninitalized" />
+		<SyntaxErrors type="string" list="true" init="new()" />
+	</SyntaxTreeNode>
 	
 	<TokenNode basedOn="SyntaxTreeNode">
 		<Text type="string" />
@@ -18,7 +23,7 @@
 	<MultiLineCommentTriviaNode basedOn="TriviaNode">
 		<Start type="TokenNode" />
 		<Content type="TokenNode" />
-		<End type="TokenNode?" />
+		<End type="TokenNode" optional="true" />
 	</MultiLineCommentTriviaNode>
 
 	<SingleLineCommentTriviaNode basedOn="TriviaNode">
@@ -31,9 +36,9 @@
 	</WhitespaceTriviaNode>
 
 	<StatementListSyntaxNode basedOn="StatementSyntaxNode">
-		<BlockStart type="SyntaxElement?" />
+		<BlockStart type="SyntaxElement" optional="true" />
 		<Statements type="StatementSyntaxNode" list="true" />
-		<BlockEnd type="SyntaxElement?" />
+		<BlockEnd type="SyntaxElement"  optional="true" />
 	</StatementListSyntaxNode>
 
 	<ExpressionStatementSyntaxNode basedOn="StatementSyntaxNode">
@@ -62,8 +67,8 @@
 
 	<FunctionDeclarationStatementSyntaxNode basedOn="StatementSyntaxNode">
 		<Modifiers type="SyntaxElement" list="true" />
-		<ExternLibraryName type="StringConstantExpressionSyntaxNode?" />
-		<ExternFunctionName type="StringConstantExpressionSyntaxNode?" />
+		<ExternLibraryName type="StringConstantExpressionSyntaxNode" optional="true" />
+		<ExternFunctionName type="StringConstantExpressionSyntaxNode" optional="true" />
 		<FunKeyword type="SyntaxElement" />
 		<FunctionName type="SyntaxElement" />
 		<OpenBraket type="SyntaxElement" />
@@ -71,12 +76,12 @@
 		<CloseBraket type="SyntaxElement" />
 		<ReturnTypeSeperator type="SyntaxElement" />
 		<ReturnType type="TypeReferenceSyntaxNode" />
-		<Body type="StatementListSyntaxNode?" />
+		<Body type="StatementListSyntaxNode" optional="true" />
 	</FunctionDeclarationStatementSyntaxNode>
 
 	<FunctionDeclarationParameterSyntaxNode basedOn="SyntaxTreeNode">
 		<VariableDeclaration type="VariableNameWithTypeDeclarationSyntaxNode" />
-		<Seperator type="SyntaxElement?" />
+		<Seperator type="SyntaxElement" optional="true" />
 	</FunctionDeclarationParameterSyntaxNode>
 
 	<FunctionCallExpressionSyntaxNode basedOn="ExpressionSyntaxNode">
@@ -88,7 +93,7 @@
 
 	<FunctionCallArgumentSyntaxNode basedOn="SyntaxTreeNode">
 		<Expression type="ExpressionSyntaxNode" />
-		<Seperator type="SyntaxElement?" />
+		<Seperator type="SyntaxElement" optional="true" />
 	</FunctionCallArgumentSyntaxNode>
 
 	<AdditionExpressionSyntaxNode basedOn="ExpressionSyntaxNode">

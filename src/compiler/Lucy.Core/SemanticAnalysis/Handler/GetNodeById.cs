@@ -1,11 +1,10 @@
 ﻿using Lucy.Core.Model;
-using Lucy.Core.Parsing;
 using Lucy.Core.SemanticAnalysis.Infrasturcture;
 
 namespace Lucy.Core.SemanticAnalysis.Handler
 {
     public record GetNodeById(NodeId NodeId) : IQuery<GetNodeByIdResult>;
-    public record GetNodeByIdResult(SyntaxTreeNode Node);
+    public record GetNodeByIdResult(ImmutableSyntaxTreeNode Node);
 
     public class GetNodeByIdHandler : QueryHandler<GetNodeById, GetNodeByIdResult>
     {
@@ -13,6 +12,17 @@ namespace Lucy.Core.SemanticAnalysis.Handler
         {
             var nodes = db.Query(new GetNodeMap(query.NodeId.DocumentPath)).NodesById;
             return new GetNodeByIdResult(nodes[query.NodeId]);
+        }
+    }
+
+    public record GetFlatNodeById(NodeId NodeId) : IQuery<GetFlatNodeByIdResult>;
+    public record GetFlatNodeByIdResult(FlatSyntaxTreeNode Node);
+
+    public class GetFlatNodeByIdHandler : QueryHandler<GetFlatNodeById, GetFlatNodeByIdResult>
+    {
+        public override GetFlatNodeByIdResult Handle(IDb db, GetFlatNodeById query)
+        {
+            return new GetFlatNodeByIdResult(db.Query(new GetNodeById(query.NodeId)).Node.ToFlat());
         }
     }
 }

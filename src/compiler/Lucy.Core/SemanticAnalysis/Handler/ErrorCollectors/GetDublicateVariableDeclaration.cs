@@ -26,7 +26,7 @@ namespace Lucy.Core.SemanticAnalysis.Handler.ErrorCollectors
         private void Traverse(IDb db, ScopeItem scopeItem, HashSet<string> knownNames, ComparableReadOnlyList<Error>.Builder errors)
         {
             var node = db.Query(new GetNodeById(scopeItem.NodeId)).Node;
-            if (node is FunctionDeclarationStatementSyntaxNode functionDeclarationStatementSyntaxNode)
+            if (node is ImmutableFunctionDeclarationStatementSyntaxNode functionDeclarationStatementSyntaxNode)
             {
                 var name = functionDeclarationStatementSyntaxNode.FunctionName.Token.Text;
                 if (knownNames.Contains(name))
@@ -38,7 +38,7 @@ namespace Lucy.Core.SemanticAnalysis.Handler.ErrorCollectors
                     knownNames.Add(name);
                 }
             }
-            else if (node is FunctionDeclarationParameterSyntaxNode functionDeclarationParameterSyntaxNode)
+            else if (node is ImmutableFunctionDeclarationParameterSyntaxNode functionDeclarationParameterSyntaxNode)
             {
                 var name = functionDeclarationParameterSyntaxNode.VariableDeclaration.VariableName.Token.Text;
                 if (knownNames.Contains(name))
@@ -50,7 +50,7 @@ namespace Lucy.Core.SemanticAnalysis.Handler.ErrorCollectors
                     knownNames.Add(name);
                 }
             }
-            else if (node is DocumentRootSyntaxNode)
+            else if (node is ImmutableDocumentRootSyntaxNode)
             {
 
             }

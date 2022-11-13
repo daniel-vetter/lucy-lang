@@ -1,5 +1,7 @@
-﻿using Lucy.Core.Parsing.Nodes;
+﻿using Lucy.Core.Model;
+using Lucy.Core.Parsing.Nodes;
 using Lucy.Core.ProjectManagement;
+using Lucy.Core.SemanticAnalysis.Handler;
 using Lucy.Core.SemanticAnalysis.Infrasturcture;
 using Lucy.Core.SemanticAnalysis.Inputs;
 using System;
@@ -36,9 +38,13 @@ namespace Lucy.Core.SemanticAnalysis
 
         private void AddWorkspaceAsInputs(Workspace workspace)
         {
+            
             _db.SetInput(new GetDocumentList(), new GetDocumentListResult(_workspace.Documents.Keys.ToComparableReadOnlyList()));
             foreach (var codeFile in workspace.Documents.Values.OfType<CodeFile>())
-                _db.SetInput(new GetSyntaxTree(codeFile.Path), new GetSyntaxTreeResult(codeFile.SyntaxTree));
+            {
+                _db.SetInput(new GetSyntaxTree(codeFile.Path), new GetSyntaxTreeResult(codeFile.SyntaxTree.ToImmutable()));
+            }
+                
         }
 
         private void RegisterHandler()
@@ -74,14 +80,19 @@ namespace Lucy.Core.SemanticAnalysis
             {
                 _db.SetInput(new GetDocumentList(), new GetDocumentListResult(_workspace.Documents.Keys.ToComparableReadOnlyList()));
                 if (documentAdded.Document is CodeFile codeFile)
-                    _db.SetInput(new GetSyntaxTree(codeFile.Path), new GetSyntaxTreeResult(codeFile.SyntaxTree));
+                {
+                    _db.SetInput(new GetSyntaxTree(codeFile.Path), new GetSyntaxTreeResult(codeFile.SyntaxTree.ToImmutable()));
+                }
+
                 else
                     throw new NotSupportedException("Unsupported workspace document: " + documentAdded.Document.GetType().Name);
             }
             if (@event is DocumentChanged documentChanged)
             {
                 if (documentChanged.NewDocument is CodeFile codeFile)
-                    _db.SetInput(new GetSyntaxTree(codeFile.Path), new GetSyntaxTreeResult(codeFile.SyntaxTree));
+                {
+                    _db.SetInput(new GetSyntaxTree(codeFile.Path), new GetSyntaxTreeResult(codeFile.SyntaxTree.ToImmutable()));
+                }
             }
             if (@event is DocumentRemoved documentRemoved)
             {

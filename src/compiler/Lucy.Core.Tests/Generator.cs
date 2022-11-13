@@ -68,8 +68,8 @@ namespace Lucy.Core.Tests
 
         private static Type[] GetPossibleTypes(Type type)
         {
-            if (type == typeof(ExpressionSyntaxNode))
-                return new[] { typeof(DummyExpressionSyntaxNode) };
+            if (type == typeof(Model.ExpressionSyntaxNode))
+                return new[] { typeof(Model.MissingExpressionSyntaxNode) };
 
             var allTypes = type.Assembly.GetTypes();
             var list = new List<Type>();
@@ -80,9 +80,5 @@ namespace Lucy.Core.Tests
             }
             return list.ToArray();
         }
-    }
-
-    public record DummyExpressionSyntaxNode(int DummyNumber) : ExpressionSyntaxNode
-    {
     }
 }

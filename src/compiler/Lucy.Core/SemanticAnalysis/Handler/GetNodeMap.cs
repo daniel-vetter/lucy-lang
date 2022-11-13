@@ -12,8 +12,8 @@ namespace Lucy.Core.SemanticAnalysis.Handler
     /// </summary>
     /// <param name="DocumentPath"></param>
     public record GetNodeMap(string DocumentPath) : IQuery<GetNodeMapResult>;
-    public record GetNodeMapResult(ComparableReadOnlyDictionary<NodeId, SyntaxTreeNode> NodesById,
-        ComparableReadOnlyDictionary<Type, ComparableReadOnlyList<SyntaxTreeNode>> NodesByType,
+    public record GetNodeMapResult(ComparableReadOnlyDictionary<NodeId, ImmutableSyntaxTreeNode> NodesById,
+        ComparableReadOnlyDictionary<Type, ComparableReadOnlyList<ImmutableSyntaxTreeNode>> NodesByType,
         ComparableReadOnlyDictionary<NodeId, NodeId> ParentNodes);
     
     public class GetNodeMapHandler : QueryHandler<GetNodeMap, GetNodeMapResult>
@@ -21,7 +21,7 @@ namespace Lucy.Core.SemanticAnalysis.Handler
         public override GetNodeMapResult Handle(IDb db, GetNodeMap query)
         {
             var rootNode = db.Query(new GetSyntaxTree(query.DocumentPath)).RootNode;
-            var nodesByIdBuilder = new ComparableReadOnlyDictionary<NodeId, SyntaxTreeNode>.Builder();
+            var nodesByIdBuilder = new ComparableReadOnlyDictionary<NodeId, ImmutableSyntaxTreeNode>.Builder();
             var parentNodeIds = new ComparableReadOnlyDictionary<NodeId, NodeId>.Builder();
 
             Traverse(rootNode, nodesByIdBuilder, parentNodeIds);
@@ -34,7 +34,7 @@ namespace Lucy.Core.SemanticAnalysis.Handler
             return new GetNodeMapResult(nodesById, nodesByType, parentNodeIds.Build());
         }
 
-        private void Traverse(SyntaxTreeNode node, ComparableReadOnlyDictionary<NodeId, SyntaxTreeNode>.Builder nodesById, ComparableReadOnlyDictionary<NodeId, NodeId>.Builder parentNodeIds)
+        private void Traverse(ImmutableSyntaxTreeNode node, ComparableReadOnlyDictionary<NodeId, ImmutableSyntaxTreeNode>.Builder nodesById, ComparableReadOnlyDictionary<NodeId, NodeId>.Builder parentNodeIds)
         {
             nodesById.Add(node.NodeId, node);
 

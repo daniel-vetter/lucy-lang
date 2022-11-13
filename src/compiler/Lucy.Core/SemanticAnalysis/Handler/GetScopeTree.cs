@@ -24,16 +24,16 @@ namespace Lucy.Core.SemanticAnalysis.Handler
             return new GetScopeTreeResult(documentScope);
         }
 
-        void Find(SyntaxTreeNode node, ComparableReadOnlyList<ScopeItem>.Builder items)
+        void Find(ImmutableSyntaxTreeNode node, ComparableReadOnlyList<ScopeItem>.Builder items)
         {
-            if (node is FunctionDeclarationStatementSyntaxNode)
+            if (node is ImmutableFunctionDeclarationStatementSyntaxNode)
             {
                 var subItems = new ComparableReadOnlyList<ScopeItem>.Builder();
                 foreach (var childNode in node.GetChildNodes())
                     Find(childNode, subItems);
                 items.Add(new ScopeItem(node.NodeId, subItems.Build()));
             }
-            if (node is FunctionDeclarationParameterSyntaxNode)
+            if (node is ImmutableFunctionDeclarationParameterSyntaxNode)
             {
                 items.Add(new ScopeItem(node.NodeId, new ComparableReadOnlyList<ScopeItem>()));
             }
