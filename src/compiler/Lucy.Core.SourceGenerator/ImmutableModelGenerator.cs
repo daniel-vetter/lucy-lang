@@ -35,7 +35,7 @@ namespace Lucy.Core.SourceGenerator
                 WriteProperties(sb, config, node);
                 WriteMemberVariables(sb, node);
                 WriteGetChildNodesMethod(config, sb, node);
-                WriteToFlatMethod(config, sb, node);
+                //WriteToFlatMethod(config, sb, node);
                 WriteHashBuilder(sb, node);
                 WriteEqualsMethods(sb, node);
                 sb.AppendLine("}");

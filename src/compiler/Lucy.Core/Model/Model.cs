@@ -1,16 +1,7 @@
-﻿using System;
-using System.Runtime.Intrinsics.Arm;
-using System.Text;
+﻿using System.Text;
 
 namespace Lucy.Core.Model
 {
-    public class NodeId<TNodeType> : NodeId
-    {
-        public NodeId(string documentPath, string nodePath) : base(documentPath, nodePath)
-        {
-        }
-    }
-
     public class NodeId : IHashable
     {
         public NodeId(string documentPath, string nodePath)
@@ -43,7 +34,5 @@ namespace Lucy.Core.Model
         }
 
         public override string ToString() => _str;
-
-        public NodeId<T> ToTyped<T>() => new NodeId<T>(DocumentPath, NodePath);
     }
 }

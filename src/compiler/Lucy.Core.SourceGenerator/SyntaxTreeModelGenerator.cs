@@ -21,7 +21,7 @@ namespace Lucy.Core.SourceGenerator
                     var config = ConfigLoader.GetConfig(configXml);
 
                     ModelGenerator.Generate(productionContext, name, config);
-                    FlatModelGenerator.Generate(productionContext, name, config);
+                    //FlatModelGenerator.Generate(productionContext, name, config);
                     ImmutableModelGenerator.Generate(productionContext, name, config);
                 }
             });     

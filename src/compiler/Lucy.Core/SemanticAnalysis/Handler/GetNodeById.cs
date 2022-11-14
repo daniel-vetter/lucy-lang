@@ -14,15 +14,4 @@ namespace Lucy.Core.SemanticAnalysis.Handler
             return new GetNodeByIdResult(nodes[query.NodeId]);
         }
     }
-
-    public record GetFlatNodeById(NodeId NodeId) : IQuery<GetFlatNodeByIdResult>;
-    public record GetFlatNodeByIdResult(FlatSyntaxTreeNode Node);
-
-    public class GetFlatNodeByIdHandler : QueryHandler<GetFlatNodeById, GetFlatNodeByIdResult>
-    {
-        public override GetFlatNodeByIdResult Handle(IDb db, GetFlatNodeById query)
-        {
-            return new GetFlatNodeByIdResult(db.Query(new GetNodeById(query.NodeId)).Node.ToFlat());
-        }
-    }
 }

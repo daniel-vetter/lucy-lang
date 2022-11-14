@@ -1,5 +1,4 @@
-﻿using Lucy.Core.Model;
-using Lucy.Core.Parsing.Nodes;
+﻿using Lucy.Core.Parsing.Nodes;
 using Lucy.Core.SemanticAnalysis.Infrasturcture;
 
 namespace Lucy.Core.SemanticAnalysis.Handler
@@ -14,7 +13,7 @@ namespace Lucy.Core.SemanticAnalysis.Handler
             var nodeIds = db.Query(new GetFunctionDeclarations(query.DocumentPath)).Ids;
             var result = new ComparableReadOnlyList<FunctionInfo>.Builder();
             foreach (var nodeId in nodeIds)
-                result.Add(db.Query(new GetFunctionInfo(nodeId.NodeId.ToTyped<FlatFunctionDeclarationStatementSyntaxNode>())).Info);
+                result.Add(db.Query(new GetFunctionInfo(nodeId)).Info);
             return new GetFunctionInfosInDocumentResult(result.Build());
         }
     }
