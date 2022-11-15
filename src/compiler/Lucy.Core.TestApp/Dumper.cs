@@ -12,7 +12,7 @@ public class Dumper
     /// 
     /// </summary>
     /// <param name="value"></param>
-    public static void WriteTypeInfo(object value)
+    public static void WriteTypeInfo(object? value)
     {
         if (value is string)
         {

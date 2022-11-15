@@ -34,7 +34,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Lucy.Core.Tests", "Lucy.Cor
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lucy.Emitter", "Lucy.Emitter\Lucy.Emitter.csproj", "{0545FC19-4CAB-4C65-AA00-230FEB8E419B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lucy.Core.SourceGenerator", "Lucy.Core.SourceGenerator\Lucy.Core.SourceGenerator.csproj", "{A1BCC02E-141F-4E9E-A0E3-7DB47E7B3225}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Lucy.Core.SourceGenerator", "Lucy.Core.SourceGenerator\Lucy.Core.SourceGenerator.csproj", "{A1BCC02E-141F-4E9E-A0E3-7DB47E7B3225}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -68,8 +68,8 @@ namespace Lucy.Core.Tests
 
         private static Type[] GetPossibleTypes(Type type)
         {
-            if (type == typeof(Model.ExpressionSyntaxNode))
-                return new[] { typeof(Model.MissingExpressionSyntaxNode) };
+            if (type == typeof(Model.ExpressionSyntaxNodeBuilder))
+                return new[] { typeof(Model.MissingExpressionSyntaxNodeBuilder) };
 
             var allTypes = type.Assembly.GetTypes();
             var list = new List<Type>();

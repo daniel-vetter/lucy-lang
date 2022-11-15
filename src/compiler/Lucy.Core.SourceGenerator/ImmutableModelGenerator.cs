@@ -75,7 +75,7 @@ namespace Lucy.Core.SourceGenerator
             if (!node.IsRoot)
                 return;
 
-            sb.AppendLine("    protected byte[] _hash;");
+            sb.AppendLine("    protected byte[] _hash = null!;");
             sb.AppendLine("    protected int _hashShort;");
             sb.AppendLine();
         }

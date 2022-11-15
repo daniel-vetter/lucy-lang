@@ -19,9 +19,9 @@ namespace Lucy.Core.Tests
         private static List<Type> GetTypes()
         {
             var list = new List<Type>();
-            var allTypesInAssembly = typeof(SyntaxTreeNode).Assembly.GetTypes();
+            var allTypesInAssembly = typeof(SyntaxTreeNodeBuilder).Assembly.GetTypes();
             var allConsideredType = allTypesInAssembly
-                .Where(x => x.IsAssignableTo(typeof(SyntaxTreeNode)))
+                .Where(x => x.IsAssignableTo(typeof(SyntaxTreeNodeBuilder)))
                 .Where(x => !x.IsAbstract);
 
             foreach (var type in allConsideredType)
