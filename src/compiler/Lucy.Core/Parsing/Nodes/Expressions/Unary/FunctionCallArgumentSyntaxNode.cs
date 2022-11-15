@@ -7,9 +7,9 @@ namespace Lucy.Core.Parsing.Nodes.Expressions.Unary
 {
     public class FunctionCallArgumentSyntaxNodeParser
     {
-        public static List<FunctionCallArgumentSyntaxNode> Read(Code code)
+        public static List<FunctionCallArgumentSyntaxNodeBuilder> Read(Code code)
         {
-            var result = new List<FunctionCallArgumentSyntaxNode>();
+            var result = new List<FunctionCallArgumentSyntaxNodeBuilder>();
             while (true)
             {
                 if (!ExpressionSyntaxNodeParser.TryRead(code, out var expression))
@@ -17,7 +17,7 @@ namespace Lucy.Core.Parsing.Nodes.Expressions.Unary
 
                 SyntaxElementParser.TryReadExact(code, ",", out var seperator);
 
-                result.Add(new FunctionCallArgumentSyntaxNode(expression, seperator));
+                result.Add(new FunctionCallArgumentSyntaxNodeBuilder(expression, seperator));
 
                 if (seperator == null)
                     break;

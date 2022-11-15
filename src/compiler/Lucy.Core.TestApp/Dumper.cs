@@ -8,7 +8,10 @@ public class Dumper
     {
         WritePropertyList(obj, 0);
     }
-
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="value"></param>
     public static void WriteTypeInfo(object value)
     {
         if (value is string)

@@ -6,7 +6,7 @@ namespace Lucy.Core.Parsing.Nodes.Expressions.Nested
 {
     internal class AndExpressionSyntaxNodeParser
     {
-        public static bool TryReadOrInner(Code code, [NotNullWhen(true)] out ExpressionSyntaxNode? result)
+        public static bool TryReadOrInner(Code code, [NotNullWhen(true)] out ExpressionSyntaxNodeBuilder? result)
         {
             if (!OrExpressionSyntaxNodeParser.TryReadOrInner(code, out result))
                 return false;
@@ -18,14 +18,14 @@ namespace Lucy.Core.Parsing.Nodes.Expressions.Nested
 
                 if (!OrExpressionSyntaxNodeParser.TryReadOrInner(code, out var right))
                 {
-                    right = new MissingExpressionSyntaxNode()
+                    right = new MissingExpressionSyntaxNodeBuilder()
                     {
                         SyntaxErrors = { { "Expected expression" } }
                     };
                     return true;
                 }
 
-                result = new AndExpressionSyntaxNode(result, andToken, right);
+                result = new AndExpressionSyntaxNodeBuilder(result, andToken, right);
             }
         }
     }

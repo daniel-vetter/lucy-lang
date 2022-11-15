@@ -3,18 +3,18 @@ using Lucy.Core.Model;
 
 namespace Lucy.Core.Parsing.Nodes.Trivia
 {
-    public abstract class TriviaNodeParser : SyntaxTreeNode
+    public abstract class TriviaNodeParser
     {
-        public static List<TriviaNode> ReadList(Code code)
+        public static List<TriviaNodeBuilder> ReadList(Code code)
         {
-            var l = new List<TriviaNode>();
+            var l = new List<TriviaNodeBuilder>();
 
             while (!code.IsDone)
             {
                 var next =
                    WhitespaceTriviaNodeParser.Read(code) ??
                    SingleLineCommentTriviaNodeParser.Read(code) ??
-                   (TriviaNode?)MultiLineCommentTriviaNodeParser.Read(code);
+                   (TriviaNodeBuilder?)MultiLineCommentTriviaNodeParser.Read(code);
 
                 if (next == null)
                     break;

@@ -7,7 +7,7 @@ namespace Lucy.Core.Parsing.Nodes.Expressions.Nested
 {
     public class MemberAccessExpressionSyntaxNodeParser
     {
-        public static bool TryReadOrInner(Code code, [NotNullWhen(true)] out ExpressionSyntaxNode? result)
+        public static bool TryReadOrInner(Code code, [NotNullWhen(true)] out ExpressionSyntaxNodeBuilder? result)
         {
             if (!UnaryExpression.TryRead(code, out result))
                 return false;
@@ -19,11 +19,11 @@ namespace Lucy.Core.Parsing.Nodes.Expressions.Nested
 
                 if (!SyntaxElementParser.TryReadIdentifier(code, out var identifier))
                 {
-                    result = new MemberAccessExpressionSyntaxNode(result, dotToken, SyntaxElementParser.Missing("Identifier expected after member access '.'"));
+                    result = new MemberAccessExpressionSyntaxNodeBuilder(result, dotToken, SyntaxElementParser.Missing("Identifier expected after member access '.'"));
                     return true;
                 }
 
-                result = new MemberAccessExpressionSyntaxNode(result, dotToken, identifier);
+                result = new MemberAccessExpressionSyntaxNodeBuilder(result, dotToken, identifier);
             }
         }
     }

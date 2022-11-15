@@ -4,16 +4,16 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Lucy.Core.Parsing.Nodes.Expressions
 {
-    public abstract class ExpressionSyntaxNodeParser : SyntaxTreeNode
+    public abstract class ExpressionSyntaxNodeParser
     {
-        public static ExpressionSyntaxNode Missing(string? errorMessage = null)
+        public static ExpressionSyntaxNodeBuilder Missing(string? errorMessage = null)
         {
-            var node = new MissingExpressionSyntaxNode();
+            var node = new MissingExpressionSyntaxNodeBuilder();
             if (errorMessage != null)
                 node.SyntaxErrors.Add(errorMessage);
             return node;
         }
 
-        public static bool TryRead(Code code, [NotNullWhen(true)] out ExpressionSyntaxNode? result) => IfExpressionSyntaxNodeParser.TryReadOrInner(code, out result);
+        public static bool TryRead(Code code, [NotNullWhen(true)] out ExpressionSyntaxNodeBuilder? result) => IfExpressionSyntaxNodeParser.TryReadOrInner(code, out result);
     }
 }

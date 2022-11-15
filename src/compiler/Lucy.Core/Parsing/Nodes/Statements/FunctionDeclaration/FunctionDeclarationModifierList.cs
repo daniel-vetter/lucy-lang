@@ -6,9 +6,9 @@ namespace Lucy.Core.Parsing.Nodes.Statements.FunctionDeclaration
 {
     internal static class FunctionDeclarationModifierList
     {
-        public static List<SyntaxElement> Read(Code code)
+        public static List<SyntaxElementBuilder> Read(Code code)
         {
-            var l = new List<SyntaxElement>();
+            var l = new List<SyntaxElementBuilder>();
 
             while (true)
             {

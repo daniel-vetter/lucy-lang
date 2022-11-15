@@ -4,7 +4,7 @@ namespace Lucy.Core.Parsing.Nodes.Trivia
 {
     internal class WhitespaceTriviaNodeParser
     {
-        public static WhitespaceTriviaNode? Read(Code code)
+        public static WhitespaceTriviaNodeBuilder? Read(Code code)
         {
             int len = 0;
             while (code.Peek(len) is ' ' or '\t' or '\r' or '\n')
@@ -13,7 +13,7 @@ namespace Lucy.Core.Parsing.Nodes.Trivia
             if (len == 0)
                 return null;
 
-            return new WhitespaceTriviaNode(new TokenNode(code.Read(len)));
+            return new WhitespaceTriviaNodeBuilder(new TokenNodeBuilder(code.Read(len)));
         }
     }
 }

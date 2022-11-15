@@ -5,7 +5,7 @@ namespace Lucy.Core.Parsing.Nodes.Expressions.Unary
 {
     internal class UnaryExpression
     {
-        public static bool TryRead(Code code, [NotNullWhen(true)] out ExpressionSyntaxNode? result)
+        public static bool TryRead(Code code, [NotNullWhen(true)] out ExpressionSyntaxNodeBuilder? result)
         {
             if (FunctionCallExpressionSyntaxNodeParser.TryRead(code, out var functionCallExpressionSyntaxNode))
             {

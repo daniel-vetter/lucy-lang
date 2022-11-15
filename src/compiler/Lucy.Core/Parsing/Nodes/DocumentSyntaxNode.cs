@@ -7,12 +7,12 @@ namespace Lucy.Core.Parsing.Nodes
 {
     public class DocumentRootSyntaxNodeParser
     {
-        public static DocumentRootSyntaxNode ReadDocumentSyntaxNode(Code code)
+        public static DocumentRootSyntaxNodeBuilder ReadDocumentSyntaxNode(Code code)
         {
             var statementList = StatementListSyntaxNodeParser.ReadStatementsWithoutBlock(code);
             var trailingTrivia = TriviaNodeParser.ReadList(code);
             
-            return new DocumentRootSyntaxNode(statementList, trailingTrivia);
+            return new DocumentRootSyntaxNodeBuilder(statementList, trailingTrivia);
         }
     }
 }

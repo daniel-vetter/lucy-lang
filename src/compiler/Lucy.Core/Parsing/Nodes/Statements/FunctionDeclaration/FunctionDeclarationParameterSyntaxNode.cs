@@ -6,9 +6,9 @@ namespace Lucy.Core.Parsing.Nodes.Statements.FunctionDeclaration
 {
     public class FunctionDeclarationParameterSyntaxNodeParser 
     {
-        public static List<FunctionDeclarationParameterSyntaxNode> ReadList(Code code)
+        public static List<FunctionDeclarationParameterSyntaxNodeBuilder> ReadList(Code code)
         {
-            var l = new List<FunctionDeclarationParameterSyntaxNode>();
+            var l = new List<FunctionDeclarationParameterSyntaxNodeBuilder>();
             while (true)
             {
                 if (!VariableNameWithTypeDeclarationSyntaxNodeParser.Read(code, out var variableNameWithTypeDeclaration))
@@ -16,7 +16,7 @@ namespace Lucy.Core.Parsing.Nodes.Statements.FunctionDeclaration
 
                 SyntaxElementParser.TryReadExact(code, ",", out var seperator);
 
-                l.Add(new FunctionDeclarationParameterSyntaxNode(variableNameWithTypeDeclaration, seperator));
+                l.Add(new FunctionDeclarationParameterSyntaxNodeBuilder(variableNameWithTypeDeclaration, seperator));
 
                 if (seperator == null)
                     break;

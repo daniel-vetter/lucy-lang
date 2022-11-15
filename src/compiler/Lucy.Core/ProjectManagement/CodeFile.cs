@@ -5,11 +5,11 @@ namespace Lucy.Core.ProjectManagement
 {
     public class CodeFile : WorkspaceDocument
     {
-        public CodeFile(string path, string content, DocumentRootSyntaxNode syntaxTree) : base(path, content)
+        public CodeFile(string path, string content, DocumentRootSyntaxNodeBuilder syntaxTree) : base(path, content)
         {
             SyntaxTree = syntaxTree;
         }
 
-        public DocumentRootSyntaxNode SyntaxTree { get; }
+        public DocumentRootSyntaxNodeBuilder SyntaxTree { get; }
     }
 }

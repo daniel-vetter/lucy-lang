@@ -10,10 +10,10 @@ namespace Lucy.Core.SemanticAnalysis.Handler
     {
         public override GetFunctionInfosInDocumentResult Handle(IDb db, GetFunctionInfosInDocument query)
         {
-            var nodeIds = db.Query(new GetFunctionDeclarations(query.DocumentPath)).Ids;
+            var fdList = db.Query(new GetFunctionDeclarations(query.DocumentPath)).Declarations;
             var result = new ComparableReadOnlyList<FunctionInfo>.Builder();
-            foreach (var nodeId in nodeIds)
-                result.Add(db.Query(new GetFunctionInfo(nodeId)).Info);
+            foreach (var fd in fdList)
+                result.Add(db.Query(new GetFunctionInfo(fd)).Info);
             return new GetFunctionInfosInDocumentResult(result.Build());
         }
     }

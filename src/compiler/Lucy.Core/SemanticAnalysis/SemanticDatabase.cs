@@ -10,7 +10,7 @@ using System.Linq;
 
 namespace Lucy.Core.SemanticAnalysis
 {
-    public class SemanticDatabase : IDisposable
+    public class SemanticDatabase : IDb, IDisposable
     {
         private readonly Workspace _workspace;
         private IDisposable _workspaceEventSubscription;

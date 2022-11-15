@@ -19,7 +19,7 @@ namespace Lucy.Core.SourceGenerator
             sb.AppendLine();
             foreach (var node in config.Nodes)
             {
-                sb.AppendLine($"public {(!node.IsTopMost).Then("abstract ")}class {node.Name}{((!node.IsRoot).Then(" : " + node.BasedOn))}");
+                sb.AppendLine($"public {(!node.IsTopMost).Then("abstract ")}class {node.Name}Builder{((!node.IsRoot).Then(" : " + node.BasedOn + "Builder"))}");
                 sb.AppendLine("{");
                 WriteConstructor(sb, node);
                 WriteProperties(sb, node);
@@ -71,14 +71,14 @@ namespace Lucy.Core.SourceGenerator
         {
             if (node.IsRoot)
             {
-                sb.AppendLine("    public abstract IEnumerable<SyntaxTreeNode> GetChildNodes();");
+                sb.AppendLine("    public abstract IEnumerable<SyntaxTreeNodeBuilder> GetChildNodes();");
             }
             else
             {
                 if (!node.IsTopMost)
                     return;
 
-                sb.AppendLine("    public override IEnumerable<SyntaxTreeNode> GetChildNodes()");
+                sb.AppendLine("    public override IEnumerable<SyntaxTreeNodeBuilder> GetChildNodes()");
                 sb.AppendLine("    {");
                 int count = 0;
                 foreach (var prop in node.Properties)
@@ -127,11 +127,11 @@ namespace Lucy.Core.SourceGenerator
             if (node.Properties.Count == 0)
                 return;
 
-            sb.AppendLine("    public " + node.Name + "(" + GetConstructorArguments(node) + ")");
+            sb.AppendLine($"    public {node.Name}Builder({GetConstructorArguments(node)})");
             sb.AppendLine("    {");
             foreach (var prop in node.Properties.Where(x => x.Init == null))
             {
-                sb.AppendLine("        " + prop.Name + " = " + ToLower(prop.Name) + ";");
+                sb.AppendLine($"        {prop.Name} = {ToLower(prop.Name)};");
             }
             sb.AppendLine("    }");
             sb.AppendLine();
@@ -145,6 +145,9 @@ namespace Lucy.Core.SourceGenerator
         private static string GetRealType(NodeProperty property)
         {
             var name = property.Type;
+
+            if (property.TypeIsNode)
+                name += "Builder";
 
             if (property.IsList)
                 name = $"List<{name}>";

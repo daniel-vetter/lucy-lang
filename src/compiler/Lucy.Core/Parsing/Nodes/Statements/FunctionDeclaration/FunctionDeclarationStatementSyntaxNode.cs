@@ -7,7 +7,7 @@ namespace Lucy.Core.Parsing.Nodes.Statements.FunctionDeclaration
 {
     public class FunctionDeclarationStatementSyntaxNodeParser
     {
-        public static FunctionDeclarationStatementSyntaxNode? Read(Code code)
+        public static FunctionDeclarationStatementSyntaxNodeBuilder? Read(Code code)
         {
             using var t = code.BeginTransaction();
 
@@ -40,7 +40,7 @@ namespace Lucy.Core.Parsing.Nodes.Statements.FunctionDeclaration
 
             StatementListSyntaxNodeParser.TryReadStatementBlock(code, out var body);
 
-            return new FunctionDeclarationStatementSyntaxNode(
+            return new FunctionDeclarationStatementSyntaxNodeBuilder(
                 modifiers: modifier,
                 externLibraryName: libraryNameToken,
                 externFunctionName: functionNameToken,

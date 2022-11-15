@@ -7,7 +7,7 @@ namespace Lucy.Core.Parsing.Nodes.Statements.FunctionDeclaration
 {
     public class VariableNameWithTypeDeclarationSyntaxNodeParser
     {
-        public static bool Read(Code code, [NotNullWhen(true)] out VariableNameWithTypeDeclarationSyntaxNode? result)
+        public static bool Read(Code code, [NotNullWhen(true)] out VariableNameWithTypeDeclarationSyntaxNodeBuilder? result)
         {
             var start = code.Position;
             result = null;
@@ -27,7 +27,7 @@ namespace Lucy.Core.Parsing.Nodes.Statements.FunctionDeclaration
                 return false;
             }
 
-            result = new VariableNameWithTypeDeclarationSyntaxNode(variableName, seperator, typeReference);
+            result = new VariableNameWithTypeDeclarationSyntaxNodeBuilder(variableName, seperator, typeReference);
             return true;
         }
     }

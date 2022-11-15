@@ -8,18 +8,18 @@ namespace Lucy.Core.Parsing.Nodes.Statements
 
     public class StatementListSyntaxNodeParser
     {
-        public static StatementListSyntaxNode ReadStatementsWithoutBlock(Code code)
+        public static StatementListSyntaxNodeBuilder ReadStatementsWithoutBlock(Code code)
         {
-            var result = new List<StatementSyntaxNode>();
+            var result = new List<StatementSyntaxNodeBuilder>();
             while (StatementSyntaxNodeParser.TryRead(code, out var statement))
             {
                 result.Add(statement);
             }
 
-            return new StatementListSyntaxNode(null, result, null);
+            return new StatementListSyntaxNodeBuilder(null, result, null);
         }
 
-        public static bool TryReadStatementBlock(Code code, [NotNullWhen(true)] out StatementListSyntaxNode? result)
+        public static bool TryReadStatementBlock(Code code, [NotNullWhen(true)] out StatementListSyntaxNodeBuilder? result)
         {
             if (!SyntaxElementParser.TryReadExact(code, "{", out var blockStart))
             {
@@ -27,7 +27,7 @@ namespace Lucy.Core.Parsing.Nodes.Statements
                 return false;
             }
 
-            var list = new List<StatementSyntaxNode>();
+            var list = new List<StatementSyntaxNodeBuilder>();
             while (StatementSyntaxNodeParser.TryRead(code, out var statement))
             {
                 list.Add(statement);
@@ -36,7 +36,7 @@ namespace Lucy.Core.Parsing.Nodes.Statements
             if (!SyntaxElementParser.TryReadExact(code, "}", out var blockEnd))
                 blockEnd = SyntaxElementParser.Missing("Code block end '}' expected.");
 
-            result = new StatementListSyntaxNode(blockStart, list, blockEnd);
+            result = new StatementListSyntaxNodeBuilder(blockStart, list, blockEnd);
             return true;
         }
     }

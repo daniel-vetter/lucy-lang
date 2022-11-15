@@ -6,11 +6,11 @@ namespace Lucy.Core.Parsing.Nodes.Statements
 {
     public class StatementSyntaxNodeParser
     {
-        public static bool TryRead(Code code, [NotNullWhen(true)] out StatementSyntaxNode? result)
+        public static bool TryRead(Code code, [NotNullWhen(true)] out StatementSyntaxNodeBuilder? result)
         {
             result =
                 FunctionDeclarationStatementSyntaxNodeParser.Read(code) ??
-                (StatementSyntaxNode?)ExpressionStatementSyntaxNodeParser.Read(code);
+                (StatementSyntaxNodeBuilder?)ExpressionStatementSyntaxNodeParser.Read(code);
 
             return result != null;
         }

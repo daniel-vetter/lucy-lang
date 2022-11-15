@@ -5,7 +5,7 @@ namespace Lucy.Core.Parsing
 {
     public static class Parser
     {
-        public static DocumentRootSyntaxNode Parse(string documentPath, string code)
+        public static DocumentRootSyntaxNodeBuilder Parse(string documentPath, string code)
         {
             var reader = new Code(code);
             var rootNode = DocumentRootSyntaxNodeParser.ReadDocumentSyntaxNode(reader);

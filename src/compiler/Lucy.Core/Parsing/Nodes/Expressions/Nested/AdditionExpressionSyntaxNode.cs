@@ -6,7 +6,7 @@ namespace Lucy.Core.Parsing.Nodes.Expressions.Nested
 {
     public class AdditionExpressionSyntaxNodeParser
     {
-        public static bool TryReadOrInner(Code code, [NotNullWhen(true)] out ExpressionSyntaxNode? result)
+        public static bool TryReadOrInner(Code code, [NotNullWhen(true)] out ExpressionSyntaxNodeBuilder? result)
         {
             if (!MemberAccessExpressionSyntaxNodeParser.TryReadOrInner(code, out result))
                 return false;
@@ -19,7 +19,7 @@ namespace Lucy.Core.Parsing.Nodes.Expressions.Nested
                 if (!MemberAccessExpressionSyntaxNodeParser.TryReadOrInner(code, out var right))
                     right = ExpressionSyntaxNodeParser.Missing("Missing expression after '+'.");
 
-                result = new AdditionExpressionSyntaxNode(result, plusToken, right);
+                result = new AdditionExpressionSyntaxNodeBuilder(result, plusToken, right);
             }
         }
     }

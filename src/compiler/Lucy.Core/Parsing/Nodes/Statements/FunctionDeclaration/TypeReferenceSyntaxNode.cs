@@ -6,7 +6,7 @@ namespace Lucy.Core.Parsing.Nodes.Statements.FunctionDeclaration
 {
     public class TypeReferenceSyntaxNodeParser
     {
-        public static bool TryRead(Code code, [NotNullWhen(true)] out TypeReferenceSyntaxNode? result)
+        public static bool TryRead(Code code, [NotNullWhen(true)] out TypeReferenceSyntaxNodeBuilder? result)
         {
             if (!SyntaxElementParser.TryReadIdentifier(code, out var token))
             {
@@ -14,13 +14,13 @@ namespace Lucy.Core.Parsing.Nodes.Statements.FunctionDeclaration
                 return false;
             }
 
-            result = new TypeReferenceSyntaxNode(token);
+            result = new TypeReferenceSyntaxNodeBuilder(token);
             return true;
         }
 
-        internal static TypeReferenceSyntaxNode Synthesize(string? errorMessage = null)
+        internal static TypeReferenceSyntaxNodeBuilder Synthesize(string? errorMessage = null)
         {
-            return new TypeReferenceSyntaxNode(SyntaxElementParser.Missing(errorMessage));
+            return new TypeReferenceSyntaxNodeBuilder(SyntaxElementParser.Missing(errorMessage));
         }
     }
 }

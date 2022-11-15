@@ -13,14 +13,15 @@ using System.Security.Cryptography;
 
 var ws = new Workspace();
 var changeReader = new TestCaseReader(ws, "./SampleApp");
-//var sdb = new SemanticDatabase(ws, "./graphOutput");
-var sdb = new SemanticDatabase(ws);
+var sdb = new SemanticDatabase(ws, "./graphOutput");
+//var sdb = new SemanticDatabase(ws);
 while (changeReader.NextVersion())
 {
+    
     var mainFile = ws.GetCodeFile("/main.lucy");
     var firstStatement = mainFile.SyntaxTree.StatementList.Statements[0];
     //sdb.Query(new GetAllEntryPoints());
-    Dumper.Dump(sdb.Query(new GetAllEntryPoints()));
+    Dumper.Dump(new { Result = sdb.GetAllEntryPoints() });
 
     //Console.WriteLine(JsonConvert.SerializeObject(s), Formatting.Indented)); 
     //Console.WriteLine(JsonConvert.SerializeObject(sdb.Query(new GetAllEntryPoints()), Formatting.Indented));

@@ -8,7 +8,7 @@ namespace Lucy.Core.Parsing.Nodes.Expressions.Unary
 {
     public class NumberConstantExpressionSyntaxNodeParser
     {
-        public static bool TryRead(Code code, [NotNullWhen(true)] out NumberConstantExpressionSyntaxNode? result)
+        public static bool TryRead(Code code, [NotNullWhen(true)] out NumberConstantExpressionSyntaxNodeBuilder? result)
         {
             var start = code.Position;
             var leadingTrivia = TriviaNodeParser.ReadList(code);
@@ -36,12 +36,12 @@ namespace Lucy.Core.Parsing.Nodes.Expressions.Unary
             return true;
         }
 
-        private static NumberConstantExpressionSyntaxNode CreateNode(Code code, List<TriviaNode> leadingTrivia, int count)
+        private static NumberConstantExpressionSyntaxNodeBuilder CreateNode(Code code, List<TriviaNodeBuilder> leadingTrivia, int count)
         {
             var str = code.Read(count);
             var num = double.Parse(str, CultureInfo.InvariantCulture);
-            var token = new SyntaxElement(leadingTrivia, new TokenNode(str));
-            return new NumberConstantExpressionSyntaxNode(num, token);
+            var token = new SyntaxElementBuilder(leadingTrivia, new TokenNodeBuilder(str));
+            return new NumberConstantExpressionSyntaxNodeBuilder(num, token);
         }
 
         private static bool CountDigits(Code code, out int count)

@@ -7,13 +7,13 @@ namespace Lucy.Core.Parsing
 {
     internal class IdAssigner
     {
-        internal static void Run(string documentPath, DocumentRootSyntaxNode rootNode)
+        internal static void Run(string documentPath, DocumentRootSyntaxNodeBuilder rootNode)
         {
             var nodeNameCache = new Dictionary<Type, string>();
             Traverse(rootNode, new NodeIdFactory(documentPath), nodeNameCache);
         }
 
-        private static void Traverse(SyntaxTreeNode node, NodeIdFactory nodeIdFactory, Dictionary<Type, string> nodeNameCache)
+        private static void Traverse(SyntaxTreeNodeBuilder node, NodeIdFactory nodeIdFactory, Dictionary<Type, string> nodeNameCache)
         {
             var type = node.GetType();
             if (!nodeNameCache.TryGetValue(type, out var nodeName)) 

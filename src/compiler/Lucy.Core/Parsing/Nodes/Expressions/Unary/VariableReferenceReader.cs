@@ -6,11 +6,11 @@ namespace Lucy.Core.Parsing.Nodes.Expressions.Unary
 {
     public class VariableReferenceExpressionSyntaxNodeParser
     {
-        public static bool TryRead(Code code, [NotNullWhen(true)] out VariableReferenceExpressionSyntaxNode? result)
+        public static bool TryRead(Code code, [NotNullWhen(true)] out VariableReferenceExpressionSyntaxNodeBuilder? result)
         {
             if (SyntaxElementParser.TryReadIdentifier(code, out var token))
             {
-                result = new VariableReferenceExpressionSyntaxNode(token);
+                result = new VariableReferenceExpressionSyntaxNodeBuilder(token);
                 return true;
             }
             

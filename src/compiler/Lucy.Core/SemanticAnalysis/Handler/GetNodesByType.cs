@@ -7,7 +7,7 @@ using System.Linq;
 namespace Lucy.Core.SemanticAnalysis.Handler
 {
     public record GetNodesByType(string DocumentPath, Type Type) : IQuery<GetNodesByTypeResult>;
-    public record GetNodesByTypeResult(ComparableReadOnlyList<NodeId> Nodes);
+    public record GetNodesByTypeResult(ComparableReadOnlyList<ImmutableSyntaxTreeNode> Nodes);
 
     public class GetNodesByTypesHandler : QueryHandler<GetNodesByType, GetNodesByTypeResult>
     {
@@ -15,8 +15,8 @@ namespace Lucy.Core.SemanticAnalysis.Handler
         {
             var nodesByType = db.Query(new GetNodeMap(query.DocumentPath)).NodesByType;
             if (nodesByType.TryGetValue(query.Type, out var nodes))       
-                return new GetNodesByTypeResult(nodes.Select(x => x.NodeId).ToComparableReadOnlyList());
-            return new GetNodesByTypeResult(new ComparableReadOnlyList<NodeId>());
+                return new GetNodesByTypeResult(nodes.ToComparableReadOnlyList());
+            return new GetNodesByTypeResult(new ComparableReadOnlyList<ImmutableSyntaxTreeNode>());
         }
     }
 }

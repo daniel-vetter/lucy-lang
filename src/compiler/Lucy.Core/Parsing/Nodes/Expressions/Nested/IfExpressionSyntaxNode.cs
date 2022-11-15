@@ -6,7 +6,7 @@ namespace Lucy.Core.Parsing.Nodes.Expressions.Nested
 {
     public class IfExpressionSyntaxNodeParser
     {
-        public static bool TryReadOrInner(Code code, [NotNullWhen(true)] out ExpressionSyntaxNode? result)
+        public static bool TryReadOrInner(Code code, [NotNullWhen(true)] out ExpressionSyntaxNodeBuilder? result)
         {
             if (!AndExpressionSyntaxNodeParser.TryReadOrInner(code, out result))
                 return false;
@@ -25,7 +25,7 @@ namespace Lucy.Core.Parsing.Nodes.Expressions.Nested
                 if (!AndExpressionSyntaxNodeParser.TryReadOrInner(code, out var elseExpression))
                     elseExpression = ExpressionSyntaxNodeParser.Missing("Expression exptected after ':'");
 
-                result = new IfExpressionSyntaxNode(result, ifToken, thenExpression, elseToken, elseExpression);
+                result = new IfExpressionSyntaxNodeBuilder(result, ifToken, thenExpression, elseToken, elseExpression);
             }
         }
     }

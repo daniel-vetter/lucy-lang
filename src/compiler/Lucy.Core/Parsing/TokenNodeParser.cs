@@ -4,9 +4,9 @@ namespace Lucy.Core.Parsing;
 
 public class TokenNodeParser
 {
-    public static TokenNode Missing(string? errorMessage = null)
+    public static TokenNodeBuilder Missing(string? errorMessage = null)
     {
-        var token = new TokenNode("");
+        var token = new TokenNodeBuilder("");
         if (errorMessage != null)
             token.SyntaxErrors.Add(errorMessage);
         return token;

@@ -4,12 +4,10 @@ using Lucy.Core.SemanticAnalysis.Inputs;
 
 namespace Lucy.Core.SemanticAnalysis.Handler
 {
-    public record GetAllEntryPoints() : IQuery<GetAllEntryPointsFunctionsResult>;
-    public record GetAllEntryPointsFunctionsResult(ComparableReadOnlyList<FunctionInfo> EntryPoints);
-
-    public class GetAllMainFunctionsHandler : QueryHandler<GetAllEntryPoints, GetAllEntryPointsFunctionsResult>
+    public class GetAllEntryPointsHandler
     {
-        public override GetAllEntryPointsFunctionsResult Handle(IDb db, GetAllEntryPoints query)
+        [DbHelper.DbQueryHandler] ///<see cref="GetAllEntryPointsEx.GetAllEntryPoints"/>
+        public static ComparableReadOnlyList<FunctionInfo> GetAllEntryPoints(IDb db)
         {
             var paths = db.Query(new GetDocumentList()).Paths;
             var result = new ComparableReadOnlyList<FunctionInfo>.Builder();
@@ -18,7 +16,7 @@ namespace Lucy.Core.SemanticAnalysis.Handler
                 var ids = db.Query(new GetEntryPointsInDocument(path)).EntryPoints;
                 result.AddRange(ids);
             }
-            return new GetAllEntryPointsFunctionsResult(result.Build());
+            return result.Build();
         }
     }
 }

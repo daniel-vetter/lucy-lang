@@ -8,7 +8,7 @@ namespace Lucy.Core.Parsing.Nodes.Expressions.Nested
 {
     internal class OrExpressionSyntaxNodeParser
     {
-        public static bool TryReadOrInner(Code code, [NotNullWhen(true)] out ExpressionSyntaxNode? result)
+        public static bool TryReadOrInner(Code code, [NotNullWhen(true)] out ExpressionSyntaxNodeBuilder? result)
         {
             if (!AdditionExpressionSyntaxNodeParser.TryReadOrInner(code, out result))
                 return false;
@@ -22,11 +22,11 @@ namespace Lucy.Core.Parsing.Nodes.Expressions.Nested
                 
                 if (!AdditionExpressionSyntaxNodeParser.TryReadOrInner(code, out var right))
                 {
-                    result = new OrExpressionSyntaxNode(result, orToken, ExpressionSyntaxNodeParser.Missing("Expression expected"));
+                    result = new OrExpressionSyntaxNodeBuilder(result, orToken, ExpressionSyntaxNodeParser.Missing("Expression expected"));
                     return true;
                 }
 
-                result = new OrExpressionSyntaxNode(result, orToken, right);
+                result = new OrExpressionSyntaxNodeBuilder(result, orToken, right);
             }
         }
     }
