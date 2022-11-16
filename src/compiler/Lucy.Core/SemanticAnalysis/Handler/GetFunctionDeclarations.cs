@@ -10,8 +10,7 @@ namespace Lucy.Core.SemanticAnalysis.Handler
         [GenerateDbExtension] ///<see cref="GetFunctionDeclarationsEx.GetFunctionDeclarations"/>
         public static ComparableReadOnlyList<FunctionDeclarationStatementSyntaxNode> GetFunctionDeclarations(IDb db, string documentPath)
         {
-            var r = db.Query(new GetNodesByType(documentPath, typeof(FunctionDeclarationStatementSyntaxNode)));
-            return r.Nodes.Cast<FunctionDeclarationStatementSyntaxNode>().ToComparableReadOnlyList();
+            return db.GetNodesByType<FunctionDeclarationStatementSyntaxNode>(documentPath);
         }
     }
 }

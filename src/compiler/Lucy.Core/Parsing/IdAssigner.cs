@@ -19,8 +19,12 @@ namespace Lucy.Core.Parsing
             if (!nodeNameCache.TryGetValue(type, out var nodeName)) 
             {
                 var name = node.GetType().Name;
-                if (name.EndsWith("SyntaxNode"))
-                    name = name.Substring(0, name.Length - "SyntaxNode".Length);
+                if (name.EndsWith("SyntaxNodeBuilder"))
+                    name = name.Substring(0, name.Length - "SyntaxNodeBuilder".Length);
+                if (name.EndsWith("NodeBuilder"))
+                    name = name.Substring(0, name.Length - "NodeBuilder".Length);
+                if (name.EndsWith("Builder"))
+                    name = name.Substring(0, name.Length - "Builder".Length);
                 if (name.EndsWith("TriviaNode"))
                     name = name.Substring(0, name.Length - "TriviaNode".Length);
                 if (name.EndsWith("Node"))

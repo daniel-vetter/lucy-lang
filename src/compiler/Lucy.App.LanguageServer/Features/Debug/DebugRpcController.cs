@@ -1,7 +1,7 @@
 ﻿using Lucy.App.LanguageServer.Infrastructure;
 using Lucy.Common.ServiceDiscovery;
-using Lucy.Core.Compiler;
 using Lucy.Infrastructure.RpcServer;
+using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
 
@@ -38,7 +38,8 @@ namespace Lucy.App.LanguageServer.Features.Debug
             if (_currentWorkspace.Workspace == null)
                 return "";
 
-            return WinExecutableEmitter.GetAssemblyCode(_currentWorkspace.Workspace);
+            throw new NotImplementedException();
+            //return WinExecutableEmitter.GetAssemblyCode(_currentWorkspace.Workspace);
         }
     }
 }

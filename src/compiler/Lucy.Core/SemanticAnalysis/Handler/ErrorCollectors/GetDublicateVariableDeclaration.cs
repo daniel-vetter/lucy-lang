@@ -6,22 +6,20 @@ using System.Collections.Generic;
 
 namespace Lucy.Core.SemanticAnalysis.Handler.ErrorCollectors
 {
-    public record GetDublicateDeclarations(string DocumentPath) : IQuery<GetDublicateVariableDeclarationsResult>;
-    public record GetDublicateVariableDeclarationsResult(ComparableReadOnlyList<Error> Errors);
-
     public record Error(NodeId NodeId, string Message);
 
-    public class GetDublicateVariableDeclarationsHandler : QueryHandler<GetDublicateDeclarations, GetDublicateVariableDeclarationsResult>
+    public static class GetDublicateVariableDeclarationsHandler
     {
-        public override GetDublicateVariableDeclarationsResult Handle(IDb db, GetDublicateDeclarations query)
+        [GenerateDbExtension] ///<see cref="GetDublicateVariableDeclarationsEx.GetDublicateVariableDeclarations"/>
+        public static ComparableReadOnlyList<Error> GetDublicateVariableDeclarations(IDb db, string documentPath)
         {
-            var root = db.GetScopeTree(query.DocumentPath);
+            var root = db.GetScopeTree(documentPath);
             var result = new ComparableReadOnlyList<Error>.Builder();
             Traverse(db, root, new HashSet<string>(), result);
-            return new GetDublicateVariableDeclarationsResult(result.Build());
+            return result.Build();
         }
 
-        private void Traverse(IDb db, ScopeItem scopeItem, HashSet<string> knownNames, ComparableReadOnlyList<Error>.Builder errors)
+        private static void Traverse(IDb db, ScopeItem scopeItem, HashSet<string> knownNames, ComparableReadOnlyList<Error>.Builder errors)
         {
             var node = db.GetNodeById(scopeItem.NodeId);
             if (node is FunctionDeclarationStatementSyntaxNode functionDeclarationStatementSyntaxNode)

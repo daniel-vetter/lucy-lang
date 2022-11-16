@@ -3,7 +3,6 @@ using Lucy.Feature.LanguageServer.Models;
 using Lucy.Common.ServiceDiscovery;
 using Lucy.App.LanguageServer.Infrastructure;
 using System;
-using Lucy.Core.Helper;
 using Lucy.Core.Parsing.Nodes.Token;
 using Lucy.Core.Parsing;
 using System.Text;

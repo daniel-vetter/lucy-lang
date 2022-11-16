@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Lucy.Core.Model;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -148,7 +149,11 @@ namespace Lucy.Core.SemanticAnalysis.Infrastructure
                 return;
             }
 
-            var label = new KeyValueTable(query.GetType().Name ?? "root");
+            var nodeTitle = query.GetType().Name;
+            if (nodeTitle.EndsWith("Input"))
+                nodeTitle = nodeTitle[..^"Input".Length];
+
+            var label = new KeyValueTable(nodeTitle ?? "root");
             if (_calculatedQueries.TryGetValue(query, out var calculationStats))
             {
                 label.Set("Execution", "#" + (calculationStats.Index + 1).ToString() + ", Calc: " + calculationStats.ExclusiveHandlerExecutionTime.TotalMilliseconds + "ms, " + calculationStats.InclusiveHandlerExecutionTime.TotalMilliseconds + "ms, Equal: " + calculationStats.OverheadExecutionTime.TotalMilliseconds + "ms");
@@ -187,7 +192,15 @@ namespace Lucy.Core.SemanticAnalysis.Infrastructure
 
             foreach (var props in query.GetType().GetProperties())
             {
-                label.Set(props.Name, props.GetValue(query)?.ToString() ?? "");
+                var value = props.GetValue(query);
+                var displayString = value switch
+                {
+                    null => "",
+                    SyntaxTreeNode syntaxTreeNode => syntaxTreeNode.NodeId.ToString(),
+                    _ => value.ToString() ?? ""
+                };
+                
+                label.Set(props.Name, displayString);
             }
             node.Label = label;
         }

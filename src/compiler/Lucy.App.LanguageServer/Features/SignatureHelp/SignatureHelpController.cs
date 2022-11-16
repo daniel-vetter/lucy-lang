@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Reflection.Emit;
 using System.Runtime.InteropServices;
 using System.Text;
+using Lucy.Core.Model;
 
 namespace Lucy.App.LanguageServer.Features.SignatureHelp
 {

@@ -2,20 +2,24 @@
 using Lucy.Core.Parsing.Nodes;
 using Lucy.Core.SemanticAnalysis.Infrastructure;
 using System;
+using System.Linq;
 
 namespace Lucy.Core.SemanticAnalysis.Handler
 {
-    public record GetNodesByType(string DocumentPath, Type Type) : IQuery<GetNodesByTypeResult>;
-    public record GetNodesByTypeResult(ComparableReadOnlyList<SyntaxTreeNode> Nodes);
-
-    public class GetNodesByTypesHandler : QueryHandler<GetNodesByType, GetNodesByTypeResult>
+    public static class GetNodesByTypesHandler
     {
-        public override GetNodesByTypeResult Handle(IDb db, GetNodesByType query)
+        public static ComparableReadOnlyList<T> GetNodesByType<T>(this IDb db, string documentPath) where T : SyntaxTreeNode
         {
-            var nodesByType = db.GetNodeMap(query.DocumentPath).NodesByType;
-            if (nodesByType.TryGetValue(query.Type, out var nodes))       
-                return new GetNodesByTypeResult(nodes.ToComparableReadOnlyList());
-            return new GetNodesByTypeResult(new ComparableReadOnlyList<SyntaxTreeNode>());
+            return db.GetNodesByType(documentPath, typeof(T)).Cast<T>().ToComparableReadOnlyList();
+        }
+
+        [GenerateDbExtension] ///<see cref="GetNodesByTypeEx.GetNodexByType"/>
+        public static ComparableReadOnlyList<SyntaxTreeNode> GetNodesByType(IDb db, string documentPath, Type type)
+        {
+            var nodesByType = db.GetNodeMap(documentPath).NodesByType;
+            if (nodesByType.TryGetValue(type, out var nodes))
+                return nodes;
+            return new ComparableReadOnlyList<SyntaxTreeNode>();
         }
     }
 }

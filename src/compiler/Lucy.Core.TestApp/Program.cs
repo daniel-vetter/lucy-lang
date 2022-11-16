@@ -2,7 +2,9 @@
 using Lucy.Core.ProjectManagement;
 using Lucy.Core.SemanticAnalysis;
 using Lucy.Core.SemanticAnalysis.Handler;
+using Lucy.Core.SemanticAnalysis.Handler.ErrorCollectors;
 using Lucy.Core.SemanticAnalysis.Infrastructure;
+using Lucy.Core.SemanticAnalysis.Inputs;
 using Lucy.Core.TestApp;
 
 var ws = new Workspace();
@@ -13,7 +15,7 @@ var sdb = new SemanticDatabase(ws, "./graphOutput");
 
 while (changeReader.NextVersion())
 {
-    Dumper.Dump(new { Result = sdb.GetAllEntryPoints() });
+    Dumper.Dump(new { Result = sdb.GetAllErrors() });
     Console.WriteLine(GC.GetTotalMemory(true) / 1024.0 / 1024.0);
 }
 

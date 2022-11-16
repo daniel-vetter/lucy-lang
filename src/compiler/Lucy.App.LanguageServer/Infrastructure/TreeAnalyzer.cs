@@ -1,5 +1,4 @@
-﻿using Lucy.Core.Helper;
-using Lucy.Core.Parsing;
+﻿using Lucy.Core.Model;
 using System.Collections.Immutable;
 using System.Linq;
 

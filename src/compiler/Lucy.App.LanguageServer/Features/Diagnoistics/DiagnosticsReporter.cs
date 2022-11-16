@@ -1,6 +1,6 @@
 ﻿using Lucy.App.LanguageServer.Infrastructure;
 using Lucy.Common.ServiceDiscovery;
-using Lucy.Core.Helper;
+using Lucy.Core.Model;
 using Lucy.Core.Parsing;
 using Lucy.Core.ProjectManagement;
 using Lucy.Feature.LanguageServer.Models;
@@ -58,7 +58,7 @@ namespace Lucy.App.LanguageServer.Features.Diagnoistics
                                 End = new RpcPosition { Line = range.End.Line, Character = range.End.Column },
                             },
                             Code = "M",
-                            Message = source.ErrorMessage ?? "<missing errror message on node " + child.GetType().Name + ">",
+                            Message = source.ErrorMessage ?? "<missing error message on node " + child.GetType().Name + ">",
                             Severity = RpcDiagnosticSeverity.Error,
                             Source = "lucy",
                         });
