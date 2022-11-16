@@ -1,7 +1,5 @@
 ﻿using Lucy.Core.Model;
-using Lucy.Core.Parsing;
 using Lucy.Core.Parsing.Nodes;
-using Lucy.Core.Parsing.Nodes.Statements.FunctionDeclaration;
 using Lucy.Core.SemanticAnalysis.Infrastructure;
 using System;
 using System.Collections.Generic;
@@ -17,7 +15,7 @@ namespace Lucy.Core.SemanticAnalysis.Handler.ErrorCollectors
     {
         public override GetDublicateVariableDeclarationsResult Handle(IDb db, GetDublicateDeclarations query)
         {
-            var root = db.Query(new GetScopeTree(query.DocumentPath)).DocumentScope;
+            var root = db.GetScopeTree(query.DocumentPath);
             var result = new ComparableReadOnlyList<Error>.Builder();
             Traverse(db, root, new HashSet<string>(), result);
             return new GetDublicateVariableDeclarationsResult(result.Build());
@@ -25,8 +23,8 @@ namespace Lucy.Core.SemanticAnalysis.Handler.ErrorCollectors
 
         private void Traverse(IDb db, ScopeItem scopeItem, HashSet<string> knownNames, ComparableReadOnlyList<Error>.Builder errors)
         {
-            var node = db.Query(new GetNodeById(scopeItem.NodeId)).Node;
-            if (node is ImmutableFunctionDeclarationStatementSyntaxNode functionDeclarationStatementSyntaxNode)
+            var node = db.GetNodeById(scopeItem.NodeId);
+            if (node is FunctionDeclarationStatementSyntaxNode functionDeclarationStatementSyntaxNode)
             {
                 var name = functionDeclarationStatementSyntaxNode.FunctionName.Token.Text;
                 if (knownNames.Contains(name))
@@ -38,7 +36,7 @@ namespace Lucy.Core.SemanticAnalysis.Handler.ErrorCollectors
                     knownNames.Add(name);
                 }
             }
-            else if (node is ImmutableFunctionDeclarationParameterSyntaxNode functionDeclarationParameterSyntaxNode)
+            else if (node is FunctionDeclarationParameterSyntaxNode functionDeclarationParameterSyntaxNode)
             {
                 var name = functionDeclarationParameterSyntaxNode.VariableDeclaration.VariableName.Token.Text;
                 if (knownNames.Contains(name))
@@ -50,7 +48,7 @@ namespace Lucy.Core.SemanticAnalysis.Handler.ErrorCollectors
                     knownNames.Add(name);
                 }
             }
-            else if (node is ImmutableDocumentRootSyntaxNode)
+            else if (node is DocumentRootSyntaxNode)
             {
 
             }

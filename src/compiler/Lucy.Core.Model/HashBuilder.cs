@@ -1,15 +1,8 @@
-﻿using System;
-using System.IO;
-using System.Security.Cryptography;
+﻿using System.Security.Cryptography;
 using System.Text;
 
 namespace Lucy.Core.Model
 {
-    public interface IHashable
-    {
-        byte[] GetFullHash();
-    }
-
     public class HashBuilder : IDisposable
     {
         private readonly MemoryStream _ms;

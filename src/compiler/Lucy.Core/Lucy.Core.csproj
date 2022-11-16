@@ -8,9 +8,8 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\Lucy.Common\Lucy.Common.csproj" />
+		<ProjectReference Include="..\Lucy.Core.Model\Lucy.Core.Model.csproj" />
 		<ProjectReference Include="..\Lucy.Core.SourceGenerator\Lucy.Core.SourceGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
-
-		<AdditionalFiles Include="Parsing\model.xml"></AdditionalFiles>
 	</ItemGroup>
 
 

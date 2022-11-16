@@ -3,15 +3,13 @@ using Lucy.Core.SemanticAnalysis.Infrastructure;
 
 namespace Lucy.Core.SemanticAnalysis.Handler
 {
-    public record GetNodeById(NodeId NodeId) : IQuery<GetNodeByIdResult>;
-    public record GetNodeByIdResult(ImmutableSyntaxTreeNode Node);
-
-    public class GetNodeByIdHandler : QueryHandler<GetNodeById, GetNodeByIdResult>
+    public static class GetNodeByIdHandler
     {
-        public override GetNodeByIdResult Handle(IDb db, GetNodeById query)
+        [GenerateDbExtension] ///<see cref="GetNodeByIdEx.GetNodeById"/>
+        public static SyntaxTreeNode GetNodeById(IDb db, NodeId nodeId)
         {
-            var nodes = db.Query(new GetNodeMap(query.NodeId.DocumentPath)).NodesById;
-            return new GetNodeByIdResult(nodes[query.NodeId]);
+            var nodes = db.GetNodeMap(nodeId.DocumentPath).NodesById;
+            return nodes[nodeId];
         }
     }
 }

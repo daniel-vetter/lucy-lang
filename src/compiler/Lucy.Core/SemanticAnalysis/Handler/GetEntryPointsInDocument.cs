@@ -3,21 +3,19 @@ using Lucy.Core.SemanticAnalysis.Infrastructure;
 
 namespace Lucy.Core.SemanticAnalysis.Handler
 {
-    public record GetEntryPointsInDocument(string DocumentPath) : IQuery<GetEntryPointsInDocumentResult>;
-    public record GetEntryPointsInDocumentResult(ComparableReadOnlyList<FunctionInfo> EntryPoints);
-
-    public class GetMainFunctionsInDocumentHandler : QueryHandler<GetEntryPointsInDocument, GetEntryPointsInDocumentResult>
+    public static class GetMainFunctionsInDocumentHandler
     {
-        public override GetEntryPointsInDocumentResult Handle(IDb db, GetEntryPointsInDocument query)
+        [GenerateDbExtension] ///<see cref="GetEntryPointsInDocumentEx.GetEntryPointsInDocument"/>
+        public static ComparableReadOnlyList<FunctionInfo> GetEntryPointsInDocument(IDb db, string documentPath)
         {
-            var infos = db.Query(new GetFunctionInfosInDocument(query.DocumentPath)).FunctionInfos;
+            var infos = db.GetFunctionInfosInDocument(documentPath);
             var result = new ComparableReadOnlyList<FunctionInfo>.Builder();
             foreach(var info in infos)
             {
                 if (info.Name == "main")
                     result.Add(info);
             }
-            return new GetEntryPointsInDocumentResult(result.Build());
+            return result.Build();
         }
     }
 }

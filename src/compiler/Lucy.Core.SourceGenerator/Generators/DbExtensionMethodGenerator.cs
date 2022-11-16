@@ -9,6 +9,7 @@ namespace Lucy.Core.SourceGenerator.Generators
     public class DbExtensionMethodGenerator
     {
         private static readonly string Ns = "Lucy.Core.SemanticAnalysis.Infrastructure";
+        private static readonly Logger Logger = new Logger("extension", true);
 
         public static void Register(IncrementalGeneratorInitializationContext context)
         {
@@ -19,6 +20,11 @@ namespace Lucy.Core.SourceGenerator.Generators
                     public class GenerateDbExtension : System.Attribute {}
                 }
                 """, Encoding.UTF8)));
+
+            if (Logger.IsEnabled)
+            {
+                Logger.Write("Started...");
+            }
 
             IncrementalValuesProvider<MethodDeclarationSyntax> classDeclarationFilter = context.SyntaxProvider.CreateSyntaxProvider(
                 predicate: (node, _) => node is MethodDeclarationSyntax,
@@ -41,7 +47,13 @@ namespace Lucy.Core.SourceGenerator.Generators
                 {
                     if (context.SemanticModel.GetSymbolInfo(attributeSyntax).Symbol is IMethodSymbol symbol &&
                         symbol.ContainingType.ToDisplayString() == Ns + ".GenerateDbExtension")
+                    {
+                        if (Logger.IsEnabled)
+                        {
+                            Logger.Write("Found " + methodDeclarationSyntax.Identifier.Text);
+                        }
                         return methodDeclarationSyntax;
+                    }
                 }
             }
 
@@ -59,28 +71,56 @@ namespace Lucy.Core.SourceGenerator.Generators
 
                 var methodInfo = sm.GetDeclaredSymbol(method);
                 if (methodInfo == null)
+                {
+                    if (Logger.IsEnabled)
+                        Logger.Write("Skipped " + method.Identifier.Text + " because the declared symbol could not be resolved.");
                     continue;
+                }
+                    
 
                 var methodReturnTypeInfo = sm.GetSymbolInfo(method.ReturnType).Symbol as INamedTypeSymbol;
                 if (methodReturnTypeInfo == null)
+                {
+                    if (Logger.IsEnabled)
+                        Logger.Write("Skipped " + method.Identifier.Text + " because the return type symbol could not be resolved.");
                     continue;
+                }
+                    
 
                 var @class = method.Ancestors().OfType<ClassDeclarationSyntax>().FirstOrDefault();
                 if (@class == null)
+                {
+                    if (Logger.IsEnabled)
+                        Logger.Write("Skipped " + method.Identifier.Text + " because the class could not be resolved.");
                     continue;
+                }
+                    
 
                 List<string> myArguments = new();
                 List<string> handlerArguments = new();
                 List<string> myMethodParameter = new();
                 List<string> myRecordParameter = new();
+                bool failed = false;
                 foreach (var methodParameter in method.ParameterList.Parameters)
                 {
                     if (methodParameter.Type == null)
-                        return;
+                    {
+                        if (Logger.IsEnabled)
+                            Logger.Write("Skipped " + method.Identifier.Text + " because the parameter " + methodParameter.Identifier.Text + " type was not provided.");
+                        failed= true;
+                        break;
+                    }
+                        
 
                     var typeSymbol = sm.GetSymbolInfo(methodParameter.Type).Symbol as INamedTypeSymbol;
                     if (typeSymbol == null)
-                        return;
+                    {
+                        if (Logger.IsEnabled)
+                            Logger.Write("Skipped " + method.Identifier.Text + " because the parameter " + methodParameter.Identifier.Text + " type symbol could not be resolved.");
+                        failed = true;
+                        break;
+                    }
+                        
 
                     if (typeSymbol.ToDisplayString() == Ns + ".IDb")
                         continue;
@@ -90,6 +130,9 @@ namespace Lucy.Core.SourceGenerator.Generators
                     myRecordParameter.Add(typeSymbol.ToDisplayString() + " " + methodParameter.Identifier.Text);
                     handlerArguments.Add("query." + methodParameter.Identifier.Text);
                 }
+
+                if (failed)
+                    continue;
 
                 handlerArguments.Insert(0, "db");
                 myMethodParameter.Insert(0, $"this {Ns}.IDb db");
@@ -103,7 +146,7 @@ namespace Lucy.Core.SourceGenerator.Generators
                         public static class {{method.Identifier.Text}}Ex
                         {
                             ///<summary>
-                            /// <see cref="Implementation: {{@class.Identifier.Text}}.{{method.Identifier.Text}}" />
+                            ///Implementation: <see cref="{{@class.Identifier.Text}}.{{method.Identifier.Text}}" />
                             ///</summary>
                             public static {{methodReturnTypeInfo.ToDisplayString()}} {{method.Identifier.Text}}({{string.Join(", ", myMethodParameter)}})
                             {

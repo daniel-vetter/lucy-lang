@@ -1,7 +1,7 @@
 ﻿using System.Collections.Immutable;
 using System.Xml;
 
-namespace Lucy.Core.SourceGenerator.Infrastructure
+namespace Lucy.Core.Model.SourceGenerator
 {
     public class ConfigLoader
     {

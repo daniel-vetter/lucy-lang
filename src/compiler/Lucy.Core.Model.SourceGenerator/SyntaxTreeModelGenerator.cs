@@ -1,9 +1,7 @@
-﻿using Lucy.Core.SourceGenerator.Infrastructure;
-using Microsoft.CodeAnalysis;
-using System.Collections.Immutable;
+﻿using Microsoft.CodeAnalysis;
 using System.Text;
 
-namespace Lucy.Core.SourceGenerator.Generators
+namespace Lucy.Core.Model.SourceGenerator
 {
     internal static class SyntaxTreeModelGenerator
     {
@@ -16,7 +14,6 @@ namespace Lucy.Core.SourceGenerator.Generators
             sb.AppendLine("using System.Linq;");
             sb.AppendLine("using System.Collections.Generic;");
             sb.AppendLine("using System.Collections.Immutable;");
-            sb.AppendLine("using Lucy.Core.Parsing.Nodes;");
             sb.AppendLine();
             sb.AppendLine("namespace " + config.Namespace + ";");
             sb.AppendLine();
@@ -25,12 +22,12 @@ namespace Lucy.Core.SourceGenerator.Generators
             {
                 var basedOn = new List<string>();
                 if (node.BasedOn != null)
-                    basedOn.Add("Immutable" + node.BasedOn);
+                    basedOn.Add(node.BasedOn);
                 if (node.IsRoot)
                     basedOn.Add("IHashable");
-                basedOn.Add("IEquatable<Immutable" + node.Name + "?>");
+                basedOn.Add("IEquatable<" + node.Name + "?>");
 
-                sb.AppendLine($"public {(node.IsTopMost ? "" : "abstract ")}class Immutable{node.Name} : " + string.Join(", ", basedOn));
+                sb.AppendLine($"public {(node.IsTopMost ? "" : "abstract ")}class {node.Name} : " + string.Join(", ", basedOn));
                 sb.AppendLine("{");
                 sb.WriteConstructor(config, node);
                 sb.WriteProperties(config, node);
@@ -48,7 +45,7 @@ namespace Lucy.Core.SourceGenerator.Generators
         private static void WriteEqualsMethods(this StringBuilder sb, Node node)
         {
 
-            sb.AppendLine("    public bool Equals(Immutable" + node.Name + "? other)");
+            sb.AppendLine("    public bool Equals(" + node.Name + "? other)");
             sb.AppendLine("    {");
             sb.AppendLine("        return other is not null && _hash.AsSpan().SequenceEqual(other._hash);");
             sb.AppendLine("    }");
@@ -58,7 +55,7 @@ namespace Lucy.Core.SourceGenerator.Generators
             {
                 sb.AppendLine("    public override bool Equals(object? obj)");
                 sb.AppendLine("    {");
-                sb.AppendLine($"        return Equals(obj as Immutable{node.Name});");
+                sb.AppendLine($"        return Equals(obj as {node.Name});");
                 sb.AppendLine("    }");
                 sb.AppendLine();
 
@@ -139,7 +136,7 @@ namespace Lucy.Core.SourceGenerator.Generators
             var paramStr = string.Join(", ", allParameters);
             var baseStr = string.Join(", ", baseParameters);
 
-            sb.AppendLine($"    public Immutable{node.Name}({paramStr}) : base(" + baseStr + ")");
+            sb.AppendLine($"    public {node.Name}({paramStr}) : base(" + baseStr + ")");
             sb.AppendLine("    {");
             foreach (var prop in node.Properties)
             {
@@ -159,9 +156,6 @@ namespace Lucy.Core.SourceGenerator.Generators
         private static string GetRealType(Config config, NodeProperty property)
         {
             var name = property.Type;
-
-            if (property.TypeIsNode)
-                name = "Immutable" + name;
 
             if (property.IsOptional)
                 name += "?";
@@ -189,14 +183,14 @@ namespace Lucy.Core.SourceGenerator.Generators
         {
             if (node.BasedOn == null)
             {
-                sb.AppendLine("    public abstract IEnumerable<ImmutableSyntaxTreeNode> GetChildNodes();");
+                sb.AppendLine("    public abstract IEnumerable<SyntaxTreeNode> GetChildNodes();");
             }
             else
             {
                 if (!node.IsTopMost)
                     return;
 
-                sb.AppendLine("    public override IEnumerable<ImmutableSyntaxTreeNode> GetChildNodes()");
+                sb.AppendLine("    public override IEnumerable<SyntaxTreeNode> GetChildNodes()");
                 sb.AppendLine("    {");
                 int count = 0;
                 foreach (var prop in node.Properties.Where(x => x.TypeIsNode))

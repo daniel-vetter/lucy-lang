@@ -3,18 +3,16 @@ using Lucy.Core.SemanticAnalysis.Infrastructure;
 
 namespace Lucy.Core.SemanticAnalysis.Handler
 {
-    public record GetFunctionInfosInDocument(string DocumentPath) : IQuery<GetFunctionInfosInDocumentResult>;
-    public record GetFunctionInfosInDocumentResult(ComparableReadOnlyList<FunctionInfo> FunctionInfos);
-
-    public class GetFunctionsInfosInDocumentHandler : QueryHandler<GetFunctionInfosInDocument, GetFunctionInfosInDocumentResult>
+    public static class GetFunctionsInfosInDocumentHandler
     {
-        public override GetFunctionInfosInDocumentResult Handle(IDb db, GetFunctionInfosInDocument query)
+        [GenerateDbExtension] ///<see cref="GetFunctionInfosInDocumentEx.GetFunctionInfosInDocument"/>
+        public static ComparableReadOnlyList<FunctionInfo> GetFunctionInfosInDocument(IDb db, string documentPath)
         {
-            var fdList = db.Query(new GetFunctionDeclarations(query.DocumentPath)).Declarations;
+            var fdList = db.GetFunctionDeclarations(documentPath);
             var result = new ComparableReadOnlyList<FunctionInfo>.Builder();
             foreach (var fd in fdList)
-                result.Add(db.Query(new GetFunctionInfo(fd)).Info);
-            return new GetFunctionInfosInDocumentResult(result.Build());
+                result.Add(db.GetFunctionInfo(fd));
+            return result.Build();
         }
     }
 }

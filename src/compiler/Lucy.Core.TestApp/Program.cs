@@ -1,32 +1,19 @@
 ﻿using BenchmarkDotNet.Attributes;
-using BenchmarkDotNet.Running;
-using Lucy.Common;
 using Lucy.Core.ProjectManagement;
 using Lucy.Core.SemanticAnalysis;
 using Lucy.Core.SemanticAnalysis.Handler;
-using Lucy.Core.SemanticAnalysis.Handler.ErrorCollectors;
 using Lucy.Core.SemanticAnalysis.Infrastructure;
 using Lucy.Core.TestApp;
-using System.Security.Cryptography;
-
-//var summary = BenchmarkRunner.Run(typeof(Program).Assembly);
 
 var ws = new Workspace();
 var changeReader = new TestCaseReader(ws, "./SampleApp");
+
 var sdb = new SemanticDatabase(ws, "./graphOutput");
 //var sdb = new SemanticDatabase(ws);
+
 while (changeReader.NextVersion())
 {
-    
-    var mainFile = ws.GetCodeFile("/main.lucy");
-    var firstStatement = mainFile.SyntaxTree.StatementList.Statements[0];
-    //sdb.Query(new GetAllEntryPoints());
     Dumper.Dump(new { Result = sdb.GetAllEntryPoints() });
-
-    //Console.WriteLine(JsonConvert.SerializeObject(s), Formatting.Indented)); 
-    //Console.WriteLine(JsonConvert.SerializeObject(sdb.Query(new GetAllEntryPoints()), Formatting.Indented));
-    //Console.WriteLine(JsonConvert.SerializeObject(sdb.Query(new GetScopeTree("/main.lucy")), Formatting.Indented));
-
     Console.WriteLine(GC.GetTotalMemory(true) / 1024.0 / 1024.0);
 }
 

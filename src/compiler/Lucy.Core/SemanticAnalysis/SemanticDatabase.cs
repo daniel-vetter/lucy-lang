@@ -42,7 +42,7 @@ namespace Lucy.Core.SemanticAnalysis
             _db.SetInput(new GetDocumentList(), new GetDocumentListResult(_workspace.Documents.Keys.ToComparableReadOnlyList()));
             foreach (var codeFile in workspace.Documents.Values.OfType<CodeFile>())
             {
-                _db.SetInput(new GetSyntaxTree(codeFile.Path), new GetSyntaxTreeResult(codeFile.SyntaxTree.ToImmutable()));
+                _db.SetInput(new GetSyntaxTree(codeFile.Path), new GetSyntaxTreeResult(codeFile.SyntaxTree.Build()));
             }
                 
         }
@@ -81,7 +81,7 @@ namespace Lucy.Core.SemanticAnalysis
                 _db.SetInput(new GetDocumentList(), new GetDocumentListResult(_workspace.Documents.Keys.ToComparableReadOnlyList()));
                 if (documentAdded.Document is CodeFile codeFile)
                 {
-                    _db.SetInput(new GetSyntaxTree(codeFile.Path), new GetSyntaxTreeResult(codeFile.SyntaxTree.ToImmutable()));
+                    _db.SetInput(new GetSyntaxTree(codeFile.Path), new GetSyntaxTreeResult(codeFile.SyntaxTree.Build()));
                 }
 
                 else
@@ -91,7 +91,7 @@ namespace Lucy.Core.SemanticAnalysis
             {
                 if (documentChanged.NewDocument is CodeFile codeFile)
                 {
-                    _db.SetInput(new GetSyntaxTree(codeFile.Path), new GetSyntaxTreeResult(codeFile.SyntaxTree.ToImmutable()));
+                    _db.SetInput(new GetSyntaxTree(codeFile.Path), new GetSyntaxTreeResult(codeFile.SyntaxTree.Build()));
                 }
             }
             if (@event is DocumentRemoved documentRemoved)

@@ -4,33 +4,30 @@ using Lucy.Core.SemanticAnalysis.Infrastructure;
 
 namespace Lucy.Core.SemanticAnalysis.Handler
 {
-    public record GetFunctionInfo(ImmutableFunctionDeclarationStatementSyntaxNode Declaration) : IQuery<GetFunctionInfoResult>;
-    public record GetFunctionInfoResult(FunctionInfo Info);
-
     public record FunctionInfo(NodeId Declaration, string Name, ComparableReadOnlyList<FunctionParameterInfo> Parameters);
     public record FunctionParameterInfo(NodeId Declaration, string Name);
 
-    
-    public class GetFunctionInfoHandler : QueryHandler<GetFunctionInfo, GetFunctionInfoResult>
+    public static class GetFunctionInfoHandler
     {
-        public override GetFunctionInfoResult Handle(IDb db, GetFunctionInfo query)
+        [GenerateDbExtension] ///<see cref="GetFunctionInfoEx.GetFunctionInfo"/>
+        public static FunctionInfo GetFunctionInfo(IDb db, FunctionDeclarationStatementSyntaxNode declaration)
         {
-            var name = query.Declaration.FunctionName.Token.Text;
+            var name = declaration.FunctionName.Token.Text;
             
             var parameters = new ComparableReadOnlyList<FunctionParameterInfo>.Builder();
-            foreach(var param in query.Declaration.ParameterList)
+            foreach(var param in declaration.ParameterList)
             {
                 var paramName = param.VariableDeclaration.VariableName.Token.Text;
                 parameters.Add(new FunctionParameterInfo(param.NodeId, paramName));
             }
 
             var info = new FunctionInfo(
-                Declaration: query.Declaration.NodeId,
+                Declaration: declaration.NodeId,
                 Name: name,
                 Parameters: parameters.Build()
             );
 
-            return new GetFunctionInfoResult(info);
+            return info;
         }
     }
 }

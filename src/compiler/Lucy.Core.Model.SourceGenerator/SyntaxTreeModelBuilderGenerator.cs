@@ -1,8 +1,8 @@
-﻿using Lucy.Core.SourceGenerator.Infrastructure;
+﻿using Lucy.Core.Model.SourceGenerator;
 using Microsoft.CodeAnalysis;
 using System.Text;
 
-namespace Lucy.Core.SourceGenerator.Generators
+namespace Lucy.Core.Model.SourceGenerator
 {
     internal static class SyntaxTreeModelBuilderGenerator
     {
@@ -32,14 +32,14 @@ namespace Lucy.Core.SourceGenerator.Generators
                         x.WriteConstructor(node);
                         x.WriteProperties(node);
                         x.WriteGetChildNodesMethod(node);
-                        x.WriteToImmutableMethod(node);
+                        x.WriteBuildMethod(node);
                     });
             }
 
             productionContext.AddSource("SyntaxTreeModelBuilder.g.cs", sb.ToString());
         }
 
-        private static void WriteToImmutableMethod(this StringBuilder sb, Node node)
+        private static void WriteBuildMethod(this StringBuilder sb, Node node)
         {
             if (node.IsTopMost)
             {
@@ -52,27 +52,27 @@ namespace Lucy.Core.SourceGenerator.Generators
                                 name += "?";
 
                             if (x.IsList && x.TypeIsNode)
-                                name += ".Select(x => x.ToImmutable())";
+                                name += ".Select(x => x.Build())";
 
                             if (x.IsList)
                                 name += ".ToImmutableArray()";
                             else if (x.TypeIsNode)
-                                name += ".ToImmutable()";
+                                name += ".Build()";
 
                             return name;
                         })
                         .ToArray());
 
                 sb.AppendLine($$"""
-                        public override Immutable{{node.Name}} ToImmutable()
+                        public override {{node.Name}} Build()
                         {
-                            return new Immutable{{node.Name}}({{props}});
+                            return new {{node.Name}}({{props}});
                         }
                     """);
             }
             else
             {
-                sb.AppendLine($"    public abstract {(!node.IsRoot).Then("override ")}Immutable{node.Name} ToImmutable();");
+                sb.AppendLine($"    public abstract {(!node.IsRoot).Then("override ")}{node.Name} Build();");
             }
         }
 

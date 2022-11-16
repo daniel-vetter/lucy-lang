@@ -5,15 +5,13 @@ using System.Linq;
 
 namespace Lucy.Core.SemanticAnalysis.Handler
 {
-    public record GetFunctionDeclarations(string DocumentPath) : IQuery<GetFunctionDeclarationsResult>;
-    public record GetFunctionDeclarationsResult(ComparableReadOnlyList<ImmutableFunctionDeclarationStatementSyntaxNode> Declarations);
-
-    public class GetFunctionDeclarationsHandler : QueryHandler<GetFunctionDeclarations, GetFunctionDeclarationsResult>
+    public static class GetFunctionDeclarationsHandler
     {
-        public override GetFunctionDeclarationsResult Handle(IDb db, GetFunctionDeclarations query)
+        [GenerateDbExtension] ///<see cref="GetFunctionDeclarationsEx.GetFunctionDeclarations"/>
+        public static ComparableReadOnlyList<FunctionDeclarationStatementSyntaxNode> GetFunctionDeclarations(IDb db, string documentPath)
         {
-            var r = db.Query(new GetNodesByType(query.DocumentPath, typeof(ImmutableFunctionDeclarationStatementSyntaxNode)));
-            return new GetFunctionDeclarationsResult(r.Nodes.Cast<ImmutableFunctionDeclarationStatementSyntaxNode>().ToComparableReadOnlyList());
+            var r = db.Query(new GetNodesByType(documentPath, typeof(FunctionDeclarationStatementSyntaxNode)));
+            return r.Nodes.Cast<FunctionDeclarationStatementSyntaxNode>().ToComparableReadOnlyList();
         }
     }
 }

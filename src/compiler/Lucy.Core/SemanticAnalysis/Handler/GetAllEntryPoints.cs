@@ -9,11 +9,11 @@ namespace Lucy.Core.SemanticAnalysis.Handler
         [GenerateDbExtension] ///<see cref="GetAllEntryPointsEx.GetAllEntryPoints"/>
         public static ComparableReadOnlyList<FunctionInfo> GetAllEntryPoints(IDb db)
         {
-            var paths = db.Query(new GetDocumentList()).Paths;
+            var paths = db.GetDocumentList();
             var result = new ComparableReadOnlyList<FunctionInfo>.Builder();
             foreach (var path in paths)
             {
-                var ids = db.Query(new GetEntryPointsInDocument(path)).EntryPoints;
+                var ids = db.GetEntryPointsInDocument(path);
                 result.AddRange(ids);
             }
             return result.Build();

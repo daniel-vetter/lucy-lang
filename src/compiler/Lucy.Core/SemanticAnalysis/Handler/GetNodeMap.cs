@@ -7,21 +7,17 @@ using System.Linq;
 
 namespace Lucy.Core.SemanticAnalysis.Handler
 {
-    /// <summary>
-    /// Returns a dictionary of all NodeIds and there corresponding SyntaxTreeNodes of a syntax tree
-    /// </summary>
-    /// <param name="DocumentPath"></param>
-    public record GetNodeMap(string DocumentPath) : IQuery<GetNodeMapResult>;
-    public record GetNodeMapResult(ComparableReadOnlyDictionary<NodeId, ImmutableSyntaxTreeNode> NodesById,
-        ComparableReadOnlyDictionary<Type, ComparableReadOnlyList<ImmutableSyntaxTreeNode>> NodesByType,
+    public record GetNodeMapResult(ComparableReadOnlyDictionary<NodeId, SyntaxTreeNode> NodesById,
+        ComparableReadOnlyDictionary<Type, ComparableReadOnlyList<SyntaxTreeNode>> NodesByType,
         ComparableReadOnlyDictionary<NodeId, NodeId> ParentNodes);
     
-    public class GetNodeMapHandler : QueryHandler<GetNodeMap, GetNodeMapResult>
+    public static class GetNodeMapHandler
     {
-        public override GetNodeMapResult Handle(IDb db, GetNodeMap query)
+        [GenerateDbExtension] ///<see cref="GetNodeMapEx.GetNodeMap"/>
+        public static GetNodeMapResult GetNodeMap(IDb db, string documentPath)
         {
-            var rootNode = db.Query(new GetSyntaxTree(query.DocumentPath)).RootNode;
-            var nodesByIdBuilder = new ComparableReadOnlyDictionary<NodeId, ImmutableSyntaxTreeNode>.Builder();
+            var rootNode = db.GetSyntaxTree(documentPath);
+            var nodesByIdBuilder = new ComparableReadOnlyDictionary<NodeId, SyntaxTreeNode>.Builder();
             var parentNodeIds = new ComparableReadOnlyDictionary<NodeId, NodeId>.Builder();
 
             Traverse(rootNode, nodesByIdBuilder, parentNodeIds);
@@ -34,7 +30,7 @@ namespace Lucy.Core.SemanticAnalysis.Handler
             return new GetNodeMapResult(nodesById, nodesByType, parentNodeIds.Build());
         }
 
-        private void Traverse(ImmutableSyntaxTreeNode node, ComparableReadOnlyDictionary<NodeId, ImmutableSyntaxTreeNode>.Builder nodesById, ComparableReadOnlyDictionary<NodeId, NodeId>.Builder parentNodeIds)
+        private static void Traverse(SyntaxTreeNode node, ComparableReadOnlyDictionary<NodeId, SyntaxTreeNode>.Builder nodesById, ComparableReadOnlyDictionary<NodeId, NodeId>.Builder parentNodeIds)
         {
             nodesById.Add(node.NodeId, node);
 
