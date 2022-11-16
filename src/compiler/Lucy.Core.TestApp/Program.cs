@@ -5,7 +5,7 @@ using Lucy.Core.ProjectManagement;
 using Lucy.Core.SemanticAnalysis;
 using Lucy.Core.SemanticAnalysis.Handler;
 using Lucy.Core.SemanticAnalysis.Handler.ErrorCollectors;
-using Lucy.Core.SemanticAnalysis.Infrasturcture;
+using Lucy.Core.SemanticAnalysis.Infrastructure;
 using Lucy.Core.TestApp;
 using System.Security.Cryptography;
 

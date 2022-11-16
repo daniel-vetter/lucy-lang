@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics;
 
-namespace Lucy.Core.SemanticAnalysis.Infrasturcture;
+namespace Lucy.Core.SemanticAnalysis.Infrastructure;
 
 public abstract class QueryHandler
 {

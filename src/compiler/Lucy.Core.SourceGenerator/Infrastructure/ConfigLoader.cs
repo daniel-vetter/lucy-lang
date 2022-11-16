@@ -1,7 +1,7 @@
 ﻿using System.Collections.Immutable;
 using System.Xml;
 
-namespace Lucy.Core.SourceGenerator
+namespace Lucy.Core.SourceGenerator.Infrastructure
 {
     public class ConfigLoader
     {
@@ -127,7 +127,7 @@ namespace Lucy.Core.SourceGenerator
 
         public Node Node { get; }
         public string Name { get; }
-        public string Type{ get; }
+        public string Type { get; }
         public bool TypeIsNode => Node.Config.ContainsNode(Type);
         public bool IsList { get; set; }
         public bool IsOptional { get; set; }

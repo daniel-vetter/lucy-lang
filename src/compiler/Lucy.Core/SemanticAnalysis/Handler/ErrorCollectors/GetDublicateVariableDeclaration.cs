@@ -2,7 +2,7 @@
 using Lucy.Core.Parsing;
 using Lucy.Core.Parsing.Nodes;
 using Lucy.Core.Parsing.Nodes.Statements.FunctionDeclaration;
-using Lucy.Core.SemanticAnalysis.Infrasturcture;
+using Lucy.Core.SemanticAnalysis.Infrastructure;
 using System;
 using System.Collections.Generic;
 

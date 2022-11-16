@@ -4,7 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 
-namespace Lucy.Core.SemanticAnalysis.Infrasturcture
+namespace Lucy.Core.SemanticAnalysis.Infrastructure
 {
     public enum GraphExportMode
     {
@@ -147,7 +147,7 @@ namespace Lucy.Core.SemanticAnalysis.Infrasturcture
                 node.Label = rootData;
                 return;
             }
-            
+
             var label = new KeyValueTable(query.GetType().Name ?? "root");
             if (_calculatedQueries.TryGetValue(query, out var calculationStats))
             {

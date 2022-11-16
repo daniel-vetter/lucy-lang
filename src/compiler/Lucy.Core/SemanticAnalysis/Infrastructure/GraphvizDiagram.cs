@@ -4,7 +4,7 @@ using System.Globalization;
 using System.Linq;
 using System.Text;
 
-namespace Lucy.Core.SemanticAnalysis.Infrasturcture
+namespace Lucy.Core.SemanticAnalysis.Infrastructure
 {
     public class GraphvizDiagram
     {
@@ -193,7 +193,7 @@ namespace Lucy.Core.SemanticAnalysis.Infrasturcture
             sb.Append("</tr>");
             foreach (var (key, value) in _props)
             {
-                foreach(var (valuePart, isFirst) in Split(value))
+                foreach (var (valuePart, isFirst) in Split(value))
                 {
                     sb.Append("<tr>");
                     if (isFirst)

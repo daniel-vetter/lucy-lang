@@ -1,5 +1,5 @@
 ﻿using Lucy.Core.Model;
-using Lucy.Core.SemanticAnalysis.Infrasturcture;
+using Lucy.Core.SemanticAnalysis.Infrastructure;
 
 namespace Lucy.Core.SemanticAnalysis.Handler
 {

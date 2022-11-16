@@ -2,7 +2,7 @@
 using Lucy.Core.Parsing.Nodes;
 using Lucy.Core.ProjectManagement;
 using Lucy.Core.SemanticAnalysis.Handler;
-using Lucy.Core.SemanticAnalysis.Infrasturcture;
+using Lucy.Core.SemanticAnalysis.Infrastructure;
 using Lucy.Core.SemanticAnalysis.Inputs;
 using System;
 using System.Diagnostics;

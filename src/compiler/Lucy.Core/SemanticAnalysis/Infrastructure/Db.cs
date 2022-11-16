@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 
-namespace Lucy.Core.SemanticAnalysis.Infrasturcture
+namespace Lucy.Core.SemanticAnalysis.Infrastructure
 {
     public class Db
     {
@@ -85,11 +85,11 @@ namespace Lucy.Core.SemanticAnalysis.Infrasturcture
                     return Recalculate(entry);
                 }
             }
-            
+
             entry.LastChecked = _currentRevision;
             return false;
         }
-        
+
         public TQueryResult Query<TQueryResult>(IQuery<TQueryResult> query) where TQueryResult : notnull
         {
             return (TQueryResult)(Query(query, null).Result ?? throw new Exception("Query was not executed."));

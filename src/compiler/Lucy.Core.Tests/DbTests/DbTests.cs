@@ -1,4 +1,4 @@
-using Lucy.Core.SemanticAnalysis.Infrasturcture;
+using Lucy.Core.SemanticAnalysis.Infrastructure;
 using Shouldly;
 
 namespace Lucy.Core.Tests.DbTests

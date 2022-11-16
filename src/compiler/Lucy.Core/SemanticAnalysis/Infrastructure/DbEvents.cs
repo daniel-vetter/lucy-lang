@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Lucy.Core.SemanticAnalysis.Infrasturcture;
+namespace Lucy.Core.SemanticAnalysis.Infrastructure;
 
 public enum ResultType
 {

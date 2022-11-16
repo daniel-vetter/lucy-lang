@@ -1,6 +1,6 @@
 ﻿using Lucy.Core.Model;
 using Lucy.Core.Parsing.Nodes;
-using Lucy.Core.SemanticAnalysis.Infrasturcture;
+using Lucy.Core.SemanticAnalysis.Infrastructure;
 using Lucy.Core.SemanticAnalysis.Inputs;
 using System;
 using System.Linq;

@@ -1,8 +1,6 @@
 ﻿using Lucy.Core.Model;
 using Lucy.Core.Parsing.Nodes;
-using Lucy.Core.SemanticAnalysis.Infrasturcture;
-using System;
-using System.Linq.Expressions;
+using Lucy.Core.SemanticAnalysis.Infrastructure;
 
 namespace Lucy.Core.SemanticAnalysis.Handler
 {
@@ -15,11 +13,6 @@ namespace Lucy.Core.SemanticAnalysis.Handler
     
     public class GetFunctionInfoHandler : QueryHandler<GetFunctionInfo, GetFunctionInfoResult>
     {
-        public void Run(int test)
-        {
-            
-        }
-
         public override GetFunctionInfoResult Handle(IDb db, GetFunctionInfo query)
         {
             var name = query.Declaration.FunctionName.Token.Text;
@@ -37,28 +30,7 @@ namespace Lucy.Core.SemanticAnalysis.Handler
                 Parameters: parameters.Build()
             );
 
-            var r = db.DoSome("awd");
-
             return new GetFunctionInfoResult(info);
-        }
-    }
-
-    public static class MyHandler
-    {
-        [DbHelper.DbQueryHandlerAttribute()] /// <see cref="DoSomeExtension.DoSome"/>
-        public static int DoSome(IDb db, string blub)
-        {
-            return 0;
-        }
-    }
-
-    public class TestAttribute : System.Attribute
-    {
-        public delegate object Del(IDb db);
-
-        public TestAttribute(string exp)
-        {
-
         }
     }
 }

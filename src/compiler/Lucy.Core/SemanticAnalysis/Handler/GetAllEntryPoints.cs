@@ -1,12 +1,12 @@
 ﻿using Lucy.Core.Parsing.Nodes;
-using Lucy.Core.SemanticAnalysis.Infrasturcture;
+using Lucy.Core.SemanticAnalysis.Infrastructure;
 using Lucy.Core.SemanticAnalysis.Inputs;
 
 namespace Lucy.Core.SemanticAnalysis.Handler
 {
     public class GetAllEntryPointsHandler
     {
-        [DbHelper.DbQueryHandler] ///<see cref="GetAllEntryPointsEx.GetAllEntryPoints"/>
+        [GenerateDbExtension] ///<see cref="GetAllEntryPointsEx.GetAllEntryPoints"/>
         public static ComparableReadOnlyList<FunctionInfo> GetAllEntryPoints(IDb db)
         {
             var paths = db.Query(new GetDocumentList()).Paths;
