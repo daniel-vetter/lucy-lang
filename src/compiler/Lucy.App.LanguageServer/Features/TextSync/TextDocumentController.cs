@@ -5,6 +5,7 @@ using Lucy.Feature.LanguageServer.Models;
 using Lucy.Common.ServiceDiscovery;
 using Lucy.App.LanguageServer.Infrastructure;
 using System;
+using Lucy.Core.ProjectManagement;
 
 namespace Lucy.Feature.LanguageServer.RpcController
 {
@@ -23,9 +24,6 @@ namespace Lucy.Feature.LanguageServer.RpcController
         [JsonRpcFunction("textDocument/didOpen", deserializeParamterIntoSingleObject: false)]
         public Task DidOpen(RpcTextDocumentItem textDocument)
         {
-            if (_currentWorkspace.Workspace == null)
-                throw new Exception("No workspace loaded.");
-
             _currentWorkspace.AddOrUpdate(textDocument.Uri, textDocument.Text);
             //await _diagnosticsReporter.Report();
             return Task.CompletedTask;
@@ -40,12 +38,14 @@ namespace Lucy.Feature.LanguageServer.RpcController
         [JsonRpcFunction("textDocument/didChange", deserializeParamterIntoSingleObject: false)]
         public Task DidChange(RpcVersionedTextDocumentIdentifier textDocument, ImmutableArray<RpcTextDocumentContentChangeEvent> contentChanges)
         {
-            foreach(var change in contentChanges)
+            foreach (var change in contentChanges)
             {
-                if (change.Range != null)
-                    throw new Exception("Incremental changes currently not supported.");
-
-                _currentWorkspace.AddOrUpdate(textDocument.Uri, change.Text);
+                if (change.Range == null)
+                    _currentWorkspace.AddOrUpdate(textDocument.Uri, change.Text);
+                else
+                    _currentWorkspace.IncrementelUpdate(textDocument.Uri, new Range2D(
+                        new Position2D(change.Range.Start.Line, change.Range.Start.Character),
+                        new Position2D(change.Range.End.Line, change.Range.End.Character)), change.Text);
             }
 
             //await _diagnosticsReporter.Report();

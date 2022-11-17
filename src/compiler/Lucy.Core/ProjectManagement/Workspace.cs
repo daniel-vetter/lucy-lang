@@ -29,50 +29,74 @@ namespace Lucy.Core.ProjectManagement
             foreach (var file in await Task.WhenAll(tasks))
             {
                 var subPath = file.Path.Substring(path.Length).Replace("\\", "/");
-                ws.AddOrUpdateFile(subPath, file.Content);
+                ws.AddFile(subPath, file.Content);
             }
             return ws;
         }
 
-        public void AddOrUpdateFile(string path, string content)
+        public void AddFile(string path, string content)
         {
+            if (_documents.ContainsKey(path))
+                throw new Exception("A file named '" + path + "' already exists.");
+
             if (path.EndsWith(".lucy"))
             {
                 var document = new CodeFile(path, content, Parser.Parse(path, content));
-                if (_documents.TryGetValue(path, out var oldDocument))
-                {
-                    _documents = _documents.SetItem(document.Path, document);
-                    _eventSubscriptions.Publish(new DocumentChanged(oldDocument, document));
-                }
-                else
-                {
-                    _documents = _documents.Add(document.Path, document);
-                    _eventSubscriptions.Publish(new DocumentAdded(document));
-                }
+                _documents = _documents.Add(document.Path, document);
+                _eventSubscriptions.Publish(new DocumentAdded(document));
             }
             else
                 throw new NotSupportedException("Could not determin type of workspace file: " + path);
         }
 
+        public void UpdateFile(string path, string content)
+        {
+            if (!_documents.TryGetValue(path, out var oldDocument))
+                throw new Exception("A file named '" + path + "' does not exist.");
+
+            var document = new CodeFile(path, content, Parser.Parse(path, content));
+            _documents = _documents.SetItem(document.Path, document);
+            _eventSubscriptions.Publish(new DocumentChanged(oldDocument, document));
+        }
+
+        public void UpdateFile(string path, Range2D range, string content)
+        {
+            if (!_documents.TryGetValue(path, out var document))
+                throw new Exception("A file named '" + path + "' does not exist.");
+
+            UpdateFile(path, document.ConvertTo1D(range), content);
+        }
+
+        public void UpdateFile(string path, Range1D range, string content)
+        {
+            if (!_documents.TryGetValue(path, out var document))
+                throw new Exception("A file named '" + path + "' does not exist.");
+
+            if (document is not CodeFile codeFile)
+                throw new Exception($"Incrental update of '{path}' is not supported.");
+
+            var pre = codeFile.Content.Substring(0, range.Start.Position);
+            var post = codeFile.Content.Substring(range.End.Position);
+
+            UpdateFile(path, pre + content + post);
+        }
+
         public void RemoveFile(string path)
         {
             if (!_documents.TryGetValue(path, out var document))
-                throw new Exception("This workspace does not contain a document with the path: " + path);
+                throw new Exception("A file named '" + path + "' does not exist.");
             _documents.Remove(path);
             _eventSubscriptions.Publish(new DocumentRemoved(document));
         }
 
         public bool ContainsFile(string path) => _documents.TryGetValue(path, out var document);
 
-        public CodeFile GetCodeFile(string path)
+        public WorkspaceDocument GetFile(string path)
         {
             if (!_documents.TryGetValue(path, out var document))
-                throw new Exception("This workspace does not contain a code file with path: " + path);
+                throw new Exception("This workspace does not contain a file with path: " + path);
 
-            if (document is not CodeFile cf)
-                throw new Exception("This workspace does contain a file with path " + path + " but it is not a code file.");
-
-            return cf;
+            return document;
         }
     }
 

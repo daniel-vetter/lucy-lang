@@ -11,7 +11,7 @@ export function getLanguageClientFor(workespaceFolder: WorkspaceFolder): Languag
     }
     
     const serverOptions: ServerOptions = {
-        command: "C:\\OneDrive\\coding\\csharp\\Lucy2\\src\\compiler\\Lucy.App.LanguageServer\\bin\\Debug\\net5.0\\Lucy.App.LanguageServer.exe",
+        command: "C:\\OneDrive\\coding\\csharp\\lucy-lang\\src\\compiler\\Lucy.App.LanguageServer\\bin\\Debug\\net7.0\\Lucy.App.LanguageServer.exe",
         transport: TransportKind.stdio
     }
     const clientOptions: LanguageClientOptions = {

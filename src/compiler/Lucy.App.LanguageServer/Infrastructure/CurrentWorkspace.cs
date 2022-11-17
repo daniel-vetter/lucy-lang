@@ -10,8 +10,8 @@ namespace Lucy.App.LanguageServer.Infrastructure
     {
         private readonly IFileSystem _fileSystem;
 
-        public Workspace? Workspace { get; private set; }
-        public SystemPath? RootPath { get; private set; }
+        private Workspace? _workspace;
+        private SystemPath? _rootPath;
 
         public CurrentWorkspace(IFileSystem fileSystem)
         {
@@ -20,36 +20,57 @@ namespace Lucy.App.LanguageServer.Infrastructure
 
         public async Task Load(SystemPath path)
         {
+            if (_workspace != null)
+                throw new InvalidOperationException("A workspace is already loaded");
+
             var ws = new Workspace();
             var rootPathLength = path.ToString().Length;
             var files = await _fileSystem.GetFilesInDirectory(path);
             
             foreach(var file in files)
-                ws.AddOrUpdateFile(file.ToString().Substring(rootPathLength).Replace("\\", "/"), await _fileSystem.ReadAllText(file));
+                ws.AddFile(file.ToString().Substring(rootPathLength).Replace("\\", "/"), await _fileSystem.ReadAllText(file));
 
-            Workspace = ws;
-            RootPath = path;
+            _workspace = ws;
+            _rootPath = path;
         }
 
         public void AddOrUpdate(SystemPath path, string content)
         {
-            Workspace.AddOrUpdateFile(ToWorkspacePath(path), content);
+            if (_workspace == null)
+                throw new InvalidOperationException("No workspace was loaded");
+
+            var workspacePath = ToWorkspacePath(path);
+
+            if (_workspace.ContainsFile(workspacePath))
+                _workspace.UpdateFile(workspacePath, content);
+            else
+                _workspace.AddFile(ToWorkspacePath(path), content);
+        }
+
+        public void IncrementelUpdate(SystemPath path, Range2D range, string content)
+        {
+            if (_workspace == null)
+                throw new InvalidOperationException("No workspace was loaded");
+
+            var workspacePath = ToWorkspacePath(path);
+
+            _workspace.UpdateFile(workspacePath, range, content);
         }
 
         public string ToWorkspacePath(SystemPath systemPath)
         {
-            if (RootPath == null)
-                throw new Exception("No workspace path availible.");
+            if (_rootPath == null)
+                throw new InvalidOperationException("No workspace was loaded");
 
-            return systemPath.ToString().Substring(RootPath.ToString().Length).Replace("\\", "/");
+            return systemPath.ToString().Substring(_rootPath.ToString().Length).Replace("\\", "/");
         }
 
         public SystemPath ToSystemPath(string workspacePath)
         {
-            if (RootPath == null)
-                throw new Exception("No workspace path availible.");
+            if (_rootPath == null)
+                throw new InvalidOperationException("No workspace was loaded");
 
-            return RootPath.Append(workspacePath);
+            return _rootPath.Append(workspacePath);
         }
     }
 }

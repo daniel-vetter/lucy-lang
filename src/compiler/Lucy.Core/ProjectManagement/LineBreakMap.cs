@@ -5,8 +5,8 @@ namespace Lucy.Core.ProjectManagement
 {
     public class LineBreakMap
     {
-        private int[] _lineStart;
-        private int[] _lineLengths;
+        private List<int> _lineStart;
+        private List<int> _lineLengths;
 
         public LineBreakMap(string content)
         {
@@ -31,54 +31,50 @@ namespace Lucy.Core.ProjectManagement
                 starts.Add(start);
             }
 
-            _lineLengths = lengths.ToArray();
-            _lineStart = starts.ToArray();
+            _lineLengths = lengths;
+            _lineStart = starts;
         }
 
-        public Position2D ConvertTo2D(int position)
+        public Position2D To2D(Position1D position)
         {
-            if (position < 0)
-                throw new ArgumentException("Invalid position: " + position, nameof(position));
+            if (position.Position < 0)
+                throw new ArgumentException("Invalid position: " + position.Position, nameof(position.Position));
 
-            if (position > _lineStart[^1] + _lineLengths[^1])
-                return new Position2D(_lineStart.Length - 1, _lineLengths[^1]);
+            if (position.Position > _lineStart[^1] + _lineLengths[^1])
+                return new Position2D(_lineStart.Count - 1, _lineLengths[^1]);
 
             var index = FindIndex(i =>
             {
-                if (position < _lineStart[i]) return 1;
-                if (position > _lineStart[i] + _lineLengths[i]) return -1;
+                if (position.Position < _lineStart[i]) return 1;
+                if (position.Position > _lineStart[i] + _lineLengths[i]) return -1;
                 return 0;
             });
 
             if (index == -1)
                 throw new Exception("Invalid position: " + position);
 
-            return new Position2D(index, position - _lineStart[index]);
+            return new Position2D(index, position.Position - _lineStart[index]);
         }
 
-        public int ConvertTo1D(Position2D position)
+        public Position1D To1D(Position2D position)
         {
-            return ConvertTo1D(position.Line, position.Character);
-        }
+            if (position.Line < 0) throw new ArgumentException("Invalid line: " + position.Line, nameof(position));
+            if (position.Character < 0) throw new ArgumentException("Invalid character: " + position.Character, nameof(position));
 
-        public int ConvertTo1D(int line, int character)
-        {
-            if (line < 0) throw new ArgumentException("Invalid line: " + line, nameof(line));
-            if (character < 0) throw new ArgumentException("Invalid character: " + character, nameof(character));
+            if (position.Line >= _lineStart.Count)
+                return new Position1D(_lineStart[^1] + _lineLengths[^1]);
 
-            if (line >= _lineStart.Length)
-                return _lineStart[^1] + _lineLengths[^1];
+            var c = position.Character;
+            if (position.Character > _lineLengths[position.Line])
+                c = _lineLengths[position.Line];
 
-            if (character > _lineLengths[line])
-                character = _lineLengths[line];
-
-            return _lineStart[line] + character;
+            return new Position1D(_lineStart[position.Line] + c);
         }
 
         private int FindIndex(Func<int, int> compare)
         {
             var min = 0;
-            var max = _lineLengths.Length;
+            var max = _lineLengths.Count;
             var mid = ((max - min) / 2) + min;
             while (min < max)
             {
@@ -89,12 +85,15 @@ namespace Lucy.Core.ProjectManagement
                     max = mid - 1;
                 else return mid;
             }
-            if (min == max && min < _lineLengths.Length && compare(min) == 0)
+            if (min == max && min < _lineLengths.Count && compare(min) == 0)
                 return min;
 
             return -1;
         }
     }
 
+    public record Position1D(int Position);
+    public record Range1D(Position1D Start, Position1D End);
     public record Position2D(int Line, int Character);
+    public record Range2D(Position2D Start, Position2D End);
 }

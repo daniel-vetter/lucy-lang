@@ -6,14 +6,14 @@ namespace Lucy.Core.TestApp;
 internal class TestCaseReader
 {
     private readonly Workspace _workspace;
-    private Dictionary<int, List<CodeFile>> _versions;
+    private Dictionary<int, List<(string Path, string Content)>> _versions;
     private int _currentVersion = 0;
 
     public TestCaseReader(Workspace workspace, string dir)
     {
         dir = Path.GetFullPath(dir);
         var files = Directory.GetFiles(dir, "*.lucy", SearchOption.AllDirectories);
-        _versions = new Dictionary<int, List<CodeFile>>();
+        _versions = new Dictionary<int, List<(string Path, string Content)>>();
         foreach (var file in files)
         {
             var content = File.ReadAllText(file);
@@ -31,11 +31,11 @@ internal class TestCaseReader
 
             if (!_versions.TryGetValue(version, out var list))
             {
-                list = new List<CodeFile>();
+                list = new List<(string, string)>();
                 _versions[version] = list;
             }
 
-            list.Add(new CodeFile(workspacePath, content, Parser.Parse(workspacePath, content)));
+            list.Add((workspacePath, content));
         }
         _workspace = workspace;
     }
@@ -50,7 +50,10 @@ internal class TestCaseReader
         foreach (var file in files)
         {
             Console.WriteLine("Appling " + file.Path + " v" + _currentVersion);
-            _workspace.AddOrUpdateDocument(file);
+            if (_workspace.ContainsFile(file.Path))
+                _workspace.UpdateFile(file.Path, file.Content);
+            else
+                _workspace.AddFile(file.Path, file.Content);
         }
         return true;
     }
