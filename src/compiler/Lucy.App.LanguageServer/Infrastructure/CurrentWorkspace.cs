@@ -1,5 +1,7 @@
 ﻿using Lucy.Common.ServiceDiscovery;
 using Lucy.Core.ProjectManagement;
+using Lucy.Core.SemanticAnalysis;
+using Lucy.Core.SemanticAnalysis.Infrastructure;
 using System;
 using System.Threading.Tasks;
 
@@ -11,12 +13,15 @@ namespace Lucy.App.LanguageServer.Infrastructure
         private readonly IFileSystem _fileSystem;
 
         private Workspace? _workspace;
+        private SemanticDatabase? _semanticDatabase;
         private SystemPath? _rootPath;
 
         public CurrentWorkspace(IFileSystem fileSystem)
         {
             _fileSystem = fileSystem;
         }
+
+        public IDb Analysis => _semanticDatabase ?? throw new Exception("No workspace was loaded");
 
         public async Task Load(SystemPath path)
         {
@@ -30,6 +35,7 @@ namespace Lucy.App.LanguageServer.Infrastructure
             foreach(var file in files)
                 ws.AddFile(file.ToString().Substring(rootPathLength).Replace("\\", "/"), await _fileSystem.ReadAllText(file));
 
+            _semanticDatabase = new SemanticDatabase(ws);
             _workspace = ws;
             _rootPath = path;
         }

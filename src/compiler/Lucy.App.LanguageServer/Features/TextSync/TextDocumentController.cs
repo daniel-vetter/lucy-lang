@@ -6,6 +6,7 @@ using Lucy.Common.ServiceDiscovery;
 using Lucy.App.LanguageServer.Infrastructure;
 using System;
 using Lucy.Core.ProjectManagement;
+using Lucy.App.LanguageServer.Features.Diagnoistics;
 
 namespace Lucy.Feature.LanguageServer.RpcController
 {
@@ -13,20 +14,19 @@ namespace Lucy.Feature.LanguageServer.RpcController
     internal class TextDocumentController
     {
         private readonly CurrentWorkspace _currentWorkspace;
-        //private readonly DiagnosticsReporter _diagnosticsReporter;
+        private readonly DiagnosticsReporter _diagnosticsReporter;
 
-        public TextDocumentController(CurrentWorkspace currentWorkspace/*, DiagnosticsReporter diagnosticsReporter*/)
+        public TextDocumentController(CurrentWorkspace currentWorkspace, DiagnosticsReporter diagnosticsReporter)
         {
             _currentWorkspace = currentWorkspace;
-            //_diagnosticsReporter = diagnosticsReporter;
+            _diagnosticsReporter = diagnosticsReporter;
         }
 
         [JsonRpcFunction("textDocument/didOpen", deserializeParamterIntoSingleObject: false)]
-        public Task DidOpen(RpcTextDocumentItem textDocument)
+        public async Task DidOpen(RpcTextDocumentItem textDocument)
         {
             _currentWorkspace.AddOrUpdate(textDocument.Uri, textDocument.Text);
-            //await _diagnosticsReporter.Report();
-            return Task.CompletedTask;
+            await _diagnosticsReporter.Report();
         }
 
         [JsonRpcFunction("textDocument/didClose", deserializeParamterIntoSingleObject: false)]
@@ -36,7 +36,7 @@ namespace Lucy.Feature.LanguageServer.RpcController
         }
 
         [JsonRpcFunction("textDocument/didChange", deserializeParamterIntoSingleObject: false)]
-        public Task DidChange(RpcVersionedTextDocumentIdentifier textDocument, ImmutableArray<RpcTextDocumentContentChangeEvent> contentChanges)
+        public async Task DidChange(RpcVersionedTextDocumentIdentifier textDocument, ImmutableArray<RpcTextDocumentContentChangeEvent> contentChanges)
         {
             foreach (var change in contentChanges)
             {
@@ -48,8 +48,7 @@ namespace Lucy.Feature.LanguageServer.RpcController
                         new Position2D(change.Range.End.Line, change.Range.End.Character)), change.Text);
             }
 
-            //await _diagnosticsReporter.Report();
-            return Task.CompletedTask;
+            await _diagnosticsReporter.Report();
         }
     }
 }

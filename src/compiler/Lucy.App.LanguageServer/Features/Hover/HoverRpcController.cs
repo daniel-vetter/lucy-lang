@@ -9,7 +9,6 @@ using System.Text;
 
 namespace Lucy.App.LanguageServer.Features.Hover
 {
-    /*
     [Service(Lifetime.Singleton)]
     internal class HoverRpcController
     {
@@ -23,6 +22,7 @@ namespace Lucy.App.LanguageServer.Features.Hover
         [JsonRpcFunction("textDocument/hover")]
         public RpcHover? TextDocumentHover(RpcHoverParams input)
         {
+            /*
             if (_currentWorkspace.Workspace == null)
                 throw new Exception("No workspace loaded.");
 
@@ -37,16 +37,15 @@ namespace Lucy.App.LanguageServer.Features.Hover
                 sb.AppendLine(" * " + node.GetType().Name);
                 sb.AppendLine();
             }
-
+            */
             return new RpcHover
             {
                 Contents = new RpcMarkupContent
                 {
                     Kind = RpcMarkupKind.Markdown,
-                    Value = sb.ToString()
+                    Value = "Test" //sb.ToString()
                 }
             };
         }
     }
-    */
 }

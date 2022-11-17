@@ -1,17 +1,18 @@
 ﻿using Lucy.App.LanguageServer.Infrastructure;
 using Lucy.Common.ServiceDiscovery;
 using Lucy.Core.Model;
+using Lucy.Core.SemanticAnalysis.Inputs;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace Lucy.App.LanguageServer.Features.Debug
 {
-    /*
     [Service(Lifetime.Singleton)]
     public class DebugViewGenerator
     {
@@ -43,7 +44,7 @@ namespace Lucy.App.LanguageServer.Features.Debug
                     var map = GetObjectPropertyNames(node);
                     var children = node.GetChildNodes();
 
-                    var props = node.GetType().GetProperties();
+                    var props = Rearrange(node.GetType().GetProperties());
 
                     sb.Append("<ul>");
                     foreach (var prop in props)
@@ -54,7 +55,7 @@ namespace Lucy.App.LanguageServer.Features.Debug
                         var value = prop.GetValue(node);
                         WriteValueHeader(sb, value);
                         sb.Append("</li>");
-                        Process(value);   
+                        Process(value);
                     }
                     sb.Append("</ul>");
                 }
@@ -76,22 +77,29 @@ namespace Lucy.App.LanguageServer.Features.Debug
                 }
             }
 
-            if (_currentWorkspace.Workspace != null)
+            sb.Append("<ul class='tree'>");
+            foreach (var doc in _currentWorkspace.Analysis.GetDocumentList()) //TODO: Use CurrentWorkspace directly without using the analysis
             {
-                sb.Append("<ul class='tree'>");
-                foreach (var document in _currentWorkspace.Workspace.Documents)
-                {
-                    sb.Append($"<li>{document.Path}</li>");
-                    if (document.SyntaxTree == null)
-                        sb.Append("<li>No syntax tree</li>");
-                    else
-                        Process(document.SyntaxTree);
-                }
-                sb.Append("</ul>");
+                var syntaxTree = _currentWorkspace.Analysis.GetSyntaxTree(doc);
+                sb.Append($"<li>{doc}</li>");
+                Process(syntaxTree);
+
             }
+            sb.Append("</ul>");
 
             html = sb.ToString() + html;
             return html;
+        }
+
+        private PropertyInfo[] Rearrange(PropertyInfo[] propertyInfos)
+        {
+            var list = propertyInfos.ToList();
+            var matching = list.Where(x => x.Name == "NodeId").ToArray();
+            foreach (var toRemove in matching)
+                list.Remove(toRemove);
+            foreach (var toInsert in matching)
+                list.Insert(0, toInsert);
+            return list.ToArray();
         }
 
         private static void WriteValueHeader(StringBuilder sb, object? value)
@@ -108,9 +116,13 @@ namespace Lucy.App.LanguageServer.Features.Debug
             {
                 sb.Append($"{value.GetType().Name} <span class=\"string\">\"{str}\"</span>");
             }
+            else if (value is NodeId nodeId)
+            {
+                sb.Append($"{value.GetType().Name} <span class=\"nodeId\">\"{nodeId.ToString()}\"</span>");
+            }
             else if (value is IEnumerable<object> list)
             {
-                sb.Append("<span style='opacity: 0.5'>&lt;list of " + list.Count()  + " elements&gt;</span>");
+                sb.Append("<span style='opacity: 0.5'>&lt;list of " + list.Count() + " elements&gt;</span>");
             }
             else
             {
@@ -150,5 +162,4 @@ namespace Lucy.App.LanguageServer.Features.Debug
             public override int GetHashCode(T obj) => RuntimeHelpers.GetHashCode(obj);
         }
     }
-    */
 }

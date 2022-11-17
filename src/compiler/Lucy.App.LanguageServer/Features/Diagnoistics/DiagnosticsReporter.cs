@@ -1,22 +1,23 @@
 ﻿using Lucy.App.LanguageServer.Infrastructure;
 using Lucy.Common.ServiceDiscovery;
-using Lucy.Core.Model;
-using Lucy.Core.Parsing;
-using Lucy.Core.ProjectManagement;
+using Lucy.Core.SemanticAnalysis.Handler.ErrorCollectors;
 using Lucy.Feature.LanguageServer.Models;
-using Lucy.Feature.LanguageServer.Services;
 using Lucy.Infrastructure.RpcServer;
+using System;
 using System.Collections.Generic;
+using System.Data.Common;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Lucy.App.LanguageServer.Features.Diagnoistics
 {
-    /*
     [Service]
     public class DiagnosticsReporter
     {
         private readonly CurrentWorkspace _currentWorkspace;
         private readonly JsonRpcServer _jsonRpcServer;
+        private HashSet<string> _documentsWithErrorsInLastReport = new();
+
 
         public DiagnosticsReporter(CurrentWorkspace currentWorkspace, JsonRpcServer jsonRpcServer)
         {
@@ -26,55 +27,45 @@ namespace Lucy.App.LanguageServer.Features.Diagnoistics
 
         public async Task Report()
         {
-            if (_currentWorkspace.RootPath == null || _currentWorkspace.Workspace == null)
-                return;
+            var errors = _currentWorkspace.Analysis.GetAllErrors();
 
-            foreach (var doc in _currentWorkspace.Workspace.Documents)
+            
+
+            var documentsToReport = errors
+                .GroupBy(x => x.NodeId.DocumentPath)
+                .Select(x => new ReportJob(x.Key, x.ToArray()))
+                .ToList();
+
+            var documents = documentsToReport
+                .Select(x => x.DocumentPath)
+                .ToHashSet();
+
+            foreach(var document in _documentsWithErrorsInLastReport.Except(documents))
             {
-                var issues = GetIssues(doc);
+                documentsToReport.Add(new ReportJob(document, Array.Empty<Error>()));
+            }
 
+            _documentsWithErrorsInLastReport = documents;
+
+            foreach (var documentWithError in documentsToReport)
+            {
                 await _jsonRpcServer.SendNotification("textDocument/publishDiagnostics", new RpcPublishDiagnosticsParams
                 {
-                    Diagnostics = issues,
-                    Uri = _currentWorkspace.ToSystemPath(doc.Path)
+                    Diagnostics = documentWithError.Errors.Select(x =>
+                    {
+                        return new RpcDiagnostic 
+                        {
+                            Range = new RpcRange(),
+                            Code = "01",
+                            Severity = RpcDiagnosticSeverity.Error,
+                            Message = x.Message
+                        };
+                    }).ToArray(),
+                    Uri = _currentWorkspace.ToSystemPath(documentWithError.DocumentPath)
                 });
             }
         }
 
-        private RpcDiagnostic[] GetIssues(CodeFile doc)
-        {
-            List<RpcDiagnostic> result = new();
-            void Walk(SyntaxTreeNode node)
-            {
-                foreach (var child in node.GetChildNodes())
-                {
-                    if (child.Source is Syntetic source)
-                    {
-                        var range = child.GetRange();
-                        result.Add(new RpcDiagnostic
-                        {
-                            Range = new RpcRange
-                            {
-                                Start = new RpcPosition { Line = range.Start.Line, Character = range.Start.Column },
-                                End = new RpcPosition { Line = range.End.Line, Character = range.End.Column },
-                            },
-                            Code = "M",
-                            Message = source.ErrorMessage ?? "<missing error message on node " + child.GetType().Name + ">",
-                            Severity = RpcDiagnosticSeverity.Error,
-                            Source = "lucy",
-                        });
-                    }
-                    else
-                    {
-                        Walk(child);
-                    }
-                }
-            }
-
-            if (doc.SyntaxTree != null)
-                Walk(doc.SyntaxTree);
-            return result.ToArray();
-        }
+        private record ReportJob(string DocumentPath, Error[] Errors);
     }
-    */
 }
