@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 
 namespace Lucy.App.LanguageServer.Features.Debug
 {
+    /*
     [Service(Lifetime.Singleton)]
     public class DebugRpcController
     {
@@ -42,4 +43,5 @@ namespace Lucy.App.LanguageServer.Features.Debug
             //return WinExecutableEmitter.GetAssemblyCode(_currentWorkspace.Workspace);
         }
     }
+    */
 }

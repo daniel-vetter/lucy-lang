@@ -23,15 +23,17 @@ namespace Lucy.App.LanguageServer.Infrastructure
             var ws = new Workspace();
             var rootPathLength = path.ToString().Length;
             var files = await _fileSystem.GetFilesInDirectory(path);
+            
             foreach(var file in files)
-            {
-                ws.AddDocument(file.ToString().Substring(rootPathLength).Replace("\\", "/"), await _fileSystem.ReadAllText(file));
-            }
+                ws.AddOrUpdateFile(file.ToString().Substring(rootPathLength).Replace("\\", "/"), await _fileSystem.ReadAllText(file));
 
             Workspace = ws;
             RootPath = path;
+        }
 
-            Process();
+        public void AddOrUpdate(SystemPath path, string content)
+        {
+            Workspace.AddOrUpdateFile(ToWorkspacePath(path), content);
         }
 
         public string ToWorkspacePath(SystemPath systemPath)
@@ -48,14 +50,6 @@ namespace Lucy.App.LanguageServer.Infrastructure
                 throw new Exception("No workspace path availible.");
 
             return RootPath.Append(workspacePath);
-        }
-
-        public void Process()
-        {
-            if (Workspace == null)
-                throw new Exception("No workspace is loaded.");
-
-            Workspace.Process();
         }
     }
 }

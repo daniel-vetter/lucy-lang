@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 
 namespace Lucy.App.LanguageServer.Features.Debug
 {
+    /*
     [Service(Lifetime.Singleton)]
     public class DebugViewGenerator
     {
@@ -149,4 +150,5 @@ namespace Lucy.App.LanguageServer.Features.Debug
             public override int GetHashCode(T obj) => RuntimeHelpers.GetHashCode(obj);
         }
     }
+    */
 }

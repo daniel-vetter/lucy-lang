@@ -9,6 +9,7 @@ using System.Text;
 
 namespace Lucy.App.LanguageServer.Features.Hover
 {
+    /*
     [Service(Lifetime.Singleton)]
     internal class HoverRpcController
     {
@@ -47,4 +48,5 @@ namespace Lucy.App.LanguageServer.Features.Hover
             };
         }
     }
+    */
 }

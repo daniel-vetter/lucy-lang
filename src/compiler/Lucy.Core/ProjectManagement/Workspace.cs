@@ -29,36 +29,32 @@ namespace Lucy.Core.ProjectManagement
             foreach (var file in await Task.WhenAll(tasks))
             {
                 var subPath = file.Path.Substring(path.Length).Replace("\\", "/");
-                ws.AddCodeFile(subPath, file.Content);
+                ws.AddOrUpdateFile(subPath, file.Content);
             }
             return ws;
         }
 
-        public void AddCodeFile(string path, string content)
+        public void AddOrUpdateFile(string path, string content)
         {
-            AddDocument(new CodeFile(path, content, Parser.Parse(path, content)));
-        }
-
-        private void AddDocument(WorkspaceDocument document)
-        {
-            _documents = _documents.Add(document.Path, document);            
-            _eventSubscriptions.Publish(new DocumentAdded(document));
-        }
-
-        public void AddOrUpdateDocument(WorkspaceDocument document)
-        {
-            if (_documents.TryGetValue(document.Path, out var oldDocument))
+            if (path.EndsWith(".lucy"))
             {
-                _documents = _documents.SetItem(document.Path, document);
-                _eventSubscriptions.Publish(new DocumentChanged(oldDocument, document));
+                var document = new CodeFile(path, content, Parser.Parse(path, content));
+                if (_documents.TryGetValue(path, out var oldDocument))
+                {
+                    _documents = _documents.SetItem(document.Path, document);
+                    _eventSubscriptions.Publish(new DocumentChanged(oldDocument, document));
+                }
+                else
+                {
+                    _documents = _documents.Add(document.Path, document);
+                    _eventSubscriptions.Publish(new DocumentAdded(document));
+                }
             }
             else
-            {
-                AddDocument(document);
-            }
+                throw new NotSupportedException("Could not determin type of workspace file: " + path);
         }
 
-        public void Remove(string path)
+        public void RemoveFile(string path)
         {
             if (!_documents.TryGetValue(path, out var document))
                 throw new Exception("This workspace does not contain a document with the path: " + path);
@@ -66,7 +62,7 @@ namespace Lucy.Core.ProjectManagement
             _eventSubscriptions.Publish(new DocumentRemoved(document));
         }
 
-        public bool Contains(string path) => _documents.TryGetValue(path, out var document);
+        public bool ContainsFile(string path) => _documents.TryGetValue(path, out var document);
 
         public CodeFile GetCodeFile(string path)
         {

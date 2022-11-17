@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 
 namespace Lucy.App.LanguageServer.Features.Diagnoistics
 {
+    /*
     [Service]
     public class DiagnosticsReporter
     {
@@ -75,4 +76,5 @@ namespace Lucy.App.LanguageServer.Features.Diagnoistics
             return result.ToArray();
         }
     }
+    */
 }

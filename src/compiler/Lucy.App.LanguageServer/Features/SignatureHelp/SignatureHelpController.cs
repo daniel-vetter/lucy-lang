@@ -14,6 +14,7 @@ using Lucy.Core.Model;
 
 namespace Lucy.App.LanguageServer.Features.SignatureHelp
 {
+    /*
     [Service]
     public class SignatureHelpController
     {
@@ -102,4 +103,5 @@ namespace Lucy.App.LanguageServer.Features.SignatureHelp
             return functionCall.ArgumentList.Count;
         }
     }
+    */
 }
