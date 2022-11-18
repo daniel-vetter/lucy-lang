@@ -53,6 +53,33 @@ namespace Lucy.App.LanguageServer.Infrastructure
                 _workspace.AddFile(ToWorkspacePath(path), content);
         }
 
+        public Position1D ToPosition1D(SystemPath systemPath, Position2D position2D) => ToPosition1D(ToWorkspacePath(systemPath), position2D);
+        public Position1D ToPosition1D(string documentPath, Position2D position2D)
+        {
+            if (_workspace == null)
+                throw new InvalidOperationException("No workspace was loaded");
+
+            return _workspace.GetFile(documentPath).ConvertTo1D(position2D);
+        }
+
+        public Position2D ToPosition2D(SystemPath systemPath, Position1D position1D) => ToPosition2D(ToWorkspacePath(systemPath), position1D);
+        public Position2D ToPosition2D(string documentPath, Position1D position1D)
+        {
+            if (_workspace == null)
+                throw new InvalidOperationException("No workspace was loaded");
+
+            return _workspace.GetFile(documentPath).ConvertTo2D(position1D);
+        }
+
+        public Range2D ToRange2D(SystemPath systemPath, Range1D range1D) => ToRange2D(ToWorkspacePath(systemPath), range1D);
+        public Range2D ToRange2D(string documentPath, Range1D range1D)
+        {
+            if (_workspace == null)
+                throw new InvalidOperationException("No workspace was loaded");
+
+            return _workspace.GetFile(documentPath).ConvertTo2D(range1D);
+        }
+
         public void IncrementelUpdate(SystemPath path, Range2D range, string content)
         {
             if (_workspace == null)

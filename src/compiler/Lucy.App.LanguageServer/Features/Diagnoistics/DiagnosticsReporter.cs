@@ -1,11 +1,13 @@
 ﻿using Lucy.App.LanguageServer.Infrastructure;
 using Lucy.Common.ServiceDiscovery;
+using Lucy.Core.SemanticAnalysis.Handler;
 using Lucy.Core.SemanticAnalysis.Handler.ErrorCollectors;
 using Lucy.Feature.LanguageServer.Models;
 using Lucy.Infrastructure.RpcServer;
 using System;
 using System.Collections.Generic;
 using System.Data.Common;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -29,8 +31,6 @@ namespace Lucy.App.LanguageServer.Features.Diagnoistics
         {
             var errors = _currentWorkspace.Analysis.GetAllErrors();
 
-            
-
             var documentsToReport = errors
                 .GroupBy(x => x.NodeId.DocumentPath)
                 .Select(x => new ReportJob(x.Key, x.ToArray()))
@@ -53,9 +53,14 @@ namespace Lucy.App.LanguageServer.Features.Diagnoistics
                 {
                     Diagnostics = documentWithError.Errors.Select(x =>
                     {
-                        return new RpcDiagnostic 
+                        var node = _currentWorkspace.Analysis.GetNodeById(x.NodeId);
+                        var range1D = _currentWorkspace.Analysis.GetRangeFromNode(node);
+
+                        var range2D = _currentWorkspace.ToRange2D(documentWithError.DocumentPath, range1D);
+
+                        return new RpcDiagnostic
                         {
-                            Range = new RpcRange(),
+                            Range = range2D.ToRpcRange(),
                             Code = "01",
                             Severity = RpcDiagnosticSeverity.Error,
                             Message = x.Message

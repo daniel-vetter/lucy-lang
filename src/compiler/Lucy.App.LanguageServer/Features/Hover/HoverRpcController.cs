@@ -2,10 +2,7 @@
 using Lucy.Feature.LanguageServer.Models;
 using Lucy.Common.ServiceDiscovery;
 using Lucy.App.LanguageServer.Infrastructure;
-using System;
-using Lucy.Core.Parsing.Nodes.Token;
-using Lucy.Core.Parsing;
-using System.Text;
+using Lucy.Core.SemanticAnalysis.Handler;
 
 namespace Lucy.App.LanguageServer.Features.Hover
 {
@@ -22,28 +19,19 @@ namespace Lucy.App.LanguageServer.Features.Hover
         [JsonRpcFunction("textDocument/hover")]
         public RpcHover? TextDocumentHover(RpcHoverParams input)
         {
-            /*
-            if (_currentWorkspace.Workspace == null)
-                throw new Exception("No workspace loaded.");
+            var documentPath = _currentWorkspace.ToWorkspacePath(input.TextDocument.Uri);
+            var position = _currentWorkspace.ToPosition1D(documentPath, input.Position.ToPosition2D());
+            var node = _currentWorkspace.Analysis.GetNodeAtPosition(documentPath, position);
 
-            var document = _currentWorkspace.Workspace.Get(_currentWorkspace.ToWorkspacePath(input.TextDocument.Uri));
-            if (document == null || document.SyntaxTree == null)
+            if (node == null)
                 return new RpcHover();
 
-            var stack = TreeAnalyzer.GetStack(document.SyntaxTree, input.Position.Line, input.Position.Character);
-            var sb = new StringBuilder();
-            foreach(var node in stack)
-            {
-                sb.AppendLine(" * " + node.GetType().Name);
-                sb.AppendLine();
-            }
-            */
             return new RpcHover
             {
                 Contents = new RpcMarkupContent
                 {
                     Kind = RpcMarkupKind.Markdown,
-                    Value = "Test" //sb.ToString()
+                    Value = $"""<span style="color:blue">NodeId: {node.NodeId}</span>"""
                 }
             };
         }

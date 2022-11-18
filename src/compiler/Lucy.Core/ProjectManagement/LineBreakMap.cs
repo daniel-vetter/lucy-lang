@@ -40,6 +40,9 @@ namespace Lucy.Core.ProjectManagement
             if (position.Position < 0)
                 throw new ArgumentException("Invalid position: " + position.Position, nameof(position.Position));
 
+            if (_lineStart.Count == 0)
+                return new Position2D(0, 0);
+
             if (position.Position > _lineStart[^1] + _lineLengths[^1])
                 return new Position2D(_lineStart.Count - 1, _lineLengths[^1]);
 
@@ -61,6 +64,9 @@ namespace Lucy.Core.ProjectManagement
             if (position.Line < 0) throw new ArgumentException("Invalid line: " + position.Line, nameof(position));
             if (position.Character < 0) throw new ArgumentException("Invalid character: " + position.Character, nameof(position));
 
+            if (_lineStart.Count == 0)
+                return new Position1D(0);
+
             if (position.Line >= _lineStart.Count)
                 return new Position1D(_lineStart[^1] + _lineLengths[^1]);
 
@@ -75,9 +81,10 @@ namespace Lucy.Core.ProjectManagement
         {
             var min = 0;
             var max = _lineLengths.Count;
-            var mid = ((max - min) / 2) + min;
+            
             while (min < max)
             {
+                var mid = ((max - min) / 2) + min;
                 var result = compare(mid);
                 if (result < 0)
                     min = mid + 1;

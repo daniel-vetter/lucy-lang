@@ -36,8 +36,6 @@ namespace Lucy.App.LanguageServer.Features.Debug
 
             void Process(object? obj)
             {
-                if (obj is SyntaxElement)
-                    return;
 
                 if (obj is SyntaxTreeNode node)
                 {

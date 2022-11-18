@@ -4,7 +4,6 @@ using Lucy.Infrastructure.RpcServer;
 using Lucy.Feature.LanguageServer.Models;
 using Lucy.Common.ServiceDiscovery;
 using Lucy.App.LanguageServer.Infrastructure;
-using System;
 using Lucy.Core.ProjectManagement;
 using Lucy.App.LanguageServer.Features.Diagnoistics;
 

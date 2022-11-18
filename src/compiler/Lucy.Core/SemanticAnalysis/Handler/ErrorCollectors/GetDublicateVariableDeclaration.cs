@@ -27,7 +27,7 @@ namespace Lucy.Core.SemanticAnalysis.Handler.ErrorCollectors
                 var name = functionDeclarationStatementSyntaxNode.FunctionName.Token.Text;
                 if (knownNames.Contains(name))
                 {
-                    errors.Add(new Error(node.NodeId, $"A symbol named '{name}' was already defined in this or a parent scope."));
+                    errors.Add(new Error(functionDeclarationStatementSyntaxNode.FunctionName.Token.NodeId, $"A symbol named '{name}' was already defined in this or a parent scope."));
                 }
                 else
                 {
@@ -39,7 +39,7 @@ namespace Lucy.Core.SemanticAnalysis.Handler.ErrorCollectors
                 var name = functionDeclarationParameterSyntaxNode.VariableDeclaration.VariableName.Token.Text;
                 if (knownNames.Contains(name))
                 {
-                    errors.Add(new Error(node.NodeId, $"A symbol named '{name}' was already defined in this or a parent scope."));
+                    errors.Add(new Error(functionDeclarationParameterSyntaxNode.VariableDeclaration.VariableName.Token.NodeId, $"A symbol named '{name}' was already defined in this or a parent scope."));
                 }
                 else
                 {
