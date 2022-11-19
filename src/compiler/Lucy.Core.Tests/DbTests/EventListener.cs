@@ -6,7 +6,7 @@ namespace Lucy.Core.Tests.DbTests
     {
         public EventListener(Db db)
         {
-            db.AddEventHandler(x => Add(x));
+            db.AddEventHandler((db, e) => Add(e));
         }
     }
 }

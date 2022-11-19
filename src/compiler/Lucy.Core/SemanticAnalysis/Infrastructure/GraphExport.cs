@@ -3,26 +3,26 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 
 namespace Lucy.Core.SemanticAnalysis.Infrastructure
 {
-    public enum GraphExportMode
-    {
-        ByType,
-        ByQuery
-    }
-
     public class GraphExport
     {
         private Dictionary<IQuery, CalculationStats> _calculatedQueries = new();
-        private Dictionary<Dependency, DependencyStats> _dependencies = new();
         private Dictionary<IQuery, InputStats> _inputs = new();
         private int _counter;
         private readonly string _outputDirectory;
         private Stopwatch _lastQueryStopwatch = new Stopwatch();
+        private IQuery? _currentRootQuery;
 
         private record Dependency(IQuery? From, IQuery To);
+
+        public GraphExport(string outputDirectory)
+        {
+            if (!Directory.Exists(outputDirectory))
+                Directory.CreateDirectory(outputDirectory);
+            _outputDirectory = outputDirectory;
+        }
 
         private class CalculationStats
         {
@@ -33,43 +33,26 @@ namespace Lucy.Core.SemanticAnalysis.Infrastructure
             public TimeSpan OverheadExecutionTime { get; set; } = TimeSpan.Zero;
         }
 
-        private class DependencyStats
-        {
-            public int CallCount { get; set; } = 0;
-        }
-
         private class InputStats
         {
             public bool Changed { get; set; }
             public bool Removed { get; set; }
         }
 
-        public GraphExport(string outputDirectory)
+        public void ProcessDbEvent(Db db, IDbEvent @event)
         {
-            if (!Directory.Exists(outputDirectory))
-                Directory.CreateDirectory(outputDirectory);
-            _outputDirectory = outputDirectory;
-        }
-
-        public void ProcessDbEvent(IDbEvent @event)
-        {
-            if (@event is QueryReceived queryReceived)
+            if (@event is QueryReceived { ParentQuery: null } qr)
             {
-                if (queryReceived.ParentQuery == null)
-                    _lastQueryStopwatch.Restart();
+                _currentRootQuery = qr.Query;
+                _lastQueryStopwatch.Restart();
             }
 
-            if (@event is QueryAnswered queryAnsweredEvent)
+            if (@event is QueryAnswered { ParentQuery: null } qa)
             {
-                var key = new Dependency(queryAnsweredEvent.ParentQuery, queryAnsweredEvent.Query);
-                _dependencies.TryAdd(key, new DependencyStats());
-                _dependencies[key].CallCount++;
-
-                if (queryAnsweredEvent.ParentQuery == null)
-                {
-                    _lastQueryStopwatch.Stop();
-                    Flush();
-                }
+                _lastQueryStopwatch.Stop();
+                if (_currentRootQuery != null)
+                    WriteGraph(db.GetEntryDetails(_currentRootQuery));
+                Reset();
             }
 
             if (@event is CalculationStarted cs)
@@ -87,7 +70,6 @@ namespace Lucy.Core.SemanticAnalysis.Infrastructure
                 entry.ExclusiveHandlerExecutionTime = cf.ExlusiveHandlerExecutionTime;
                 entry.InclusiveHandlerExecutionTime = cf.InclusiveHandlerExecutionTime;
                 entry.OverheadExecutionTime = cf.OverheadExecutionTime;
-
             }
 
             if (@event is InputWasChanged ic)
@@ -105,36 +87,41 @@ namespace Lucy.Core.SemanticAnalysis.Infrastructure
             }
         }
 
-        private void Flush()
+        private void WriteGraph(EntryDetails entry)
         {
             var d = new GraphvizDiagram();
             d.NodeFontName = "Consolas";
             d.EdgeFontName = "Consolas";
 
-            foreach (var query in _dependencies.Keys.SelectMany(x => new[] { x.From, x.To }))
+            void Add(EntryDetails ed)
             {
-                if (d.HasNodeFor(query))
-                    continue;
+                foreach(var target in ed.Dependencies)
+                {
+                    if (!d.HasNodeFor(target.Query))
+                        CreateNode(d, target.Query);
+                    if (!d.HasEdgeBetween(ed.Query, target.Query))
+                        d.CreateEdgeFor(ed.Query, target.Query);
 
-                CreateNode(d, query);
+                    Add(target);
+                }
             }
 
-            foreach (var ((from, to), stats) in _dependencies)
-            {
-                var edge = d.CreateEdgeFor(from, to);
-                if (stats.CallCount == 0)
-                    edge.Style = "dotted";
-            }
+            CreateNode(d, entry.Query);
+            Add(entry);
 
             var fileContent = d.Build();
-            File.WriteAllText(Path.Combine(_outputDirectory, "_last.dot"), fileContent);
-            File.WriteAllText(Path.Combine(_outputDirectory, ++_counter + ".dot"), fileContent);
+            File.WriteAllText(Path.Combine(_outputDirectory, ++_counter + " " + entry.Query.GetType().Name + Math.Round(_lastQueryStopwatch.Elapsed.TotalMilliseconds,2) + ".dot"), fileContent);
+        }
 
+        private void Reset()
+        {
+            _currentRootQuery = null;
             _calculatedQueries.Clear();
-            foreach (var stats in _dependencies.Values)
-                stats.CallCount = 0;
             foreach (var stats in _inputs.Values)
+            {
                 stats.Changed = false;
+                stats.Removed = false;
+            }
         }
 
         private void CreateNode(GraphvizDiagram d, IQuery? query)

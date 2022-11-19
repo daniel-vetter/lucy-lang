@@ -1,7 +1,9 @@
 ﻿using Lucy.Common;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Diagnostics;
+using System.Linq;
 
 namespace Lucy.Core.SemanticAnalysis.Infrastructure
 {
@@ -18,9 +20,9 @@ namespace Lucy.Core.SemanticAnalysis.Infrastructure
             _handlers.Add(handler.GetType().BaseType!.GetGenericArguments()[0], handler);
         }
 
-        public IDisposable AddEventHandler(Action<IDbEvent> handler)
+        public IDisposable AddEventHandler(Action<Db, IDbEvent> handler)
         {
-            return _subscriptions.AddHandler(handler);
+            return _subscriptions.AddHandler(x => { handler(this, x); });
         }
 
         public void SetInput<TQueryResult>(IQuery<TQueryResult> query, TQueryResult result) where TQueryResult : notnull
@@ -156,6 +158,21 @@ namespace Lucy.Core.SemanticAnalysis.Infrastructure
             return resultType != ResultType.WasTheSame;
         }
 
+        public EntryDetails GetEntryDetails(IQuery query)
+        {
+            if (!_entries.TryGetValue(query, out var entry))
+                throw new Exception("Query not found");
+
+            static EntryDetails Map(Entry entry) => new(
+                Query: entry.Query,
+                Result: entry.Result,
+                IsInput: entry.IsInput,
+                Dependencies: entry.Dependencies.Select(Map).ToImmutableArray()
+            );
+
+            return Map(entry);
+        }
+
         private class Entry
         {
             public Entry(IQuery query, object? result, int lastChanged, int lastChecked, bool isInput, List<Entry>? dependencies = null)
@@ -203,4 +220,6 @@ namespace Lucy.Core.SemanticAnalysis.Infrastructure
             }
         }
     }
+
+    public record EntryDetails(IQuery Query, object? Result, bool IsInput, ImmutableArray<EntryDetails> Dependencies);
 }

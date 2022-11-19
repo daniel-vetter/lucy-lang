@@ -17,8 +17,11 @@ namespace Lucy.Core.SemanticAnalysis.Infrastructure
 
         private int _lastId = 0;
         private Dictionary<NullableKey, Node> _nodesByKey = new();
+        private HashSet<EdgeByNodeKeys> _edgesByNodeKeys = new();
         private List<Edge> _edges = new();
         private record NullableKey(object? Value);
+        private record EdgeByNodeKeys(object? From, object? To);
+
 
         string BuildProps(Dictionary<string, object> values)
         {
@@ -54,6 +57,11 @@ namespace Lucy.Core.SemanticAnalysis.Infrastructure
         public bool HasNodeFor(object? key)
         {
             return _nodesByKey.ContainsKey(new NullableKey(key));
+        }
+
+        public bool HasEdgeBetween(object? from, object? to)
+        {
+            return _edgesByNodeKeys.Contains(new EdgeByNodeKeys(from, to));
         }
 
         public string Build()
@@ -131,6 +139,7 @@ namespace Lucy.Core.SemanticAnalysis.Infrastructure
 
             var edge = new Edge(fromNode, toNode);
             _edges.Add(edge);
+            _edgesByNodeKeys.Add(new EdgeByNodeKeys(from, to));
             return edge;
         }
     }

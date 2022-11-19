@@ -5,7 +5,7 @@ using Lucy.Core.SemanticAnalysis.Infrastructure;
 
 namespace Lucy.Core.SemanticAnalysis.Handler
 {
-    public record ScopeItem(NodeId NodeId, ComparableReadOnlyList<ScopeItem> Items);
+    public record ScopeItem(SyntaxTreeNode Node, ComparableReadOnlyList<ScopeItem> Items);
     
     public static class GetScopeMapHandler
     {
@@ -16,7 +16,7 @@ namespace Lucy.Core.SemanticAnalysis.Handler
 
             var items = new ComparableReadOnlyList<ScopeItem>.Builder();
             Find(rootNode, items);
-            return new ScopeItem(rootNode.NodeId, items.Build());
+            return new ScopeItem(rootNode, items.Build());
         }
 
         private static void Find(SyntaxTreeNode node, ComparableReadOnlyList<ScopeItem>.Builder items)
@@ -26,11 +26,11 @@ namespace Lucy.Core.SemanticAnalysis.Handler
                 var subItems = new ComparableReadOnlyList<ScopeItem>.Builder();
                 foreach (var childNode in node.GetChildNodes())
                     Find(childNode, subItems);
-                items.Add(new ScopeItem(node.NodeId, subItems.Build()));
+                items.Add(new ScopeItem(node, subItems.Build()));
             }
             if (node is FunctionDeclarationParameterSyntaxNode)
             {
-                items.Add(new ScopeItem(node.NodeId, new ComparableReadOnlyList<ScopeItem>()));
+                items.Add(new ScopeItem(node, new ComparableReadOnlyList<ScopeItem>()));
             }
             else
             {

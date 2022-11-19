@@ -32,7 +32,7 @@ namespace Lucy.App.LanguageServer.Features.Diagnoistics
             var errors = _currentWorkspace.Analysis.GetAllErrors();
 
             var documentsToReport = errors
-                .GroupBy(x => x.NodeId.DocumentPath)
+                .GroupBy(x => x.Node.NodeId.DocumentPath)
                 .Select(x => new ReportJob(x.Key, x.ToArray()))
                 .ToList();
 
@@ -53,15 +53,12 @@ namespace Lucy.App.LanguageServer.Features.Diagnoistics
                 {
                     Diagnostics = documentWithError.Errors.Select(x =>
                     {
-                        var node = _currentWorkspace.Analysis.GetNodeById(x.NodeId);
-                        var range1D = _currentWorkspace.Analysis.GetRangeFromNode(node);
-
+                        var range1D = _currentWorkspace.Analysis.GetRangeFromNode(x.Node);
                         var range2D = _currentWorkspace.ToRange2D(documentWithError.DocumentPath, range1D);
 
                         return new RpcDiagnostic
                         {
                             Range = range2D.ToRpcRange(),
-                            Code = "01",
                             Severity = RpcDiagnosticSeverity.Error,
                             Message = x.Message
                         };

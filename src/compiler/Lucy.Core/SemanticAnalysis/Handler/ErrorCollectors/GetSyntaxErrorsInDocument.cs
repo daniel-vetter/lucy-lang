@@ -38,7 +38,7 @@ namespace Lucy.Core.SemanticAnalysis.Handler.ErrorCollectors
 
         private static void Traverse(IDb db, SyntaxTreeNode node, ComparableReadOnlyList<Error>.Builder list)
         {
-            list.AddRange(node.SyntaxErrors.Select(x => new Error(node.NodeId, x)));
+            list.AddRange(node.SyntaxErrors.Select(x => new Error(node, x)));
 
             foreach(var child in node.GetChildNodes())
             {

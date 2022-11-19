@@ -6,7 +6,7 @@ using System.Collections.Generic;
 
 namespace Lucy.Core.SemanticAnalysis.Handler.ErrorCollectors
 {
-    public record Error(NodeId NodeId, string Message);
+    public record Error(SyntaxTreeNode Node, string Message);
 
     public static class GetDublicateVariableDeclarationsHandler
     {
@@ -21,13 +21,13 @@ namespace Lucy.Core.SemanticAnalysis.Handler.ErrorCollectors
 
         private static void Traverse(IDb db, ScopeItem scopeItem, HashSet<string> knownNames, ComparableReadOnlyList<Error>.Builder errors)
         {
-            var node = db.GetNodeById(scopeItem.NodeId);
+            var node = scopeItem.Node;
             if (node is FunctionDeclarationStatementSyntaxNode functionDeclarationStatementSyntaxNode)
             {
                 var name = functionDeclarationStatementSyntaxNode.FunctionName.Token.Text;
                 if (knownNames.Contains(name))
                 {
-                    errors.Add(new Error(functionDeclarationStatementSyntaxNode.FunctionName.Token.NodeId, $"A symbol named '{name}' was already defined in this or a parent scope."));
+                    errors.Add(new Error(functionDeclarationStatementSyntaxNode.FunctionName.Token, $"A symbol named '{name}' was already defined in this or a parent scope."));
                 }
                 else
                 {
@@ -39,7 +39,7 @@ namespace Lucy.Core.SemanticAnalysis.Handler.ErrorCollectors
                 var name = functionDeclarationParameterSyntaxNode.VariableDeclaration.VariableName.Token.Text;
                 if (knownNames.Contains(name))
                 {
-                    errors.Add(new Error(functionDeclarationParameterSyntaxNode.VariableDeclaration.VariableName.Token.NodeId, $"A symbol named '{name}' was already defined in this or a parent scope."));
+                    errors.Add(new Error(functionDeclarationParameterSyntaxNode.VariableDeclaration.VariableName.Token, $"A symbol named '{name}' was already defined in this or a parent scope."));
                 }
                 else
                 {

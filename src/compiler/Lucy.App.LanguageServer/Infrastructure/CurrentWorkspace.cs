@@ -35,7 +35,7 @@ namespace Lucy.App.LanguageServer.Infrastructure
             foreach(var file in files)
                 ws.AddFile(file.ToString().Substring(rootPathLength).Replace("\\", "/"), await _fileSystem.ReadAllText(file));
 
-            _semanticDatabase = new SemanticDatabase(ws);
+            _semanticDatabase = new SemanticDatabase(ws, "C:\\language-server-output");
             _workspace = ws;
             _rootPath = path;
         }
