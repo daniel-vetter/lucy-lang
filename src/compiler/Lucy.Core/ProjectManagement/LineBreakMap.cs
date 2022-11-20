@@ -14,7 +14,7 @@ namespace Lucy.Core.ProjectManagement
             var starts = new List<int>();
             var count = 0;
             var start = 0;
-            for (int i=0;i<content.Length;i++)
+            for (int i = 0; i < content.Length; i++)
             {
                 count++;
                 if (content[i] == '\n')
@@ -81,7 +81,7 @@ namespace Lucy.Core.ProjectManagement
         {
             var min = 0;
             var max = _lineLengths.Count;
-            
+
             while (min < max)
             {
                 var mid = ((max - min) / 2) + min;
@@ -101,6 +101,12 @@ namespace Lucy.Core.ProjectManagement
 
     public record Position1D(int Position);
     public record Range1D(Position1D Start, Position1D End);
-    public record Position2D(int Line, int Character);
+    public record Position2D(int Line, int Character)
+    {
+        public override string ToString()
+        {
+            return $"[{Line + 1}, {Character + 1}]";
+        }
+    }
     public record Range2D(Position2D Start, Position2D End);
 }

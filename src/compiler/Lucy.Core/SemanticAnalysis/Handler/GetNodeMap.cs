@@ -6,39 +6,64 @@ using System;
 using System.Linq;
 
 namespace Lucy.Core.SemanticAnalysis.Handler
-{
-    public record GetNodeMapResult(ComparableReadOnlyDictionary<NodeId, SyntaxTreeNode> NodesById,
-        ComparableReadOnlyDictionary<Type, ComparableReadOnlyList<SyntaxTreeNode>> NodesByType,
-        ComparableReadOnlyDictionary<NodeId, NodeId> ParentNodes);
-    
+{   
     public static class GetNodeMapHandler
     {
-        [GenerateDbExtension] ///<see cref="GetNodeMapEx.GetNodeMap"/>
-        public static GetNodeMapResult GetNodeMap(IDb db, string documentPath)
+        [GenerateDbExtension] ///<see cref="GetNodeByIdMapEx.GetNodeByIdMap"/>
+        public static ComparableReadOnlyDictionary<NodeId, SyntaxTreeNode> GetNodeByIdMap(IDb db, string documentPath)
         {
-            var rootNode = db.GetSyntaxTree(documentPath);
-            var nodesByIdBuilder = new ComparableReadOnlyDictionary<NodeId, SyntaxTreeNode>.Builder();
-            var parentNodeIds = new ComparableReadOnlyDictionary<NodeId, NodeId>.Builder();
-
-            Traverse(rootNode, nodesByIdBuilder, parentNodeIds);
-
-            var nodesById = nodesByIdBuilder.Build();
-            var nodesByType = nodesById.Values
-                .GroupBy(x => x.GetType())
-                .ToComparableReadOnlyDictionary(x => x.Key, x => x.ToComparableReadOnlyList());
-
-            return new GetNodeMapResult(nodesById, nodesByType, parentNodeIds.Build());
+            return db.GetNodeList(db.GetSyntaxTree(documentPath)).ToComparableReadOnlyDictionary(x => x.NodeId, x => x);
         }
 
-        private static void Traverse(SyntaxTreeNode node, ComparableReadOnlyDictionary<NodeId, SyntaxTreeNode>.Builder nodesById, ComparableReadOnlyDictionary<NodeId, NodeId>.Builder parentNodeIds)
+        [GenerateDbExtension] ///<see cref="GetNodeByIdEx.GetNodeById"/>
+        public static SyntaxTreeNode GetNodeById(IDb db, NodeId nodeId)
         {
-            nodesById.Add(node.NodeId, node);
+            return db.GetNodeByIdMap(nodeId.DocumentPath)[nodeId];
+        }
 
-            foreach (var child in node.GetChildNodes())
+        [GenerateDbExtension] ///<see cref="GetNodesByTypeMapEx.GetNodesByTypeMap"/>
+        public static ComparableReadOnlyDictionary<Type, ComparableReadOnlyList<SyntaxTreeNode>> GetNodesByTypeMap(IDb db, string documentPath)
+        {
+            return db.GetNodeList(db.GetSyntaxTree(documentPath))
+                .GroupBy(x => x.GetType())
+                .ToComparableReadOnlyDictionary(x => x.Key, x => x.ToComparableReadOnlyList());
+        }
+
+        [GenerateDbExtension] ///<see cref="GetNodesByTypeEx.GetNodesByType"/>
+        public static ComparableReadOnlyList<SyntaxTreeNode> GetNodesByType(IDb db, string documentPath, Type type)
+        {
+            if (db.GetNodesByTypeMap(documentPath).TryGetValue(type, out var list))
+                return list;
+            return new ComparableReadOnlyList<SyntaxTreeNode>();
+        }
+
+        public static ComparableReadOnlyList<T> GetNodesByType<T>(this IDb db, string documentPath) where T : SyntaxTreeNode
+        {
+            return db.GetNodesByType(documentPath, typeof(T)).Cast<T>().ToComparableReadOnlyList();
+        }
+
+        [GenerateDbExtension] ///<see cref="GetNodeListEx.GetNodeList"/>
+        public static ComparableReadOnlyList<SyntaxTreeNode> GetNodeList(IDb db, SyntaxTreeNode node)
+        {
+            static void Traverse(IDb db, SyntaxTreeNode node, ComparableReadOnlyList<SyntaxTreeNode>.Builder nodes)
             {
-                parentNodeIds.Add(child.NodeId, node.NodeId);
-                Traverse(child, nodesById, parentNodeIds);
+                nodes.Add(node);
+
+                if (node is StatementListSyntaxNode statementList)
+                {
+                    foreach (var child in node.GetChildNodes())
+                        nodes.AddRange(db.GetNodeList(child));
+                }
+                else
+                {
+                    foreach (var child in node.GetChildNodes())
+                        Traverse(db, child, nodes);
+                }
             }
+
+            var list = new ComparableReadOnlyList<SyntaxTreeNode>.Builder();
+            Traverse(db, node, list);
+            return list.Build();
         }
     }
 }

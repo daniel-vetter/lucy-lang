@@ -1,12 +1,13 @@
 ﻿using Lucy.Core.Model;
 using Lucy.Core.Parsing.Nodes;
+using Lucy.Core.ProjectManagement;
 using Lucy.Core.SemanticAnalysis.Infrastructure;
 using System;
 using System.Collections.Generic;
 
 namespace Lucy.Core.SemanticAnalysis.Handler.ErrorCollectors
 {
-    public record Error(SyntaxTreeNode Node, string Message);
+    public record Error(string DocumentPath, Range1D Range, string Message);
 
     public static class GetDublicateVariableDeclarationsHandler
     {
@@ -24,26 +25,26 @@ namespace Lucy.Core.SemanticAnalysis.Handler.ErrorCollectors
             var node = scopeItem.Node;
             if (node is FunctionDeclarationStatementSyntaxNode functionDeclarationStatementSyntaxNode)
             {
-                var name = functionDeclarationStatementSyntaxNode.FunctionName.Token.Text;
-                if (knownNames.Contains(name))
+                var nameNode = functionDeclarationStatementSyntaxNode.FunctionName.Token;
+                if (knownNames.Contains(nameNode.Text))
                 {
-                    errors.Add(new Error(functionDeclarationStatementSyntaxNode.FunctionName.Token, $"A symbol named '{name}' was already defined in this or a parent scope."));
+                    errors.Add(new Error(nameNode.NodeId.DocumentPath, db.GetRangeFromNode(nameNode), $"A symbol named '{nameNode.Text}' was already defined in this or a parent scope."));
                 }
                 else
                 {
-                    knownNames.Add(name);
+                    knownNames.Add(nameNode.Text);
                 }
             }
             else if (node is FunctionDeclarationParameterSyntaxNode functionDeclarationParameterSyntaxNode)
             {
-                var name = functionDeclarationParameterSyntaxNode.VariableDeclaration.VariableName.Token.Text;
-                if (knownNames.Contains(name))
+                var name = functionDeclarationParameterSyntaxNode.VariableDeclaration.VariableName.Token;
+                if (knownNames.Contains(name.Text))
                 {
-                    errors.Add(new Error(functionDeclarationParameterSyntaxNode.VariableDeclaration.VariableName.Token, $"A symbol named '{name}' was already defined in this or a parent scope."));
+                    errors.Add(new Error(name.NodeId.DocumentPath, db.GetRangeFromNode(functionDeclarationParameterSyntaxNode.VariableDeclaration.VariableName.Token), $"A symbol named '{name}' was already defined in this or a parent scope."));
                 }
                 else
                 {
-                    knownNames.Add(name);
+                    knownNames.Add(name.Text);
                 }
             }
             else if (node is DocumentRootSyntaxNode)
