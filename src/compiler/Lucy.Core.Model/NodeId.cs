@@ -34,5 +34,30 @@ namespace Lucy.Core.Model
         }
 
         public override string ToString() => _str;
+
+        public bool IsRoot => NodePath.IndexOf('.') == -1;
+        public NodeId Parent
+        {
+            get
+            {
+                var lastIndex = NodePath.LastIndexOf('.');
+                if (lastIndex == -1)
+                    throw new Exception("Current node is already the root node id.");
+                return new NodeId(DocumentPath, NodePath[..lastIndex]);
+            }
+        }
+
+        public static bool operator ==(NodeId id1, NodeId id2)
+        {
+            if (ReferenceEquals(id1, id2)) return true;
+            if (ReferenceEquals(id1, null)) return false;
+            if (ReferenceEquals(id2, null)) return false;
+            return id1.Equals(id2);
+        }
+
+        public static bool operator !=(NodeId id1, NodeId id2)
+        {
+            return !(id1 == id2);
+        }
     }
 }

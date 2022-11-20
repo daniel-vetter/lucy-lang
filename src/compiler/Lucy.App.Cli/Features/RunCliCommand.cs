@@ -1,13 +1,13 @@
 ﻿using Lucy.App.Infrastructure.Cli;
 using Lucy.Common.ServiceDiscovery;
-using Lucy.Core.Compiler;
-using Lucy.Core.Interpreter;
 using Lucy.Core.ProjectManagement;
+using Lucy.Core.SemanticAnalysis;
+using Lucy.Core.SemanticAnalysis.Handler.ErrorCollectors;
+using Lucy.Interpreter;
 using System;
 using System.CommandLine;
 using System.CommandLine.Builder;
 using System.CommandLine.Invocation;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -27,7 +27,6 @@ namespace Lucy.App.Features
         private async Task<int> Run(bool useInterpreter)
         {
             var workspace = await Workspace.CreateFromPath(Environment.CurrentDirectory);
-            //workspace.Process();
 
             return useInterpreter 
                 ? Interpret(workspace) 
@@ -42,28 +41,41 @@ namespace Lucy.App.Features
             if (workspace.Documents.Count() == 0)
                 throw new Exception("Could not find a code file in the workspace.");
 
-            var doc = workspace.Documents.Single();
+            using var semanticDatabase = new SemanticDatabase(workspace);
 
-            //if (doc.SyntaxTree == null)
-            //throw new Exception("Syntax tree was not parsed.");
+            if (CheckForErrors(workspace, semanticDatabase))
+                return -1;
 
-            //if (doc.SemanticModel == null)
-            //throw new Exception("Semenatic model was not provided.");
+            var result = CodeInterpreter.Run(semanticDatabase);
 
-            //var ctx = new InterpreterContext(doc.SemanticModel);
-            //var result = TreeInterpreter.Run(doc.SyntaxTree, ctx);
-            /*
-            if (result is VoidValue)
-                return 0;
-            else if (result is NumberValue nv)
-                return (int)nv.Value;
-            else throw new Exception("Application did not return a valid exit code.");
-            */
-            return 0;
+            return result switch
+            {
+                VoidValue => 0,
+                NumberValue nv => (int)nv.Value,
+                _ => throw new Exception("Application did not return a valid exit code.")
+            };
         }
 
-        private static async Task<int> CompileAndRun(Workspace workspace)
+        private static bool CheckForErrors(Workspace workspace, SemanticDatabase semanticDatabase)
         {
+            var errors = semanticDatabase.GetAllErrors();
+
+            foreach (var error in errors)
+            {
+                var file = workspace.GetFile(error.DocumentPath);
+                var range = file.ConvertTo2D(error.Range);
+
+                Console.WriteLine($"{error.DocumentPath} {range.Start}: {error.Message}");
+            }
+
+            return errors.Count > 0;
+        }
+
+        private static Task<int> CompileAndRun(Workspace workspace)
+        {
+            throw new NotImplementedException();
+
+            /*
             var tempFileName = "C:\\temp\\out.exe";
             await WinExecutableEmitter.Emit(workspace, tempFileName);
             var p = new System.Diagnostics.Process();
@@ -71,6 +83,7 @@ namespace Lucy.App.Features
             p.Start();
             await p.WaitForExitAsync();
             return p.ExitCode;
+            */
         }
     }
 }

@@ -1,18 +1,26 @@
-﻿using Lucy.Core.Parsing;
+﻿using Lucy.Core.Model;
 using Lucy.Core.SemanticAnalysis;
+using Lucy.Core.SemanticAnalysis.Handler;
 
 namespace Lucy.Interpreter
 {
-    public static class TreeInterpreter
+    public static class CodeInterpreter
     {
-        public static Value Run(SyntaxTreeNode node, InterpreterContext ctx)
+        public static Value Run(SemanticDatabase semanticDatabase)
         {
-            return new VoidValue();
+            var entryPoint = semanticDatabase.GetEntryPoints();
+            if (entryPoint.Count != 1)
+                throw new Exception("No entry point found.");
 
-            /*
+            var entryPointNode = semanticDatabase.GetNodeById(entryPoint[0].Declaration);
+
+            return Run(entryPointNode, new InterpreterContext(semanticDatabase));
+        }
+
+        private static Value Run(SyntaxTreeNode node, InterpreterContext ctx)
+        {
             return node switch
             {
-                DocumentRootSyntaxNode dsn => Handle(dsn, ctx),
                 FunctionDeclarationStatementSyntaxNode fdsn => Handle(fdsn, ctx),
                 FunctionCallExpressionSyntaxNode fcesn => Handle(fcesn, ctx),
                 StringConstantExpressionSyntaxNode sc => new StringValue(sc.Value),
@@ -26,24 +34,6 @@ namespace Lucy.Interpreter
                 ExpressionStatementSyntaxNode esn => Handle(esn, ctx),
                 _ => throw new NotSupportedException("Unsupported node type: " + node.GetType().Name)
             };
-            */
-        }
-        /*
-        private static Value Handle(DocumentRootSyntaxNode documentSyntaxNode, InterpreterContext ctx)
-        {
-            var entryPoint = documentSyntaxNode.StatementList
-                .Statements
-                .OfType<FunctionDeclarationStatementSyntaxNode>()
-                .Where(x => ctx.SemanticModel.GetFunctionInfo(x).IsEntryPoint)
-                .SingleOrDefault();
-
-            if (entryPoint == null)
-                throw new Exception("Could not find a entry point.");
-
-            if (entryPoint.Body == null)
-                throw new Exception("Entry function has no body.");
-
-            return Run(entryPoint.Body, ctx);
         }
 
         private static Value Handle(FunctionDeclarationStatementSyntaxNode functionDeclarationStatementSyntaxNode, InterpreterContext ctx)
@@ -53,7 +43,7 @@ namespace Lucy.Interpreter
 
         private static Value Handle(FunctionCallExpressionSyntaxNode functionCallExpressionSyntaxNode, InterpreterContext ctx)
         {
-            var info = ctx.SemanticModel.GetFunctionInfo(functionCallExpressionSyntaxNode);
+            var info = ctx.SemanticDatabase.GetFunctionInfo(functionCallExpressionSyntaxNode);
             if (info.Extern == null)
                 throw new NotImplementedException("Only external functions are currently supported.");
 
@@ -61,10 +51,8 @@ namespace Lucy.Interpreter
             foreach(var argument in functionCallExpressionSyntaxNode.ArgumentList)
             {
                 var value = Run(argument.Expression, ctx);
-                if (value is StringValue sv)
-                    arguments.Add(sv.Value);
-                else if (value is NumberValue nv)
-                    arguments.Add((int)nv.Value);
+                if (value is StringValue sv) arguments.Add(sv.Value);
+                else if (value is NumberValue nv) arguments.Add((int)nv.Value);
                 else throw new Exception("Could not unwrap value of type " + value.GetType().Name);
             }
 
@@ -141,17 +129,16 @@ namespace Lucy.Interpreter
 
             return new NumberValue(leftNumber.Value + rightNumber.Value);
         }
-        */
     }
 
     public class InterpreterContext
     {
-        public InterpreterContext(SemanticAnalyzer semanticModel)
+        public InterpreterContext(SemanticDatabase semanticDatabase)
         {
-            SemanticModel = semanticModel;
+            SemanticDatabase = semanticDatabase;
         }
 
-        public SemanticAnalyzer SemanticModel { get; }
+        public SemanticDatabase SemanticDatabase { get; }
         public Dictionary<string, Value> Variables = new Dictionary<string, Value>();
     }
 
@@ -161,5 +148,4 @@ namespace Lucy.Interpreter
     public record BooleanValue(bool Value) : Value;
     public record StringValue(string Value) : Value;
     public record NumberValue(double Value) : Value;
-
 }

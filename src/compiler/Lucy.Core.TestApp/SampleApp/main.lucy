@@ -1,11 +1,5 @@
-﻿fun helperFunction1(): number {
-	helperFunction2()
-}
-
-fun helperFunction2(): number {
-
-}
+﻿import "helper"
 
 fun main(): number {
-	helperFunction1()
+	helperFunction()
 }

@@ -45,6 +45,11 @@
 		<Expression type="ExpressionSyntaxNode" />
 	</ExpressionStatementSyntaxNode>
 
+	<ImportStatementSyntaxNode basedOn="StatementSyntaxNode">
+		<ImportKeyword type="SyntaxElement" />
+		<Path type="StringConstantExpressionSyntaxNode" />
+	</ImportStatementSyntaxNode>
+
 	<StringConstantExpressionSyntaxNode basedOn="ExpressionSyntaxNode">
 		<Value type="string" />
 		<Str type="SyntaxElement" />

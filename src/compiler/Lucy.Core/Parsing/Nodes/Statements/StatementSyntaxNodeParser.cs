@@ -9,6 +9,7 @@ namespace Lucy.Core.Parsing.Nodes.Statements
         public static bool TryRead(Code code, [NotNullWhen(true)] out StatementSyntaxNodeBuilder? result)
         {
             result =
+                ImportStatementParser.Read(code) ??
                 FunctionDeclarationStatementSyntaxNodeParser.Read(code) ??
                 (StatementSyntaxNodeBuilder?)ExpressionStatementSyntaxNodeParser.Read(code);
 

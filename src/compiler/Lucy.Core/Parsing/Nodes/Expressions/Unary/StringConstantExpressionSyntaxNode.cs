@@ -1,11 +1,18 @@
 ﻿using Lucy.Core.Parsing.Nodes.Trivia;
 using System.Diagnostics.CodeAnalysis;
 using Lucy.Core.Model;
+using Lucy.Core.Parsing.Nodes.Token;
 
 namespace Lucy.Core.Parsing.Nodes.Expressions.Unary
 {
     public class StringConstantExpressionSyntaxNodeParser
     {
+        public static StringConstantExpressionSyntaxNodeBuilder Missing(string? errorMessage = null)
+        {
+            var node = new StringConstantExpressionSyntaxNodeBuilder("", SyntaxElementParser.Missing(errorMessage));
+            return node;
+        }
+
         public static bool TryRead(Code code, [NotNullWhen(true)] out StringConstantExpressionSyntaxNodeBuilder? result)
         {
             var start = code.Position;

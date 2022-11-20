@@ -1,6 +1,5 @@
 ﻿using Lucy.App.Infrastructure.Cli;
 using Lucy.Common.ServiceDiscovery;
-using Lucy.Core.Compiler;
 using Lucy.Core.ProjectManagement;
 using System.CommandLine;
 using System.CommandLine.Builder;
@@ -10,6 +9,7 @@ using System.Threading.Tasks;
 
 namespace Lucy.App.Features
 {
+    /*
     [Service(Lifetime.Singleton)]
     class CompileCliCommand : ICliCommand
     {
@@ -41,4 +41,5 @@ namespace Lucy.App.Features
             await WinExecutableEmitter.Emit(workspace, "out.exe");
         }
     }
+    */
 }
