@@ -3,7 +3,7 @@
     "patterns": [
         {
             "name": "keyword.other",
-            "match": "\\b(fun|extern|and|or,true|false|var|null|in|cdecl|import)\\b"
+            "match": "\\b(fun|extern|and|or,true|false|var|null|in|cdecl|import|int)\\b"
         },
         {
             "name": "keyword.control",

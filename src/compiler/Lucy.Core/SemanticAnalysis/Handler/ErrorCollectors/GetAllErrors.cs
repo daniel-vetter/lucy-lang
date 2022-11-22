@@ -10,9 +10,12 @@ namespace Lucy.Core.SemanticAnalysis.Handler.ErrorCollectors
         public static ComparableReadOnlyList<Error> GetAllErrors(IDb db)
         {
             var result = new ComparableReadOnlyList<Error>.Builder();
+            result.AddRange(db.GetImportErrors());
+            result.AddRange(db.GetEntryPointErrors());
+
             foreach(var document in db.GetDocumentList())
             {
-                result.AddRange(db.GetEntryPointErrors());
+                
                 result.AddRange(db.GetSyntaxErrorsInDocument(document));
                 result.AddRange(db.GetDublicateVariableDeclarations(document));
             }

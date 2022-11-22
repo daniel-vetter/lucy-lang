@@ -1,10 +1,11 @@
 ﻿using Lucy.Core.Model;
 using System;
-using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 
 namespace Lucy.Core.Parsing
 {
+    [EditorBrowsable(EditorBrowsableState.Never)]
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class Code
     {

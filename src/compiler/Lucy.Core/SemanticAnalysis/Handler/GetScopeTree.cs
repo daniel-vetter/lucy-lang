@@ -5,37 +5,68 @@ using Lucy.Core.SemanticAnalysis.Infrastructure;
 
 namespace Lucy.Core.SemanticAnalysis.Handler
 {
-    public record ScopeItem(SyntaxTreeNode Node, ComparableReadOnlyList<ScopeItem> Items);
+    public record ScopeLayer(ComparableReadOnlyList<ScopeItem> Items, ScopeLayerType Type);
+    public enum ScopeLayerType
+    {
+        Document,
+        Function,
+        StatementList
+    }
+
+    public abstract record ScopeItem();
+    public record SubLayerScopeItem(ScopeLayer Layer) : ScopeItem;
+    public record SymbolDeclarationScopeItem(string Name) : ScopeItem;
+    public record SymbolUseScopeItem(string Name) : ScopeItem;
     
     public static class GetScopeMapHandler
     {
         [GenerateDbExtension] ///<see cref="GetScopeTreeEx.GetScopeTree"/>
-        public static ScopeItem GetScopeTree(IDb db, string documentPath)
+        public static ScopeLayer GetScopeTree(IDb db, string documentPath)
         {
             var rootNode = db.GetSyntaxTree(documentPath);
-
             var items = new ComparableReadOnlyList<ScopeItem>.Builder();
-            Find(rootNode, items);
-            return new ScopeItem(rootNode, items.Build());
+            Traverse(db, rootNode.StatementList, items);
+            return new ScopeLayer(items.Build(), ScopeLayerType.Document);
         }
 
-        private static void Find(SyntaxTreeNode node, ComparableReadOnlyList<ScopeItem>.Builder items)
+        [GenerateDbExtension] ///<see cref="GetScopeLayerFromFunctionDeclarationEx.GetScopeLayerFromFunctionDeclaration"/>
+        public static ScopeLayer GetScopeLayerFromFunctionDeclaration(IDb db, FunctionDeclarationStatementSyntaxNode node)
         {
-            if (node is FunctionDeclarationStatementSyntaxNode)
+            var items = new ComparableReadOnlyList<ScopeItem>.Builder();
+            foreach (var param in node.ParameterList)
+                items.Add(new SymbolDeclarationScopeItem(param.VariableDeclaration.VariableName.Token.Text));
+
+            if (node.Body is not null)
+                foreach(var statement in node.Body.Statements)
+                    Traverse(db, statement, items);
+
+            return new ScopeLayer(items.Build(), ScopeLayerType.Function);
+        }
+
+        [GenerateDbExtension] ///<see cref="GetScopeLayerFromFunctionDeclarationEx.GetScopeLayerFromFunctionDeclaration"/>
+        public static ScopeLayer GetScopeLayerFromStatementList(IDb db, StatementListSyntaxNode node)
+        {
+            var items = new ComparableReadOnlyList<ScopeItem>.Builder();
+            Traverse(db, node, items);
+            return new ScopeLayer(items.Build(), ScopeLayerType.StatementList);
+        }
+
+        private static void Traverse(IDb db, SyntaxTreeNode node, ComparableReadOnlyList<ScopeItem>.Builder result)
+        {
+            foreach (var child in node.GetChildNodes())
             {
-                var subItems = new ComparableReadOnlyList<ScopeItem>.Builder();
-                foreach (var childNode in node.GetChildNodes())
-                    Find(childNode, subItems);
-                items.Add(new ScopeItem(node, subItems.Build()));
-            }
-            if (node is FunctionDeclarationParameterSyntaxNode)
-            {
-                items.Add(new ScopeItem(node, new ComparableReadOnlyList<ScopeItem>()));
-            }
-            else
-            {
-                foreach (var childNode in node.GetChildNodes())
-                    Find(childNode, items);
+                if (child is FunctionDeclarationStatementSyntaxNode functionDeclarationStatement)
+                {
+                    result.Add(new SubLayerScopeItem(db.GetScopeLayerFromFunctionDeclaration(functionDeclarationStatement)));
+                }
+                else if (child is StatementListSyntaxNode statementListSyntaxNode)
+                {
+                    result.Add(new SubLayerScopeItem(db.GetScopeLayerFromStatementList(statementListSyntaxNode)));
+                }
+                else
+                {
+                    Traverse(db, child, result);
+                }
             }
         }
     }

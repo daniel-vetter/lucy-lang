@@ -3,6 +3,7 @@ using Lucy.Common.ServiceDiscovery;
 using Lucy.Core.Model;
 using Lucy.Core.SemanticAnalysis.Inputs;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -23,7 +24,7 @@ namespace Lucy.App.LanguageServer.Features.Debug
             _currentWorkspace = currentWorkspace;
         }
 
-        internal async Task<string> Generate()
+        internal async Task<string> Generate(object value)
         {
             var stream = GetType().Assembly.GetManifestResourceStream(GetType().Namespace + ".DebugView.html");
             if (stream == null)
@@ -36,29 +37,9 @@ namespace Lucy.App.LanguageServer.Features.Debug
 
             void Process(object? obj)
             {
+                if (obj is string or NodeId) return;
 
-                if (obj is SyntaxTreeNode node)
-                {
-                    var map = GetObjectPropertyNames(node);
-                    var children = node.GetChildNodes();
-
-                    var props = Rearrange(node.GetType().GetProperties());
-
-                    sb.Append("<ul>");
-                    foreach (var prop in props)
-                    {
-                        sb.Append("<li>");
-                        sb.Append($"<span class='property'>{prop.Name}</span>: ");
-
-                        var value = prop.GetValue(node);
-                        WriteValueHeader(sb, value);
-                        sb.Append("</li>");
-                        Process(value);
-                    }
-                    sb.Append("</ul>");
-                }
-
-                if (obj is IEnumerable<SyntaxTreeNode> subList)
+                if (obj is IEnumerable subList && obj is not string)
                 {
                     sb.Append("<ul>");
                     int index = 0;
@@ -73,16 +54,32 @@ namespace Lucy.App.LanguageServer.Features.Debug
                     }
                     sb.Append("</ul>");
                 }
+                else if (obj != null)
+                {
+                    var map = GetObjectPropertyNames(obj);
+                    var props = Rearrange(obj.GetType().GetProperties());
+
+                    sb.Append("<ul>");
+                    foreach (var prop in props)
+                    {
+                        sb.Append("<li>");
+                        sb.Append($"<span class='property'>{prop.Name}</span>: ");
+
+                        var value = prop.GetValue(obj);
+                        WriteValueHeader(sb, value);
+                        sb.Append("</li>");
+
+                        Process(value);
+                    }
+                    sb.Append("</ul>");
+                }
             }
 
             sb.Append("<ul class='tree'>");
-            foreach (var doc in _currentWorkspace.Analysis.GetDocumentList()) //TODO: Use CurrentWorkspace directly without using the analysis
-            {
-                var syntaxTree = _currentWorkspace.Analysis.GetSyntaxTree(doc);
-                sb.Append($"<li>{doc}</li>");
-                Process(syntaxTree);
-
-            }
+            sb.Append("<li>");
+            WriteValueHeader(sb, value);
+            sb.Append("</li>");
+            Process(value);
             sb.Append("</ul>");
 
             html = sb.ToString() + html;
@@ -122,20 +119,24 @@ namespace Lucy.App.LanguageServer.Features.Debug
             {
                 sb.Append("<span style='opacity: 0.5'>&lt;list of " + list.Count() + " elements&gt;</span>");
             }
+            else if (value is Enum)
+            {
+                sb.Append(value.ToString());
+            }
             else
             {
                 sb.Append(value.GetType().Name);
             }
         }
 
-        private Dictionary<object, string> GetObjectPropertyNames(SyntaxTreeNode node)
+        private Dictionary<object, string> GetObjectPropertyNames(object obj)
         {
             var dict = new Dictionary<object, string>(new ObjectReferenceEqualityComparer<object>());
 
-            var props = node.GetType().GetProperties();
+            var props = obj.GetType().GetProperties();
             foreach (var prop in props)
             {
-                var value = prop.GetValue(node);
+                var value = prop.GetValue(obj);
                 if (value == null)
                     continue;
 

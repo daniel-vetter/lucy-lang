@@ -14,12 +14,13 @@ namespace Lucy.Core.SemanticAnalysis.Handler.ErrorCollectors
         [GenerateDbExtension] ///<see cref="GetDublicateVariableDeclarationsEx.GetDublicateVariableDeclarations"/>
         public static ComparableReadOnlyList<Error> GetDublicateVariableDeclarations(IDb db, string documentPath)
         {
-            var root = db.GetScopeTree(documentPath);
+            //var root = db.GetScopeTree(documentPath);
             var result = new ComparableReadOnlyList<Error>.Builder();
-            Traverse(db, root, new HashSet<string>(), result);
+            //Traverse(db, root, new HashSet<string>(), result);
             return result.Build();
         }
 
+        /*
         private static void Traverse(IDb db, ScopeItem scopeItem, HashSet<string> knownNames, ComparableReadOnlyList<Error>.Builder errors)
         {
             var node = scopeItem.Node;
@@ -58,5 +59,6 @@ namespace Lucy.Core.SemanticAnalysis.Handler.ErrorCollectors
                 Traverse(db, subScope, knownNames, errors);
             }
         }
+        */
     }
 }

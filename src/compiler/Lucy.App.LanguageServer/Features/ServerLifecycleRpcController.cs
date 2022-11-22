@@ -26,13 +26,14 @@ namespace Lucy.Feature.LanguageServer.RpcController
         [JsonRpcFunction("initialize", deserializeParamterIntoSingleObject: true)]
         public async Task<RpcInitializeResult> Initialize(RpcInitializeParams request)
         {
-            var result = new RpcInitializeResult();
-
-            //General server info
-            result.ServerInfo = new RpcServerInfo
+            var result = new RpcInitializeResult
             {
-                Name = "Lucy language server",
-                Version = GetType().Assembly.GetName().Version?.ToString() ?? ""
+                //General server info
+                ServerInfo = new RpcServerInfo
+                {
+                    Name = "Lucy language server",
+                    Version = GetType().Assembly.GetName().Version?.ToString() ?? ""
+                }
             };
 
             //Only support hover if markdown is supported

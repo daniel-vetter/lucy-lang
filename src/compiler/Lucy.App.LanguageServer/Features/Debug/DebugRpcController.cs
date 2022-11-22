@@ -1,5 +1,7 @@
 ﻿using Lucy.App.LanguageServer.Infrastructure;
 using Lucy.Common.ServiceDiscovery;
+using Lucy.Core.SemanticAnalysis.Handler;
+using Lucy.Core.SemanticAnalysis.Inputs;
 using Lucy.Infrastructure.RpcServer;
 using System;
 using System.Diagnostics;
@@ -20,9 +22,17 @@ namespace Lucy.App.LanguageServer.Features.Debug
         }
 
         [JsonRpcFunction("debug/getSyntaxTree")]
-        public async Task<string> GetDump()
+        public async Task<string> GetSyntaxTree(RpcGetSyntaxTree input)
         {
-            return await _debugViewGenerator.Generate();
+            var tree = _currentWorkspace.Analysis.GetSyntaxTree(_currentWorkspace.ToWorkspacePath(input.Uri));
+            return await _debugViewGenerator.Generate(tree);
+        }
+
+        [JsonRpcFunction("debug/getScopeTree")]
+        public async Task<string> GetScopeTree(RpcGetSyntaxTree input)
+        {
+            var tree = _currentWorkspace.Analysis.GetScopeTree(_currentWorkspace.ToWorkspacePath(input.Uri));
+            return await _debugViewGenerator.Generate(tree);
         }
 
         [JsonRpcFunction("debug/attachDebugger")]
@@ -42,5 +52,15 @@ namespace Lucy.App.LanguageServer.Features.Debug
             return WinExecutableEmitter.GetAssemblyCode(_currentWorkspace.Workspace);
         }
         */
+    }
+
+    public class RpcGetSyntaxTree
+    {
+        public SystemPath Uri { get; set; } = null!;
+    }
+
+    public class RpcGetScopeTree
+    {
+        public SystemPath Uri { get; set; } = null!;
     }
 }

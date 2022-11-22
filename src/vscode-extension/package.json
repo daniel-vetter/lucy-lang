@@ -43,6 +43,10 @@
 				"title": "Lucy: Show Syntax Tree"
 			},
 			{
+				"command": "lucy.openScopeTree",
+				"title": "Lucy: Show Scope Tree"
+			},
+			{
 				"command": "lucy.openAssembly",
 				"title": "Lucy: Show Assembly"
 			},
