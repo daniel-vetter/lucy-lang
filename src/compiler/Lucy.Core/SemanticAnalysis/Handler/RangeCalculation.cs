@@ -2,6 +2,7 @@
 using Lucy.Core.ProjectManagement;
 using Lucy.Core.SemanticAnalysis.Infrastructure;
 using Lucy.Core.SemanticAnalysis.Inputs;
+using System.Diagnostics;
 using System.Linq;
 
 namespace Lucy.Core.SemanticAnalysis.Handler
@@ -21,8 +22,9 @@ namespace Lucy.Core.SemanticAnalysis.Handler
         [GenerateDbExtension] ///<see cref="GetRangeFromNodeEx.GetRangeFromNode"/>
         public static Range1D? GetRangeFromNode(IDb db, SyntaxTreeNode node)
         {
-            var root = db.GetSyntaxTree(node.NodeId.DocumentPath);
-            return FindRangeFromNode(db, root, node, 0);
+            var start = db.GetDistanceFromDocumentStart(node);
+            var len = db.GetNodeRangeLength(node);
+            return new Range1D(new (start), new (start + len));
         }
 
         private static Range1D? FindRangeFromNode(IDb db, SyntaxTreeNode parentNode, SyntaxTreeNode target, int offset)
@@ -69,32 +71,36 @@ namespace Lucy.Core.SemanticAnalysis.Handler
 
         private record SearchResult(SyntaxTreeNode Node, Range1D Range);
 
-        [GenerateDbExtension] ///<see cref="GetStatementListRangeLengthEx.GetStatementListRangeLength"/>
-        public static int GetNodeRangeLength(IDb db, SyntaxTreeNode node)
+        [GenerateDbExtension] ///<see cref="GetDistanceFromDocumentStartEx.GetDistanceFromDocumentStart"/>
+        public static int GetDistanceFromDocumentStart(IDb db, SyntaxTreeNode node)
         {
-            return GetLengthOf(db, node);
+            if (node.NodeId.IsRoot)
+                return 0;
+
+            var parentNode = db.GetNodeById(node.NodeId.Parent);
+
+            var distance = 0;
+            foreach(var child in parentNode.GetChildNodes())
+            {
+                if (child.NodeId == node.NodeId)
+                    break;
+                distance += db.GetNodeRangeLength(child);
+            }
+
+            return distance + db.GetDistanceFromDocumentStart(parentNode);
         }
 
-        private static int GetLengthOf(IDb db, SyntaxTreeNode node)
+        [GenerateDbExtension] ///<see cref="GetNodeRangeLengthEx.GetNodeRangeLength"/>
+        public static int GetNodeRangeLength(IDb db, SyntaxTreeNode node)
         {
-            int length = 0;
+            var len = 0;
+            foreach(var child in node.GetChildNodes())
+                len += db.GetNodeRangeLength(child);
 
             if (node is TokenNode token)
-            {
-                length += token.Text.Length;
-            }
+                len += token.Text.Length;
 
-            foreach (var child in node.GetChildNodes())
-            {
-                if (child is StatementSyntaxNode statementNode)
-                {
-                    length += db.GetNodeRangeLength(statementNode);
-                }
-                else
-                    length += GetLengthOf(db, child);
-            }
-
-            return length;
+            return len;
         }
     }
 }
