@@ -6,6 +6,7 @@ using Lucy.Core.SemanticAnalysis.Infrastructure;
 using Lucy.Core.SemanticAnalysis.Inputs;
 using System;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 
 namespace Lucy.Core.SemanticAnalysis
@@ -14,9 +15,8 @@ namespace Lucy.Core.SemanticAnalysis
     {
         private readonly Workspace _workspace;
         private IDisposable _workspaceEventSubscription;
-        private IDisposable? _exporterEventSubscription;
         private Db _db = new();
-        
+
         public SemanticDatabase(Workspace workspace, string? traceOutputDir = null)
         {
             _workspaceEventSubscription = workspace.AddEventHandler(OnWorkspaceEvent);
@@ -29,22 +29,39 @@ namespace Lucy.Core.SemanticAnalysis
 
         private void RegisterTraceListener(string? graphOutputDir)
         {
-            if (graphOutputDir != null)
+            if (graphOutputDir == null)
+                return;
+
+            var exporterDetailed = new DetailedGraphExport(graphOutputDir);
+            var exporterSummary = new SummaryGraphExport(graphOutputDir);
+
+            _db.OnQueryDone = () =>
             {
-                var exporter = new GraphExport(graphOutputDir);
-                _exporterEventSubscription = _db.AddEventHandler(exporter.ProcessDbEvent);
-            }
+                var sw1 = Stopwatch.StartNew();
+                var log = _db.GetLastQueryExecutionLog();
+                sw1.Stop();
+
+                var sw2 = Stopwatch.StartNew();
+                exporterDetailed.Export(log);
+                exporterSummary.Export(log);
+                sw2.Stop();
+
+                File.WriteAllText("C:\\temp\\summary.txt", $"""
+                    Log creation: {sw1.Elapsed}
+                    Graph creation: {sw2.Elapsed}
+                    """);
+            };
         }
 
         private void AddWorkspaceAsInputs(Workspace workspace)
         {
-            
+
             _db.SetInput(new GetDocumentList(), new GetDocumentListResult(_workspace.Documents.Keys.ToComparableReadOnlyList()));
             foreach (var codeFile in workspace.Documents.Values.OfType<CodeFile>())
             {
                 _db.SetInput(new GetSyntaxTree(codeFile.Path), new GetSyntaxTreeResult(codeFile.SyntaxTree.Build()));
             }
-                
+
         }
 
         private void RegisterHandler()
@@ -64,7 +81,6 @@ namespace Lucy.Core.SemanticAnalysis
         public void Dispose()
         {
             _workspaceEventSubscription.Dispose();
-            _exporterEventSubscription?.Dispose();
         }
 
         public TQueryResult Query<TQueryResult>(IQuery<TQueryResult> query) where TQueryResult : notnull

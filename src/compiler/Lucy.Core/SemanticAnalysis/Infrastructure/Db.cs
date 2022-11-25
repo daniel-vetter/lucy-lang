@@ -1,5 +1,4 @@
-﻿using Lucy.Common;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
@@ -11,18 +10,19 @@ namespace Lucy.Core.SemanticAnalysis.Infrastructure
     {
         private Dictionary<IQuery, Entry> _entries = new();
         private Dictionary<Type, QueryHandler> _handlers = new();
-        private Subscriptions<IDbEvent> _subscriptions = new();
         private int _currentRevision;
+
+        private Dictionary<Entry, RecordedCalculation> _lastQueryCalculations = new();
+        private TimeSpan _lastQueryDuration = TimeSpan.Zero;
+        private IQuery? _lastQuery = null;
+
         //TODO: Garbage collection
+
+        public Action? OnQueryDone { get; set; }
 
         public void RegisterHandler(QueryHandler handler)
         {
             _handlers.Add(handler.GetType().BaseType!.GetGenericArguments()[0], handler);
-        }
-
-        public IDisposable AddEventHandler(Action<Db, IDbEvent> handler)
-        {
-            return _subscriptions.AddHandler(x => { handler(this, x); });
         }
 
         public void SetInput<TQueryResult>(IQuery<TQueryResult> query, TQueryResult result) where TQueryResult : notnull
@@ -40,9 +40,6 @@ namespace Lucy.Core.SemanticAnalysis.Infrastructure
             {
                 _entries.Add(query, new Entry(query, result, _currentRevision, _currentRevision, true, null));
             }
-
-            if (_subscriptions.HasSubscriptions)
-                _subscriptions.Publish(new InputWasChanged(query, result));
         }
 
         public void RemoveInput<TQueryResult>(IQuery<TQueryResult> query) where TQueryResult : notnull
@@ -52,9 +49,6 @@ namespace Lucy.Core.SemanticAnalysis.Infrastructure
 
             _currentRevision++;
             entry.LastChanged = _currentRevision;
-
-            if (_subscriptions.HasSubscriptions)
-                _subscriptions.Publish(new InputWasRemoved(query));
         }
 
         private bool EnsureEntryIsUpToDate(Entry entry)
@@ -94,14 +88,17 @@ namespace Lucy.Core.SemanticAnalysis.Infrastructure
 
         public TQueryResult Query<TQueryResult>(IQuery<TQueryResult> query) where TQueryResult : notnull
         {
-            return (TQueryResult)(Query(query, null).Result ?? throw new Exception("Query was not executed."));
+            _lastQueryCalculations.Clear();
+            _lastQuery = query;
+            var sw = Stopwatch.StartNew();
+            var result = (TQueryResult)(Query(query, null).Result ?? throw new Exception("Query was not executed."));
+            _lastQueryDuration = sw.Elapsed;
+            OnQueryDone?.Invoke();
+            return result;
         }
 
         private Entry Query(IQuery query, IQuery? parentQuery)
         {
-            if (_subscriptions.HasSubscriptions)
-                _subscriptions.Publish(new QueryReceived(query, parentQuery));
-
             if (!_entries.TryGetValue(query, out var entry))
             {
                 entry = new Entry(query, null, 0, 0, false, new List<Entry>());
@@ -111,9 +108,6 @@ namespace Lucy.Core.SemanticAnalysis.Infrastructure
 
             EnsureEntryIsUpToDate(entry);
 
-            if (_subscriptions.HasSubscriptions)
-                _subscriptions.Publish(new QueryAnswered(query, parentQuery));
-
             return entry;
         }
 
@@ -122,14 +116,10 @@ namespace Lucy.Core.SemanticAnalysis.Infrastructure
             if (!_handlers.TryGetValue(entry.Query.GetType(), out var handler))
                 throw new Exception($"For a query of type '{entry.Query.GetType().Name}' is no input provided and no query handler registered.");
 
-            if (_subscriptions.HasSubscriptions)
-                _subscriptions.Publish(new CalculationStarted(entry.Query));
-
             var callContext = new QueryExecutionContext(this, entry.Query);
             var handlerStopwatch = Stopwatch.StartNew();
             var result = handler.Handle(callContext, entry.Query);
             handlerStopwatch.Stop();
-
 
             ResultType resultType;
             var overheadStopwatch = Stopwatch.StartNew();
@@ -152,25 +142,41 @@ namespace Lucy.Core.SemanticAnalysis.Infrastructure
 
             overheadStopwatch.Stop();
 
-            if (_subscriptions.HasSubscriptions)
-                _subscriptions.Publish(new CalculationFinished(entry.Query, entry.Result, handlerStopwatch.Elapsed - callContext.TotalTimeInSubQueries, handlerStopwatch.Elapsed, overheadStopwatch.Elapsed, resultType));
+            _lastQueryCalculations.Add(entry, new RecordedCalculation(_lastQueryCalculations.Count, query: entry.Query, handlerStopwatch.Elapsed - callContext.TotalTimeInSubQueries, handlerStopwatch.Elapsed, overheadStopwatch.Elapsed, resultType));
 
             return resultType != ResultType.WasTheSame;
         }
 
-        public EntryDetails GetEntryDetails(IQuery query)
+        public QueryExectionLog GetLastQueryExecutionLog()
         {
-            if (!_entries.TryGetValue(query, out var entry))
+            if (_lastQuery == null)
+                throw new Exception("No query was executed");
+
+            if (!_entries.TryGetValue(_lastQuery, out var entry))
                 throw new Exception("Query not found");
 
-            static EntryDetails Map(Entry entry) => new(
-                Query: entry.Query,
-                Result: entry.Result,
-                IsInput: entry.IsInput,
-                Dependencies: entry.Dependencies.Select(Map).ToImmutableArray()
-            );
+            var cache = new Dictionary<Entry, RecordedEntry>();
 
-            return Map(entry);
+            RecordedEntry Map(Entry entry)
+            {
+                if (cache.TryGetValue(entry, out var alreadyMapped))
+                    return alreadyMapped;
+
+                _lastQueryCalculations.TryGetValue(entry, out var calculation);
+
+                var mapped = new RecordedEntry(
+                    query: entry.Query,
+                    result: entry.Result,
+                    isInput: entry.IsInput,
+                    dependencies: entry.Dependencies.Select(Map).ToImmutableArray(),
+                    calculation: calculation
+                );
+
+                cache.Add(entry, mapped);
+                return mapped;
+            }
+
+            return new QueryExectionLog(_lastQueryDuration, Map(entry), _lastQueryCalculations.Values.ToImmutableArray());
         }
 
         private class Entry
@@ -210,7 +216,6 @@ namespace Lucy.Core.SemanticAnalysis.Infrastructure
 
             public TQueryResult Query<TQueryResult>(IQuery<TQueryResult> query) where TQueryResult : notnull
             {
-
                 var sw = Stopwatch.StartNew();
                 var resultEntry = _db.Query(query, _parentQuery);
                 Dependencies.Add(resultEntry);
@@ -220,6 +225,4 @@ namespace Lucy.Core.SemanticAnalysis.Infrastructure
             }
         }
     }
-
-    public record EntryDetails(IQuery Query, object? Result, bool IsInput, ImmutableArray<EntryDetails> Dependencies);
 }

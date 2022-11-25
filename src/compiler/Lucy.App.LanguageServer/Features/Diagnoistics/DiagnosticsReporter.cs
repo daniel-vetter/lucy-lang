@@ -42,7 +42,7 @@ namespace Lucy.App.LanguageServer.Features.Diagnoistics
 
             foreach(var document in _documentsWithErrorsInLastReport.Except(documents))
             {
-                documentsToReport.Add(new ReportJob(document, Array.Empty<Error>()));
+                documentsToReport.Add(new ReportJob(document, Array.Empty<ErrorWithRange>()));
             }
 
             _documentsWithErrorsInLastReport = documents;
@@ -67,6 +67,6 @@ namespace Lucy.App.LanguageServer.Features.Diagnoistics
             }
         }
 
-        private record ReportJob(string DocumentPath, Error[] Errors);
+        private record ReportJob(string DocumentPath, ErrorWithRange[] Errors);
     }
 }

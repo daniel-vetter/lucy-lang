@@ -53,6 +53,10 @@
 			{
 				"command": "lucy.attachDebugger",
 				"title": "Lucy: Attach Debugger to Language Server"
+			},
+			{
+				"command": "lucy.attachProfiler",
+				"title": "Lucy: Attach Profiler to Language Server"
 			}
 		]
 	},

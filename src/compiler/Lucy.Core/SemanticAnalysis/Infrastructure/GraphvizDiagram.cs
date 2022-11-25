@@ -20,8 +20,38 @@ namespace Lucy.Core.SemanticAnalysis.Infrastructure
         private HashSet<EdgeByNodeKeys> _edgesByNodeKeys = new();
         private List<Edge> _edges = new();
         private record NullableKey(object? Value);
-        private record EdgeByNodeKeys(object? From, object? To);
+        
 
+        private class EdgeByNodeKeys : IEquatable<EdgeByNodeKeys?>
+        {
+            public EdgeByNodeKeys(object? from, object? to)
+            {
+                _from = from;
+                _to = to;
+                _hash = HashCode.Combine(from, to);
+            }
+
+            private object? _from;
+            private object? _to;
+            private int _hash;
+
+            public override bool Equals(object? obj)
+            {
+                return Equals(obj as EdgeByNodeKeys);
+            }
+
+            public bool Equals(EdgeByNodeKeys? other)
+            {
+                return other is not null &&
+                       EqualityComparer<object?>.Default.Equals(_from, other._from) &&
+                       EqualityComparer<object?>.Default.Equals(_to, other._to);
+            }
+
+            public override int GetHashCode()
+            {
+                return _hash;
+            }
+        }
 
         string BuildProps(Dictionary<string, object> values)
         {

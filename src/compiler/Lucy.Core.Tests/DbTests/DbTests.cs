@@ -111,7 +111,6 @@ namespace Lucy.Core.Tests.DbTests
         public void Changing_the_input_should_invalidate_the_cache()
         {
             var db = new Db();
-            var events = new EventListener(db);
             db.RegisterHandler(new SumHandler());
 
             db.SetInput(new ValueQuery("A"), new ValueResult(1));
@@ -121,9 +120,6 @@ namespace Lucy.Core.Tests.DbTests
 
             db.SetInput(new ValueQuery("B"), new ValueResult(5));
             db.Query(new SumQuery("A", "B")).Value.ShouldBe(6);
-
-            //events.OfType<QueryAnswered>().Count(x => x.ResultSource == ResultSource.Cache).ShouldBe(0);
-            //events.OfType<QueryAnswered>().Count(x => x.ResultSource == ResultSource.Handler).ShouldBe(2);
         }
 
         [Test]
@@ -148,7 +144,6 @@ namespace Lucy.Core.Tests.DbTests
         public void Running_a_query_twice_should_use_the_cache()
         {
             var db = new Db();
-            var events = new EventListener(db);
             db.RegisterHandler(new SumHandler());
 
             db.SetInput(new ValueQuery("A"), new ValueResult(1));
@@ -181,7 +176,6 @@ namespace Lucy.Core.Tests.DbTests
         public void Changing_the_input_should_invalidate_the_nested_query_cache()
         {
             var db = new Db();
-            var events = new EventListener(db);
 
             db.RegisterHandler(new SumHandler());
             db.RegisterHandler(new MultiplySumHandler());
@@ -206,7 +200,6 @@ namespace Lucy.Core.Tests.DbTests
         public void Removing_a_input_should_invalidate_the_query_cache_and_reexecute_the_handler()
         {
             var db = new Db();
-            var events = new EventListener(db);
             db.RegisterHandler(new SumHandler());
 
             db.SetInput(new ValueQuery("A"), new ValueResult(1));
@@ -240,7 +233,6 @@ namespace Lucy.Core.Tests.DbTests
         public void If_the_result_of_an_subquery_is_the_same_as_the_already_cached_result_it_should_not_reexecute_dependent_handler3()
         {
             var db = new Db();
-            var events = new EventListener(db);
             db.RegisterHandler(new SumHandler());
             db.RegisterHandler(new MultiplySumHandler());
 
@@ -269,7 +261,6 @@ namespace Lucy.Core.Tests.DbTests
         public void If_the_result_of_an_subquery_is_the_same_as_the_already_cached_result_it_should_not_reexecute_dependent_handler()
         {
             var db = new Db();
-            var events = new EventListener(db);
             db.RegisterHandler(new SumHandler());
             db.RegisterHandler(new MultiplySumHandler());
 
@@ -299,7 +290,6 @@ namespace Lucy.Core.Tests.DbTests
         public void If_the_result_of_an_subquery_is_the_same_as_the_already_cached_result_it_should_not_reexecute_dependent_handler2()
         {
             var db = new Db();
-            var events = new EventListener(db);
             db.RegisterHandler(new SumHandler());
             db.RegisterHandler(new MultiplySumHandler());
 
@@ -332,7 +322,6 @@ namespace Lucy.Core.Tests.DbTests
         public void If_the_result_of_an_query_is_the_same_as_the_cached_version_it_should_throw_away_the_new_result_instance()
         {
             var db = new Db();
-            var events = new EventListener(db);
             db.RegisterHandler(new SumHandler());
 
             db.SetInput(new ValueQuery("A"), new ValueResult(1));

@@ -20,6 +20,7 @@ namespace Lucy.Core.Parsing.Nodes
     {
         private Dictionary<TKey, TValue> _dict;
         private List<KeyValuePair<TKey, TValue>> _stableList = new();
+        private int _hash;
 
         public ComparableReadOnlyDictionary()
         {
@@ -73,13 +74,18 @@ namespace Lucy.Core.Parsing.Nodes
 
         public override int GetHashCode()
         {
+            return _hash;
+        }
+
+        private void ComputeHash()
+        {
             var hc = new HashCode();
             foreach(var (key, value) in _stableList)
             {
                 hc.Add(key);
                 hc.Add(value);
             }
-            return hc.ToHashCode();
+            _hash = hc.ToHashCode();
         }
 
         public class Builder
@@ -98,6 +104,7 @@ namespace Lucy.Core.Parsing.Nodes
                 var r = new ComparableReadOnlyDictionary<TKey, TValue>();
                 r._dict = _builderDict;
                 r._stableList = _stableList;
+                r.ComputeHash();
                 return r;
             }
         }

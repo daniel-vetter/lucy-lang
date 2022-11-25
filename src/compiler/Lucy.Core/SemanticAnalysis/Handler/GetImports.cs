@@ -20,7 +20,8 @@ namespace Lucy.Core.SemanticAnalysis.Handler
         [GenerateDbExtension] ///<see cref="GetImportsEx.GetImports"/>
         public static ComparableReadOnlyList<Import> GetImports(IDb db, string documentPath)
         {
-            var importStatements = db.GetNodesByType<ImportStatementSyntaxNode>(documentPath);
+            var importStatementsIds = db.GetNodeIdsByType<ImportStatementSyntaxNode>(documentPath);
+            var importStatements = importStatementsIds.Select(x => db.GetNodeById(x) as ImportStatementSyntaxNode).ToList();
             var documentList = db.GetDocumentList().ToHashSet();
             var currentDir = GetDirectoryFrom(documentPath);
 

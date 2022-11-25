@@ -22,7 +22,7 @@ namespace Lucy.Core.SemanticAnalysis.Handler
         [GenerateDbExtension] ///<see cref="GetEntryPointsInDocumentEx.GetEntryPointsInDocument"/>
         public static ComparableReadOnlyList<FunctionInfo> GetEntryPointsInDocument(IDb db, string documentPath)
         {
-            var infos = db.GetFunctionInfosInDocument(documentPath);
+            var infos = db.GetFunctionsInDocument(documentPath);
             var result = new ComparableReadOnlyList<FunctionInfo>.Builder();
             foreach(var info in infos)
             {

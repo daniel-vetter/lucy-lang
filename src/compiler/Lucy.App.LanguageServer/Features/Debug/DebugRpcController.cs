@@ -1,9 +1,9 @@
 ﻿using Lucy.App.LanguageServer.Infrastructure;
+using Lucy.Common;
 using Lucy.Common.ServiceDiscovery;
 using Lucy.Core.SemanticAnalysis.Handler;
 using Lucy.Core.SemanticAnalysis.Inputs;
 using Lucy.Infrastructure.RpcServer;
-using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
 
@@ -24,14 +24,16 @@ namespace Lucy.App.LanguageServer.Features.Debug
         [JsonRpcFunction("debug/getSyntaxTree")]
         public async Task<string> GetSyntaxTree(RpcGetSyntaxTree input)
         {
-            var tree = _currentWorkspace.Analysis.GetSyntaxTree(_currentWorkspace.ToWorkspacePath(input.Uri));
+            var path = _currentWorkspace.ToWorkspacePath(input.Uri);
+            var tree = _currentWorkspace.Analysis.GetSyntaxTree(path);
             return await _debugViewGenerator.Generate(tree);
         }
 
         [JsonRpcFunction("debug/getScopeTree")]
         public async Task<string> GetScopeTree(RpcGetSyntaxTree input)
         {
-            var tree = _currentWorkspace.Analysis.GetScopeTree(_currentWorkspace.ToWorkspacePath(input.Uri));
+            var path = _currentWorkspace.ToWorkspacePath(input.Uri);
+            var tree = _currentWorkspace.Analysis.GetScopeTree(path);
             return await _debugViewGenerator.Generate(tree);
         }
 
@@ -40,7 +42,14 @@ namespace Lucy.App.LanguageServer.Features.Debug
         {
             Debugger.Launch(); 
             return Task.CompletedTask;
-        } 
+        }
+
+        [JsonRpcFunction("debug/attachProfiler")]
+        public Task AttachProfiler()
+        {
+            Profiler.Attach();
+            return Task.CompletedTask;
+        }
 
         /*
         [JsonRpcFunction("debug/getAssembly")]

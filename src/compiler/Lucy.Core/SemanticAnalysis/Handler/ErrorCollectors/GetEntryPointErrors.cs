@@ -18,17 +18,17 @@ namespace Lucy.Core.SemanticAnalysis.Handler.ErrorCollectors
             {
                 var documents = db.GetDocumentList();
 
-                result.Add(new Error(documents.First(), new(new(0), new(0)), "No entry point found. Please ensure the solution has exactly one 'main' function."));
+                result.Add(new ErrorWithRange(documents.First(), new(new(0), new(0)), "No entry point found. Please ensure the solution has exactly one 'main' function."));
             }
 
             if (entryPoints.Count > 1)
             {
                 foreach (var entryPoint in entryPoints)
                 {
-                    var node = (FunctionDeclarationStatementSyntaxNode)db.GetNodeById(entryPoint.Declaration);
+                    var node = (FunctionDeclarationStatementSyntaxNode)db.GetNodeById(entryPoint.DeclarationNodeId);
                     var nameNode = node.FunctionName.Token;
 
-                    result.Add(new Error(nameNode.NodeId.NodePath, db.GetRangeFromNode(nameNode), "More than one entry point was found. Please ensure the solution has only one 'main' function."));
+                    result.Add(new ErrorWithRange(nameNode.NodeId.NodePath, db.GetRangeFromNode(nameNode), "More than one entry point was found. Please ensure the solution has only one 'main' function."));
                 }
             }
 

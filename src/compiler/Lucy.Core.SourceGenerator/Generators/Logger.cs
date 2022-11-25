@@ -4,7 +4,7 @@ namespace Lucy.Core.SourceGenerator.Generators
 {
     internal class Logger
     {
-        private string _name;
+        private string? _name;
         private readonly bool _enabled;
 
         public Logger(string name, bool enabled)
@@ -16,6 +16,8 @@ namespace Lucy.Core.SourceGenerator.Generators
 
                 _name = DateTimeOffset.Now.ToString("yyyy-MM-dd-HH-mm-ss") + " " + name + ".log";
             }
+            else
+                _name = null;
 
             _enabled = enabled;
         }
@@ -24,7 +26,7 @@ namespace Lucy.Core.SourceGenerator.Generators
 
         public void Write(string message)
         {
-            if (!_enabled)
+            if (!_enabled && _name != null)
                 return;
 
             using var file = File.OpenWrite(Path.Combine("C:\\generator-log", _name));

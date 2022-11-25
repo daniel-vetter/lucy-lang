@@ -27,11 +27,11 @@ namespace Lucy.Core.SemanticAnalysis.Handler.ErrorCollectors
 
                     if (import.ValidState == ImportValidationResult.InvalidPath)
                     {
-                        result.Add(new Error(documentPath, range, $"Invalid import: '{import.Path}'."));
+                        result.Add(new ErrorWithRange(documentPath, range, $"Invalid import: '{import.Path}'."));
                     }
                     else if (import.ValidState == ImportValidationResult.CouldNotResolve)
                     {
-                        result.Add(new Error(documentPath, range, $"Could not resolve import: '{import.Path}'."));
+                        result.Add(new ErrorWithRange(documentPath, range, $"Could not resolve import: '{import.Path}'."));
                     }
                 }
             }

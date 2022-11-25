@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System;
 using System.Collections;
+using System.Xml.Linq;
 
 namespace Lucy.Core.Parsing.Nodes;
 
@@ -12,9 +13,21 @@ public static class ComparableReadOnlyListExtensionMethods
     }
 }
 
+public abstract class ComparableReadOnlyList
+{
+    public static ComparableReadOnlyList<TElement> Create<TElement>(params TElement[] elements)
+    {
+        var l = new ComparableReadOnlyList<TElement>.Builder();
+        foreach (var element in elements)
+            l.Add(element);
+        return l.Build();
+    }
+}
+
 public class ComparableReadOnlyList<T> : IEnumerable<T>, IEquatable<ComparableReadOnlyList<T>>
 {
     private List<T> _list;
+    private int _hash;
 
     public class Builder
     {
@@ -42,6 +55,7 @@ public class ComparableReadOnlyList<T> : IEnumerable<T>, IEquatable<ComparableRe
             var list = new ComparableReadOnlyList<T>();
             list._list = _builderList;
             _done = true;
+            list.ComputeHash();
             return list;
         }
     }
@@ -49,11 +63,23 @@ public class ComparableReadOnlyList<T> : IEnumerable<T>, IEquatable<ComparableRe
     public ComparableReadOnlyList()
     {
         _list = new List<T>();
+        _hash = 0;
     }
 
     public ComparableReadOnlyList(IEnumerable<T> collection)
     {
         _list = new List<T>(collection);
+        ComputeHash();
+    }
+
+    private void ComputeHash()
+    {
+        var h = new HashCode();
+        for (int i = 0; i < _list.Count; i++)
+        {
+            h.Add(_list[i]);
+        }
+        _hash = h.ToHashCode();
     }
 
     public int Count => _list.Count;
@@ -61,12 +87,7 @@ public class ComparableReadOnlyList<T> : IEnumerable<T>, IEquatable<ComparableRe
 
     public override int GetHashCode()
     {
-        var h = new HashCode();
-        for (int i = 0; i < _list.Count; i++)
-        {
-            h.Add(_list[i]);
-        }
-        return h.ToHashCode();
+        return _hash;
     }
 
     public override bool Equals(object? obj)

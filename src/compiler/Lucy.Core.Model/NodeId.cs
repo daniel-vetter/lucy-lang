@@ -47,7 +47,7 @@ namespace Lucy.Core.Model
             }
         }
 
-        public static bool operator ==(NodeId id1, NodeId id2)
+        public static bool operator ==(NodeId? id1, NodeId? id2)
         {
             if (ReferenceEquals(id1, id2)) return true;
             if (ReferenceEquals(id1, null)) return false;
@@ -55,7 +55,7 @@ namespace Lucy.Core.Model
             return id1.Equals(id2);
         }
 
-        public static bool operator !=(NodeId id1, NodeId id2)
+        public static bool operator !=(NodeId? id1, NodeId? id2)
         {
             return !(id1 == id2);
         }
