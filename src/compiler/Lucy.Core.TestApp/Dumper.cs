@@ -2,6 +2,8 @@
 using System.Reflection;
 using Lucy.Core.Model;
 
+namespace Lucy.Core.TestApp;
+
 public class Dumper
 {
     public static void Dump(object obj)
@@ -23,7 +25,7 @@ public class Dumper
         else if (value is NodeId)
         {
             Console.ForegroundColor = ConsoleColor.Red;
-            Console.Write("\"" + value.ToString() + "\"");
+            Console.Write("\"" + value + "\"");
             Console.ResetColor();
         }
         else if (value is IEnumerable enumerable)

@@ -7,7 +7,7 @@ public abstract class QueryHandler
     public abstract object Handle(IDb db, object query);
 }
 
-public abstract class QueryHandler<TQuery, TQueryResult> : QueryHandler where TQuery : notnull, IQuery<TQueryResult> where TQueryResult : notnull
+public abstract class QueryHandler<TQuery, TQueryResult> : QueryHandler where TQuery : IQuery<TQueryResult> where TQueryResult : notnull
 {
     public abstract TQueryResult Handle(IDb db, TQuery query);
 
@@ -24,4 +24,5 @@ public interface IDb
 }
 
 public interface IQuery { }
+// ReSharper disable once UnusedTypeParameter
 public interface IQuery<TQueryResult> : IQuery { }

@@ -1,19 +1,18 @@
 ﻿using Lucy.Core.Model;
 
-namespace Lucy.Core.Parsing.Nodes.Trivia
+namespace Lucy.Core.Parsing.Nodes.Trivia;
+
+internal class WhitespaceTriviaNodeParser
 {
-    internal class WhitespaceTriviaNodeParser
+    public static WhitespaceTriviaNodeBuilder? Read(Code code)
     {
-        public static WhitespaceTriviaNodeBuilder? Read(Code code)
-        {
-            int len = 0;
-            while (code.Peek(len) is ' ' or '\t' or '\r' or '\n')
-                len++;
+        int len = 0;
+        while (code.Peek(len) is ' ' or '\t' or '\r' or '\n')
+            len++;
 
-            if (len == 0)
-                return null;
+        if (len == 0)
+            return null;
 
-            return new WhitespaceTriviaNodeBuilder(new TokenNodeBuilder(code.Read(len)));
-        }
+        return new WhitespaceTriviaNodeBuilder(new TokenNodeBuilder(code.Read(len)));
     }
 }

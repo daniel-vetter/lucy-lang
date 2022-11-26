@@ -1,13 +1,12 @@
-﻿using Lucy.Core.Parsing;
-using Lucy.Core.ProjectManagement;
+﻿using Lucy.Core.ProjectManagement;
 
 namespace Lucy.Core.TestApp;
 
 internal class TestCaseReader
 {
     private readonly Workspace _workspace;
-    private Dictionary<int, List<(string Path, string Content)>> _versions;
-    private int _currentVersion = 0;
+    private readonly Dictionary<int, List<(string Path, string Content)>> _versions;
+    private int _currentVersion;
 
     public TestCaseReader(Workspace workspace, string dir)
     {
@@ -17,10 +16,10 @@ internal class TestCaseReader
         foreach (var file in files)
         {
             var content = File.ReadAllText(file);
-            var workspacePath = file.Substring(dir.Length).Replace("\\", "/");
+            var workspacePath = file[dir.Length..].Replace("\\", "/");
 
             var version = 1;
-            var underscorePos = workspacePath.LastIndexOf("_");
+            var underscorePos = workspacePath.LastIndexOf("_", StringComparison.InvariantCulture);
             if (underscorePos != -1)
             {
                 var dotPos = workspacePath.IndexOf('.', underscorePos + 1);
@@ -49,7 +48,7 @@ internal class TestCaseReader
 
         foreach (var file in files)
         {
-            Console.WriteLine("Appling " + file.Path + " v" + _currentVersion);
+            Console.WriteLine("Applying " + file.Path + " v" + _currentVersion);
             if (_workspace.ContainsFile(file.Path))
                 _workspace.UpdateFile(file.Path, file.Content);
             else

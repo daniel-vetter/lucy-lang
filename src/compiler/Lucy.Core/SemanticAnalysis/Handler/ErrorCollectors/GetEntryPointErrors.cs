@@ -4,35 +4,34 @@ using Lucy.Core.Model;
 using Lucy.Core.SemanticAnalysis.Inputs;
 using System.Linq;
 
-namespace Lucy.Core.SemanticAnalysis.Handler.ErrorCollectors
+namespace Lucy.Core.SemanticAnalysis.Handler.ErrorCollectors;
+
+public static class GetEntryPointErrorsHandler
 {
-    public static class GetEntryPointErrorsHandler
+    [GenerateDbExtension] ///<see cref="GetEntryPointErrorsEx.GetEntryPointErrors"/>
+    public static ComparableReadOnlyList<Error> GetEntryPointErrors(IDb db)
     {
-        [GenerateDbExtension] ///<see cref="GetEntryPointErrorsEx.GetEntryPointErrors"/>
-        public static ComparableReadOnlyList<Error> GetEntryPointErrors(IDb db)
+        var entryPoints = db.GetEntryPoints();
+        var result = new ComparableReadOnlyList<Error>.Builder();
+
+        if (entryPoints.Count == 0)
         {
-            var entryPoints = db.GetEntryPoints();
-            var result = new ComparableReadOnlyList<Error>.Builder();
+            var documents = db.GetDocumentList();
 
-            if (entryPoints.Count == 0)
-            {
-                var documents = db.GetDocumentList();
-
-                result.Add(new ErrorWithRange(documents.First(), new(new(0), new(0)), "No entry point found. Please ensure the solution has exactly one 'main' function."));
-            }
-
-            if (entryPoints.Count > 1)
-            {
-                foreach (var entryPoint in entryPoints)
-                {
-                    var node = (FunctionDeclarationStatementSyntaxNode)db.GetNodeById(entryPoint.DeclarationNodeId);
-                    var nameNode = node.FunctionName.Token;
-
-                    result.Add(new ErrorWithRange(nameNode.NodeId.NodePath, db.GetRangeFromNode(nameNode), "More than one entry point was found. Please ensure the solution has only one 'main' function."));
-                }
-            }
-
-            return result.Build();
+            result.Add(new ErrorWithRange(documents.First(), new(new(0), new(0)), "No entry point found. Please ensure the solution has exactly one 'main' function."));
         }
+
+        if (entryPoints.Count > 1)
+        {
+            foreach (var entryPoint in entryPoints)
+            {
+                var node = (FunctionDeclarationStatementSyntaxNode)db.GetNodeById(entryPoint.DeclarationNodeId);
+                var nameNode = node.FunctionName.Token;
+
+                result.Add(new ErrorWithRange(nameNode.NodeId.NodePath, db.GetRangeFromNode(nameNode), "More than one entry point was found. Please ensure the solution has only one 'main' function."));
+            }
+        }
+
+        return result.Build();
     }
 }

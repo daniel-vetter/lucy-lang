@@ -1,24 +1,25 @@
-﻿using System;
+﻿using JetBrains.Annotations;
+using System;
 
-namespace Lucy.Common.ServiceDiscovery
+namespace Lucy.Common.ServiceDiscovery;
+
+[AttributeUsage(AttributeTargets.Class)]
+[MeansImplicitUse]
+public class ServiceAttribute : Attribute
 {
-    [AttributeUsage(AttributeTargets.Class)]
-    public class ServiceAttribute : Attribute
+    public ServiceAttribute(Lifetime lifetime, Type? serviceType = null)
     {
-        public ServiceAttribute(Lifetime lifetime = Lifetime.Singleton, Type? serviceType = null)
-        {
-            Lifetime = lifetime;
-            ServiceType = serviceType;
-        }
-
-        public Lifetime Lifetime { get; }
-        public Type? ServiceType { get; }
+        Lifetime = lifetime;
+        ServiceType = serviceType;
     }
 
-    public enum Lifetime
-    {
-        Singleton,
-        Scoped,
-        Transient
-    }
+    public Lifetime Lifetime { get; }
+    public Type? ServiceType { get; }
+}
+
+public enum Lifetime
+{
+    Singleton,
+    Scoped,
+    Transient
 }

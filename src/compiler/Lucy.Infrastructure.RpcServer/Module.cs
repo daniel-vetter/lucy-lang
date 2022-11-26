@@ -7,45 +7,44 @@ using System.Collections.Immutable;
 using System.Reflection;
 
 
-namespace Lucy.Infrastructure.RpcServer
+namespace Lucy.Infrastructure.RpcServer;
+
+public static class Module
 {
-    public static class Module
+    public static IServiceCollection AddJsonRpcServer(this IServiceCollection sc, Action<JsonRpcServerBuilder> build)
     {
-        public static IServiceCollection AddJsonRpcServer(this IServiceCollection sc, Action<JsonRpcServerBuilder> build)
-        {
-            sc.AddServicesFromCurrentAssembly();
-            var builder = new JsonRpcServerBuilder();
-            build(builder);
-            sc.AddSingleton(builder.CreateConfig());
-            return sc;
-        }
+        sc.AddServicesFromCurrentAssembly();
+        var builder = new JsonRpcServerBuilder();
+        build(builder);
+        sc.AddSingleton(builder.CreateConfig());
+        return sc;
+    }
+}
+
+public class JsonRpcServerBuilder
+{
+    private readonly List<Assembly> _assembliesToScan = new();
+    private readonly List<JsonConverter> _jsonConverter = new();
+
+    public JsonRpcServerBuilder AddControllerFromCurrentAssembly()
+    {
+        _assembliesToScan.Add(Assembly.GetCallingAssembly());
+        return this;
     }
 
-    public class JsonRpcServerBuilder
+    public JsonRpcServerBuilder AddJsonConverter<T>() where T : JsonConverter, new()
     {
-        private List<Assembly> _assembliesToScan = new();
-        private List<JsonConverter> _jsonConverter = new();
+        return AddJsonConverter(new T());
+    }
 
-        public JsonRpcServerBuilder AddControllerFromCurrentAssembly()
-        {
-            _assembliesToScan.Add(Assembly.GetCallingAssembly());
-            return this;
-        }
+    public JsonRpcServerBuilder AddJsonConverter(JsonConverter converter)
+    {
+        _jsonConverter.Add(converter);
+        return this;
+    }
 
-        public JsonRpcServerBuilder AddJsonConverter<T>() where T : JsonConverter, new()
-        {
-            return AddJsonConverter(new T());
-        }
-
-        public JsonRpcServerBuilder AddJsonConverter(JsonConverter converter)
-        {
-            _jsonConverter.Add(converter);
-            return this;
-        }
-
-        internal JsonRpcConfig CreateConfig()
-        {
-            return new JsonRpcConfig(_jsonConverter.ToImmutableArray(), _assembliesToScan.ToImmutableArray());
-        }
+    internal JsonRpcConfig CreateConfig()
+    {
+        return new JsonRpcConfig(_jsonConverter.ToImmutableArray(), _assembliesToScan.ToImmutableArray());
     }
 }

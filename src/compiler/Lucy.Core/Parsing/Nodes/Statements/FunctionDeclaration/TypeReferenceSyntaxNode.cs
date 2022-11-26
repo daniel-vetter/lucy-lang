@@ -2,25 +2,24 @@
 using Lucy.Core.Parsing.Nodes.Token;
 using System.Diagnostics.CodeAnalysis;
 
-namespace Lucy.Core.Parsing.Nodes.Statements.FunctionDeclaration
+namespace Lucy.Core.Parsing.Nodes.Statements.FunctionDeclaration;
+
+public class TypeReferenceSyntaxNodeParser
 {
-    public class TypeReferenceSyntaxNodeParser
+    public static bool TryRead(Code code, [NotNullWhen(true)] out TypeReferenceSyntaxNodeBuilder? result)
     {
-        public static bool TryRead(Code code, [NotNullWhen(true)] out TypeReferenceSyntaxNodeBuilder? result)
+        if (!SyntaxElementParser.TryReadIdentifier(code, out var token))
         {
-            if (!SyntaxElementParser.TryReadIdentifier(code, out var token))
-            {
-                result = null;
-                return false;
-            }
-
-            result = new TypeReferenceSyntaxNodeBuilder(token);
-            return true;
+            result = null;
+            return false;
         }
 
-        internal static TypeReferenceSyntaxNodeBuilder Synthesize(string? errorMessage = null)
-        {
-            return new TypeReferenceSyntaxNodeBuilder(SyntaxElementParser.Missing(errorMessage));
-        }
+        result = new TypeReferenceSyntaxNodeBuilder(token);
+        return true;
+    }
+
+    internal static TypeReferenceSyntaxNodeBuilder Synthesize(string? errorMessage = null)
+    {
+        return new TypeReferenceSyntaxNodeBuilder(SyntaxElementParser.Missing(errorMessage));
     }
 }

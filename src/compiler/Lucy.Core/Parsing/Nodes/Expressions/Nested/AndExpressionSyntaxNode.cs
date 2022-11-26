@@ -2,31 +2,31 @@
 using Lucy.Core.Parsing.Nodes.Token;
 using System.Diagnostics.CodeAnalysis;
 
-namespace Lucy.Core.Parsing.Nodes.Expressions.Nested
+namespace Lucy.Core.Parsing.Nodes.Expressions.Nested;
+
+internal static class AndExpressionSyntaxNodeParser
 {
-    internal class AndExpressionSyntaxNodeParser
+    public static bool TryReadOrInner(Code code, [NotNullWhen(true)] out ExpressionSyntaxNodeBuilder? result)
     {
-        public static bool TryReadOrInner(Code code, [NotNullWhen(true)] out ExpressionSyntaxNodeBuilder? result)
+        if (!OrExpressionSyntaxNodeParser.TryReadOrInner(code, out result))
+            return false;
+
+        while (true)
         {
-            if (!OrExpressionSyntaxNodeParser.TryReadOrInner(code, out result))
-                return false;
+            if (!SyntaxElementParser.TryReadKeyword(code, "and", out var andToken))
+                return true;
 
-            while (true)
+            if (!OrExpressionSyntaxNodeParser.TryReadOrInner(code, out var right))
             {
-                if (!SyntaxElementParser.TryReadKeyword(code, "and", out var andToken))
-                    return true;
-
-                if (!OrExpressionSyntaxNodeParser.TryReadOrInner(code, out var right))
+                right = new MissingExpressionSyntaxNodeBuilder()
                 {
-                    right = new MissingExpressionSyntaxNodeBuilder()
-                    {
-                        SyntaxErrors = { { "Expected expression" } }
-                    };
-                    return true;
-                }
-
+                    SyntaxErrors = { { "Expected expression" } }
+                };
                 result = new AndExpressionSyntaxNodeBuilder(result, andToken, right);
+                return true;
             }
+
+            result = new AndExpressionSyntaxNodeBuilder(result, andToken, right);
         }
     }
 }

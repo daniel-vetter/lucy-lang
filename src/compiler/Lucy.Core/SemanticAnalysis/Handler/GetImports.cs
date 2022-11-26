@@ -5,82 +5,77 @@ using Lucy.Core.SemanticAnalysis.Inputs;
 using System;
 using System.Linq;
 
-namespace Lucy.Core.SemanticAnalysis.Handler
+namespace Lucy.Core.SemanticAnalysis.Handler;
+
+public record Import(NodeId NodeId, string Path, ImportValidationResult ValidState);
+public enum ImportValidationResult
 {
-    public record Import(NodeId NodeId, string Path, ImportValidationResult ValidState);
-    public enum ImportValidationResult
+    Ok,
+    CouldNotResolve
+}
+
+public static class GetImportsHandler
+{
+    [GenerateDbExtension] ///<see cref="GetImportsEx.GetImports"/>
+    public static ComparableReadOnlyList<Import> GetImports(IDb db, string documentPath)
     {
-        Ok,
-        CouldNotResolve,
-        InvalidPath
+        var importStatementsIds = db.GetNodeIdsByType<ImportStatementSyntaxNode>(documentPath);
+        var importStatements = importStatementsIds.Select(x => (ImportStatementSyntaxNode)db.GetNodeById(x)).ToList();
+        var documentList = db.GetDocumentList().ToHashSet();
+        var currentDir = GetDirectoryFrom(documentPath);
+
+        var result = new ComparableReadOnlyList<Import>.Builder();
+
+        foreach (var importStatement in importStatements)
+        {
+            var path = NormalizePath(CombinePath(currentDir, importStatement.Path.Value)) + ".lucy";
+            result.Add(!documentList.Contains(path)
+                ? new Import(importStatement.NodeId, path, ImportValidationResult.CouldNotResolve)
+                : new Import(importStatement.NodeId, path, ImportValidationResult.Ok));
+        }
+
+        return result.Build();
     }
 
-    static public class GetImportsHandler
+    private static string GetDirectoryFrom(string path)
     {
-        [GenerateDbExtension] ///<see cref="GetImportsEx.GetImports"/>
-        public static ComparableReadOnlyList<Import> GetImports(IDb db, string documentPath)
+        var index = path.LastIndexOf('/');
+        if (index == 0)
+            return "/";
+        return path[..index];
+    }
+
+    private static string CombinePath(string basePath, string toAdd)
+    {
+        if (basePath.Length == 0)
+            throw new Exception("Invalid base path");
+
+        if (toAdd.Length > 0 && toAdd[0] == '/') 
+            return toAdd;
+
+        return basePath[^1] == '/' 
+            ? $"{basePath}{toAdd}" 
+            : $"{basePath}/{toAdd}";
+    }
+
+    private static string NormalizePath(string path)
+    {
+        if (path.Length == 0) throw new Exception("Invalid path");
+        if (path[0] != '/') throw new Exception("Invalid path");
+
+        var entries = path.Split('/').ToList();
+
+        entries.RemoveAll(x => x == ".");
+
+        for (var i=1;i<entries.Count;i++)
         {
-            var importStatementsIds = db.GetNodeIdsByType<ImportStatementSyntaxNode>(documentPath);
-            var importStatements = importStatementsIds.Select(x => db.GetNodeById(x) as ImportStatementSyntaxNode).ToList();
-            var documentList = db.GetDocumentList().ToHashSet();
-            var currentDir = GetDirectoryFrom(documentPath);
+            if (entries[i - 1] == ".." || entries[i] != "..") 
+                continue;
 
-            var result = new ComparableReadOnlyList<Import>.Builder();
-
-            foreach (var importStatement in importStatements)
-            {
-                var path = NormalizePath(CombinePath(currentDir, importStatement.Path.Value)) + ".lucy";
-                if (path == null)
-                    result.Add(new Import(importStatement.NodeId, importStatement.Path.Value, ImportValidationResult.InvalidPath));
-                else if (!documentList.Contains(path))
-                    result.Add(new Import(importStatement.NodeId, path, ImportValidationResult.CouldNotResolve));
-                else result.Add(new Import(importStatement.NodeId, path, ImportValidationResult.Ok));
-            }
-
-            return result.Build();
+            entries.RemoveAt(i-1);
+            entries.RemoveAt(i-1);
         }
 
-        private static string GetDirectoryFrom(string path)
-        {
-            var index = path.LastIndexOf('/');
-            if (index == 0)
-                return "/";
-            return path[..index];
-        }
-
-        private static string CombinePath(string basePath, string toAdd)
-        {
-            if (basePath.Length == 0)
-                throw new Exception("Invalid base path");
-
-            if (toAdd.Length > 0 && toAdd[0] == '/') 
-                return toAdd;
-
-            if (basePath[^1] == '/')
-                return $"{basePath}{toAdd}";
-            else
-                return $"{basePath}/{toAdd}";
-        }
-
-        private static string? NormalizePath(string path)
-        {
-            if (path.Length == 0) throw new Exception("Invalid path");
-            if (path[0] != '/') throw new Exception("Invalid path");
-
-            var entries = path.Split('/').ToList();
-
-            entries.RemoveAll(x => x == ".");
-
-            for (int i=1;i<entries.Count;i++)
-            {
-                if (entries[i-1] != ".." && entries[i] == "..")
-                {
-                    entries.RemoveAt(i-1);
-                    entries.RemoveAt(i-1);
-                }
-            }
-
-            return string.Join("/", entries);
-        }
+        return string.Join("/", entries);
     }
 }

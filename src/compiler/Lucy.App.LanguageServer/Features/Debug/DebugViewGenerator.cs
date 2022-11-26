@@ -1,164 +1,120 @@
-﻿using Lucy.App.LanguageServer.Infrastructure;
-using Lucy.Common.ServiceDiscovery;
+﻿using Lucy.Common.ServiceDiscovery;
 using Lucy.Core.Model;
-using Lucy.Core.SemanticAnalysis.Inputs;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Lucy.App.LanguageServer.Features.Debug
+namespace Lucy.App.LanguageServer.Features.Debug;
+
+[Service(Lifetime.Singleton)]
+public class DebugViewGenerator
 {
-    [Service(Lifetime.Singleton)]
-    public class DebugViewGenerator
+    internal async Task<string> Generate(object value)
     {
-        private readonly CurrentWorkspace _currentWorkspace;
+        var stream = GetType().Assembly.GetManifestResourceStream(GetType().Namespace + ".DebugView.html");
+        if (stream == null)
+            throw new Exception("Could not find DebugView.html");
 
-        public DebugViewGenerator(CurrentWorkspace currentWorkspace)
+        var strReader = new StreamReader(stream);
+        var html = await strReader.ReadToEndAsync();
+
+        var sb = new StringBuilder();
+
+        void Process(object? obj)
         {
-            _currentWorkspace = currentWorkspace;
-        }
+            if (obj is string or NodeId) return;
 
-        internal async Task<string> Generate(object value)
-        {
-            var stream = GetType().Assembly.GetManifestResourceStream(GetType().Namespace + ".DebugView.html");
-            if (stream == null)
-                throw new Exception("Could not find DebugView.html");
-
-            var strReader = new StreamReader(stream);
-            var html = await strReader.ReadToEndAsync();
-
-            var sb = new StringBuilder();
-
-            void Process(object? obj)
+            if (obj is IEnumerable subList and not string)
             {
-                if (obj is string or NodeId) return;
-
-                if (obj is IEnumerable subList && obj is not string)
+                sb.Append("<ul>");
+                var index = 0;
+                foreach (var item in subList)
                 {
-                    sb.Append("<ul>");
-                    int index = 0;
-                    foreach (var item in subList)
-                    {
-                        sb.Append("<li>");
-                        sb.Append($"<span class='property'>[{index}]</span>: ");
-                        WriteValueHeader(sb, item);
-                        index++;
-                        sb.Append("</li>");
-                        Process(item);
-                    }
-                    sb.Append("</ul>");
+                    sb.Append("<li>");
+                    sb.Append($"<span class='property'>[{index}]</span>: ");
+                    WriteValueHeader(sb, item);
+                    index++;
+                    sb.Append("</li>");
+                    Process(item);
                 }
-                else if (obj != null)
+                sb.Append("</ul>");
+            }
+            else if (obj != null)
+            {
+                var props = Rearrange(obj.GetType().GetProperties());
+
+                sb.Append("<ul>");
+                foreach (var prop in props)
                 {
-                    var map = GetObjectPropertyNames(obj);
-                    var props = Rearrange(obj.GetType().GetProperties());
+                    sb.Append("<li>");
+                    sb.Append($"<span class='property'>{prop.Name}</span>: ");
 
-                    sb.Append("<ul>");
-                    foreach (var prop in props)
-                    {
-                        sb.Append("<li>");
-                        sb.Append($"<span class='property'>{prop.Name}</span>: ");
+                    var propValue = prop.GetValue(obj);
+                    WriteValueHeader(sb, propValue);
+                    sb.Append("</li>");
 
-                        var value = prop.GetValue(obj);
-                        WriteValueHeader(sb, value);
-                        sb.Append("</li>");
-
-                        Process(value);
-                    }
-                    sb.Append("</ul>");
+                    Process(propValue);
                 }
-            }
-
-            sb.Append("<ul class='tree'>");
-            sb.Append("<li>");
-            WriteValueHeader(sb, value);
-            sb.Append("</li>");
-            Process(value);
-            sb.Append("</ul>");
-
-            html = sb.ToString() + html;
-            return html;
-        }
-
-        private PropertyInfo[] Rearrange(PropertyInfo[] propertyInfos)
-        {
-            var list = propertyInfos.ToList();
-            var matching = list.Where(x => x.Name == "NodeId").ToArray();
-            foreach (var toRemove in matching)
-                list.Remove(toRemove);
-            foreach (var toInsert in matching)
-                list.Insert(0, toInsert);
-            return list.ToArray();
-        }
-
-        private static void WriteValueHeader(StringBuilder sb, object? value)
-        {
-            if (value == null)
-            {
-                sb.Append("<span style='opacity: 0.5'>&lt;null&gt;</span>");
-            }
-            else if (value is SyntaxElement se)
-            {
-                sb.Append($"{value.GetType().Name} <span class=\"string\">\"{se.Token.Text}\"</span>");
-            }
-            else if (value is string str)
-            {
-                sb.Append($"{value.GetType().Name} <span class=\"string\">\"{str}\"</span>");
-            }
-            else if (value is NodeId nodeId)
-            {
-                sb.Append($"{value.GetType().Name} <span class=\"nodeId\">\"{nodeId.ToString()}\"</span>");
-            }
-            else if (value is IEnumerable<object> list)
-            {
-                sb.Append("<span style='opacity: 0.5'>&lt;list of " + list.Count() + " elements&gt;</span>");
-            }
-            else if (value is Enum)
-            {
-                sb.Append(value.ToString());
-            }
-            else
-            {
-                sb.Append(value.GetType().Name);
+                sb.Append("</ul>");
             }
         }
 
-        private Dictionary<object, string> GetObjectPropertyNames(object obj)
+        sb.Append("<ul class='tree'>");
+        sb.Append("<li>");
+        WriteValueHeader(sb, value);
+        sb.Append("</li>");
+        Process(value);
+        sb.Append("</ul>");
+
+        html = sb + html;
+        return html;
+    }
+
+    private PropertyInfo[] Rearrange(PropertyInfo[] propertyInfos)
+    {
+        var list = propertyInfos.ToList();
+        var matching = list.Where(x => x.Name == "NodeId").ToArray();
+        foreach (var toRemove in matching)
+            list.Remove(toRemove);
+        foreach (var toInsert in matching)
+            list.Insert(0, toInsert);
+        return list.ToArray();
+    }
+
+    private static void WriteValueHeader(StringBuilder sb, object? value)
+    {
+        if (value == null)
         {
-            var dict = new Dictionary<object, string>(new ObjectReferenceEqualityComparer<object>());
-
-            var props = obj.GetType().GetProperties();
-            foreach (var prop in props)
-            {
-                var value = prop.GetValue(obj);
-                if (value == null)
-                    continue;
-
-                if (value is IEnumerable<SyntaxTreeNode> subList)
-                {
-                    var index = 1;
-                    foreach (var element in subList)
-                    {
-                        dict.Add(element, $"{prop.Name} {index}");
-                        index++;
-                    }
-                }
-                if (value is SyntaxTreeNode parserTreeNode)
-                    dict.Add(value, prop.Name);
-            }
-            return dict;
+            sb.Append("<span style='opacity: 0.5'>&lt;null&gt;</span>");
         }
-
-        public class ObjectReferenceEqualityComparer<T> : EqualityComparer<T> where T : class
+        else if (value is SyntaxElement se)
         {
-            public override bool Equals(T? x, T? y) => ReferenceEquals(x, y);
-            public override int GetHashCode(T obj) => RuntimeHelpers.GetHashCode(obj);
+            sb.Append($"{value.GetType().Name} <span class=\"string\">\"{se.Token.Text}\"</span>");
+        }
+        else if (value is string str)
+        {
+            sb.Append($"{value.GetType().Name} <span class=\"string\">\"{str}\"</span>");
+        }
+        else if (value is NodeId nodeId)
+        {
+            sb.Append($"{value.GetType().Name} <span class=\"nodeId\">\"{nodeId.ToString()}\"</span>");
+        }
+        else if (value is IEnumerable<object> list)
+        {
+            sb.Append("<span style='opacity: 0.5'>&lt;list of " + list.Count() + " elements&gt;</span>");
+        }
+        else if (value is Enum)
+        {
+            sb.Append(value);
+        }
+        else
+        {
+            sb.Append(value.GetType().Name);
         }
     }
 }

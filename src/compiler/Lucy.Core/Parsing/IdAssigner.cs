@@ -1,69 +1,67 @@
 ﻿using Lucy.Core.Model;
 using System;
 using System.Collections.Generic;
-using System.Text;
 
-namespace Lucy.Core.Parsing
+namespace Lucy.Core.Parsing;
+
+internal static class IdAssigner
 {
-    internal class IdAssigner
+    internal static void Run(string documentPath, DocumentRootSyntaxNodeBuilder rootNode)
     {
-        internal static void Run(string documentPath, DocumentRootSyntaxNodeBuilder rootNode)
-        {
-            var nodeNameCache = new Dictionary<Type, string>();
-            Traverse(rootNode, new NodeIdFactory(documentPath), nodeNameCache);
-        }
+        var nodeNameCache = new Dictionary<Type, string>();
+        Traverse(rootNode, new NodeIdFactory(documentPath), nodeNameCache);
+    }
 
-        private static void Traverse(SyntaxTreeNodeBuilder node, NodeIdFactory nodeIdFactory, Dictionary<Type, string> nodeNameCache)
+    private static void Traverse(SyntaxTreeNodeBuilder node, NodeIdFactory nodeIdFactory, Dictionary<Type, string> nodeNameCache)
+    {
+        var type = node.GetType();
+        if (!nodeNameCache.TryGetValue(type, out var nodeName)) 
         {
-            var type = node.GetType();
-            if (!nodeNameCache.TryGetValue(type, out var nodeName)) 
-            {
-                var name = node.GetType().Name;
-                if (name.EndsWith("SyntaxNodeBuilder"))
-                    name = name.Substring(0, name.Length - "SyntaxNodeBuilder".Length);
-                if (name.EndsWith("NodeBuilder"))
-                    name = name.Substring(0, name.Length - "NodeBuilder".Length);
-                if (name.EndsWith("Builder"))
-                    name = name.Substring(0, name.Length - "Builder".Length);
-                if (name.EndsWith("TriviaNode"))
-                    name = name.Substring(0, name.Length - "TriviaNode".Length);
-                if (name.EndsWith("Node"))
-                    name = name.Substring(0, name.Length - "Node".Length);
-                nodeName = name[0..1].ToLowerInvariant() + name[1..];
-                nodeNameCache[type] = nodeName;
-            }
+            var name = node.GetType().Name;
+            if (name.EndsWith("SyntaxNodeBuilder"))
+                name = name.Substring(0, name.Length - "SyntaxNodeBuilder".Length);
+            if (name.EndsWith("NodeBuilder"))
+                name = name.Substring(0, name.Length - "NodeBuilder".Length);
+            if (name.EndsWith("Builder"))
+                name = name.Substring(0, name.Length - "Builder".Length);
+            if (name.EndsWith("TriviaNode"))
+                name = name.Substring(0, name.Length - "TriviaNode".Length);
+            if (name.EndsWith("Node"))
+                name = name.Substring(0, name.Length - "Node".Length);
+            nodeName = name[0..1].ToLowerInvariant() + name[1..];
+            nodeNameCache[type] = nodeName;
+        }
             
-            node.NodeId = nodeIdFactory.CreateId(nodeName);
-            var subFactory = new NodeIdFactory(node.NodeId);
-            foreach (var child in node.GetChildNodes())
-            {
-                Traverse(child, subFactory, nodeNameCache);
-            }
+        node.NodeId = nodeIdFactory.CreateId(nodeName);
+        var subFactory = new NodeIdFactory(node.NodeId);
+        foreach (var child in node.GetChildNodes())
+        {
+            Traverse(child, subFactory, nodeNameCache);
+        }
+    }
+
+    private class NodeIdFactory
+    {
+        private readonly string _id = "";
+        private readonly string _documentPath;
+        private readonly Dictionary<string, int> _counter = new();
+
+        public NodeIdFactory(string documentPath)
+        {
+            _documentPath = documentPath;
         }
 
-        private class NodeIdFactory
+        public NodeIdFactory(NodeId parent)
         {
-            private readonly string _id = "";
-            private readonly string _documentPath;
-            private Dictionary<string, int> _counter = new();
+            _id = parent.NodePath;
+            _documentPath = parent.DocumentPath;
+        }
 
-            public NodeIdFactory(string documentPath)
-            {
-                _documentPath = documentPath;
-            }
-
-            public NodeIdFactory(NodeId parent)
-            {
-                _id = parent.NodePath;
-                _documentPath = parent.DocumentPath;
-            }
-
-            public NodeId CreateId(string name)
-            {
-                _counter.TryGetValue(name, out var count);
-                _counter[name] = count + 1;
-                return new NodeId(_documentPath, _id.Length == 0 ? $"{name}[{count}]" : $"{_id}.{name}[{count}]");
-            }
+        public NodeId CreateId(string name)
+        {
+            _counter.TryGetValue(name, out var count);
+            _counter[name] = count + 1;
+            return new NodeId(_documentPath, _id.Length == 0 ? $"{name}[{count}]" : $"{_id}.{name}[{count}]");
         }
     }
 }

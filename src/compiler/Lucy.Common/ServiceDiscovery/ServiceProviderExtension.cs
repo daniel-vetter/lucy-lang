@@ -2,38 +2,37 @@
 using System;
 using System.Reflection;
 
-namespace Lucy.Common.ServiceDiscovery
+namespace Lucy.Common.ServiceDiscovery;
+
+public static class ServiceProviderExtension
 {
-    public static class ServiceProviderExtension
+    public static IServiceCollection AddServicesFromCurrentAssembly(this IServiceCollection sc, bool printServices = false)
     {
-        public static IServiceCollection AddServicesFromCurrentAssembly(this IServiceCollection sc, bool printServices = false)
+        foreach (var type in Assembly.GetCallingAssembly().GetTypes())
         {
-            foreach (var type in Assembly.GetCallingAssembly().GetTypes())
+            var attribute = type.GetCustomAttribute<ServiceAttribute>();
+            if (attribute != null)
             {
-                var attribute = type.GetCustomAttribute<ServiceAttribute>();
-                if (attribute != null)
-                {
-                    var serviceType = attribute.ServiceType;
-                    if (serviceType == null)
-                        serviceType = type.GetInterfaces().Length > 0 ? type.GetInterfaces()[0] : type;
+                var serviceType = attribute.ServiceType;
+                if (serviceType == null)
+                    serviceType = type.GetInterfaces().Length > 0 ? type.GetInterfaces()[0] : type;
 
-                    if (printServices)
-                        Console.WriteLine(serviceType + " -> " + type + ": " + attribute.Lifetime);
-                    sc.Add(new ServiceDescriptor(serviceType, type, Map(attribute.Lifetime)));
-                }
+                if (printServices)
+                    Console.WriteLine(serviceType + " -> " + type + ": " + attribute.Lifetime);
+                sc.Add(new ServiceDescriptor(serviceType, type, Map(attribute.Lifetime)));
             }
-            return sc;
         }
+        return sc;
+    }
 
-        private static ServiceLifetime Map(Lifetime lifetime)
+    private static ServiceLifetime Map(Lifetime lifetime)
+    {
+        return lifetime switch
         {
-            return lifetime switch
-            {
-                Lifetime.Transient => ServiceLifetime.Transient,
-                Lifetime.Scoped => ServiceLifetime.Scoped,
-                Lifetime.Singleton => ServiceLifetime.Singleton,
-                _ => throw new NotSupportedException()
-            };
-        }
+            Lifetime.Transient => ServiceLifetime.Transient,
+            Lifetime.Scoped => ServiceLifetime.Scoped,
+            Lifetime.Singleton => ServiceLifetime.Singleton,
+            _ => throw new NotSupportedException()
+        };
     }
 }

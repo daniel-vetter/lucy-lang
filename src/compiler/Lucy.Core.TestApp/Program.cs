@@ -1,10 +1,8 @@
 ﻿using BenchmarkDotNet.Attributes;
 using Lucy.Core.ProjectManagement;
 using Lucy.Core.SemanticAnalysis;
-using Lucy.Core.SemanticAnalysis.Handler;
 using Lucy.Core.SemanticAnalysis.Handler.ErrorCollectors;
 using Lucy.Core.SemanticAnalysis.Infrastructure;
-using Lucy.Core.SemanticAnalysis.Inputs;
 using Lucy.Core.TestApp;
 
 var ws = new Workspace();
@@ -19,38 +17,41 @@ while (changeReader.NextVersion())
     Console.WriteLine(GC.GetTotalMemory(true) / 1024.0 / 1024.0);
 }
 
-public class Md5VsSha256
+namespace Lucy.Core.TestApp
 {
-    [Benchmark]
-    public void Run()
+    public class Md5VsSha256
     {
-        var db = new Db();
-        db.RegisterHandler(new Handler());
-        for (int i = 0; i < 1000; i++)
+        [Benchmark]
+        public void Run()
         {
-            db.SetInput(new BaseInput(), new BaseOuput(i));
-            var result = db.Query(new SampleQuery(1000));
-        }
-    }
-
-    public record SampleQuery(int Counter) : IQuery<SampleResult>;
-    public record SampleResult(int Result);
-
-    public class Handler : QueryHandler<SampleQuery, SampleResult>
-    {
-        public override SampleResult Handle(IDb db, SampleQuery query)
-        {
-            if (query.Counter == 0)
+            var db = new Db();
+            db.RegisterHandler(new Handler());
+            for (int i = 0; i < 1000; i++)
             {
-                db.Query(new BaseInput());
-                return new SampleResult(0);
+                db.SetInput(new BaseInput(), new BaseOutput(i));
+                db.Query(new SampleQuery(1000));
             }
-            else
-                return db.Query(new SampleQuery(query.Counter - 1));
         }
-    }
 
-    public record BaseInput() : IQuery<BaseOuput>;
-    public record BaseOuput(int Counter);
+        public record SampleQuery(int Counter) : IQuery<SampleResult>;
+        public record SampleResult(int Result);
+
+        public class Handler : QueryHandler<SampleQuery, SampleResult>
+        {
+            public override SampleResult Handle(IDb db, SampleQuery query)
+            {
+                if (query.Counter == 0)
+                {
+                    db.Query(new BaseInput());
+                    return new SampleResult(0);
+                }
+                else
+                    return db.Query(new SampleQuery(query.Counter - 1));
+            }
+        }
+
+        public record BaseInput : IQuery<BaseOutput>;
+        public record BaseOutput(int Counter);
+    }
 }
 

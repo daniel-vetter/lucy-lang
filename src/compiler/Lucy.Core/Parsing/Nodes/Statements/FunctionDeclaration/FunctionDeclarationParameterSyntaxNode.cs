@@ -2,27 +2,26 @@
 using Lucy.Core.Parsing.Nodes.Token;
 using System.Collections.Generic;
 
-namespace Lucy.Core.Parsing.Nodes.Statements.FunctionDeclaration
+namespace Lucy.Core.Parsing.Nodes.Statements.FunctionDeclaration;
+
+public class FunctionDeclarationParameterSyntaxNodeParser 
 {
-    public class FunctionDeclarationParameterSyntaxNodeParser 
+    public static List<FunctionDeclarationParameterSyntaxNodeBuilder> ReadList(Code code)
     {
-        public static List<FunctionDeclarationParameterSyntaxNodeBuilder> ReadList(Code code)
+        var l = new List<FunctionDeclarationParameterSyntaxNodeBuilder>();
+        while (true)
         {
-            var l = new List<FunctionDeclarationParameterSyntaxNodeBuilder>();
-            while (true)
-            {
-                if (!VariableNameWithTypeDeclarationSyntaxNodeParser.Read(code, out var variableNameWithTypeDeclaration))
-                    break;
+            if (!VariableNameWithTypeDeclarationSyntaxNodeParser.Read(code, out var variableNameWithTypeDeclaration))
+                break;
 
-                SyntaxElementParser.TryReadExact(code, ",", out var seperator);
+            SyntaxElementParser.TryReadExact(code, ",", out var seperator);
 
-                l.Add(new FunctionDeclarationParameterSyntaxNodeBuilder(variableNameWithTypeDeclaration, seperator));
+            l.Add(new FunctionDeclarationParameterSyntaxNodeBuilder(variableNameWithTypeDeclaration, seperator));
 
-                if (seperator == null)
-                    break;
-            }
-
-            return l;
+            if (seperator == null)
+                break;
         }
+
+        return l;
     }
 }

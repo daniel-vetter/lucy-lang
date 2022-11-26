@@ -1,7 +1,6 @@
-﻿namespace Lucy.Core.Model
+﻿namespace Lucy.Core.Model;
+
+public interface IHashable
 {
-    public interface IHashable
-    {
-        byte[] GetFullHash();
-    }
+    byte[] GetFullHash();
 }
