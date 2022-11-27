@@ -6,6 +6,9 @@ public class NodeId : IHashable
 {
     public NodeId(string documentPath, string nodePath)
     {
+        if (documentPath.Length == 0 || (documentPath[0] != '/' && documentPath[0] != '!'))
+            throw new ArgumentException("Invalid document path");
+
         DocumentPath = documentPath;
         NodePath = nodePath;
         _str = DocumentPath + "!" + NodePath;

@@ -2,10 +2,12 @@
 using Lucy.Infrastructure.RpcServer;
 using Microsoft.Extensions.DependencyInjection;
 using System;
+using System.Globalization;
 using System.Threading.Tasks;
 using Lucy.App.LanguageServer.Infrastructure;
 using Lucy.App.LanguageServer.Services;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Console;
 
 namespace Lucy.App.LanguageServer;
 
@@ -41,7 +43,8 @@ public class LanguageServerApp
             })
             .AddLogging(x =>
             {
-                x.AddSimpleConsole();
+                x.AddConsole(x => x.FormatterName = "Custom");
+                x.AddConsoleFormatter<CustomConsoleFormatter, ConsoleFormatterOptions>();
             });
     }
 

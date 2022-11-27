@@ -1,3 +1,410 @@
-﻿fun main() {
- t
+﻿import "helper"
+import "newfile"
+
+extern cdecl "kernel32.dll" "printf_" fun printf(): void
+extern cdecl "kernel32.dll" "allocConsole" fun allocConsole(): void
+
+
+
+fun main(num: int): int {
+    printf()
+   
+   fun test2(): number { 
+   
+   }      
+ 
+ 
+    test2() 
 }
+
+fun main(num: int): int {
+    printf()
+   
+   fun test2(): number { 
+   
+   }      
+ 
+ 
+    test2() 
+}
+fun main(num: int): int {
+    printf()
+   
+   fun test2(): number { 
+   
+   }      
+ 
+ 
+    test2() 
+}
+fun main(num: int): int {
+    printf()
+   
+   fun test2(): number { 
+   
+   }      
+ 
+ 
+    test2() 
+}
+fun main(num: int): int {
+    printf()
+   
+   fun test2(): number { 
+   
+   }      
+ 
+ 
+    test2() 
+}
+fun main(num: int): int {
+    printf()
+   
+   fun test2(): number { 
+   
+   }      
+ 
+ 
+    test2() 
+}
+fun main(num: int): int {
+    printf()
+   
+   fun test2(): number { 
+   
+   }      
+ 
+ 
+    test2() 
+}
+fun main(num: int): int {
+    printf()
+   
+   fun test2(): number { 
+   
+   }      
+ 
+ 
+    test2() 
+}
+fun main(num: int): int {
+    printf()
+   
+   fun test2(): number { 
+   
+   }      
+ 
+ 
+    test2() 
+}
+fun main(num: int): int {
+    printf()
+   
+   fun test2(): number { 
+   
+   }      
+ 
+ 
+    test2() 
+}
+fun main(num: int): int {
+    printf()
+   
+   fun test2(): number { 
+   
+   }      
+ 
+ 
+    test2() 
+}
+fun main(num: int): int {
+    printf()
+   
+   fun test2(): number { 
+   
+   }      
+ 
+ 
+    test2() 
+}
+fun main(num: int): int {
+    printf()
+   
+   fun test2(): number { 
+   
+   }      
+ 
+ 
+    test2() 
+}
+fun main(num: int): int {
+    printf()
+   
+   fun test2(): number { 
+   
+   }      
+ 
+ 
+    test2() 
+}
+fun main(num: int): int {
+    printf()
+   
+   fun test2(): number { 
+   
+   }      
+ 
+ 
+    test2() 
+}
+fun main(num: int): int {
+    printf()
+   
+   fun test2(): number { 
+   
+   }      
+ 
+ 
+    test2() 
+}
+fun main(num: int): int {
+    printf()
+   
+   fun test2(): number { 
+   
+   }      
+ 
+ 
+    test2() 
+}
+fun main(num: int): int {
+    printf()
+   
+   fun test2(): number { 
+   
+   }      
+ 
+ 
+    test2() 
+}
+fun main(num: int): int {
+    printf()
+   
+   fun test2(): number { 
+   
+   }      
+ 
+ 
+    test2() 
+}
+fun main(num: int): int {
+    printf()
+   
+   fun test2(): number { 
+   
+   }      
+ 
+ 
+    test2() 
+}
+fun main(num: int): int {
+    printf()
+   
+   fun test2(): number { 
+   
+   }      
+ 
+ 
+    test2() 
+}
+fun main(num: int): int {
+    printf()
+   
+   fun test2(): number { 
+   
+   }      
+ 
+ 
+    test2() 
+}
+fun main(num: int): int {
+    printf()
+   
+   fun test2(): number { 
+   
+   }      
+ 
+ 
+    test2() 
+}
+fun main(num: int): int {
+    printf()
+   
+   fun test2(): number { 
+   
+   }      
+ 
+ 
+    test2() 
+}
+fun main(num: int): int {
+    printf()
+   
+   fun test2(): number { 
+   
+   }      
+ 
+ 
+    test2() 
+}
+fun main(num: int): int {
+    printf()
+   
+   fun test2(): number { 
+   
+   }      
+ 
+ 
+    test2() 
+}
+fun main(num: int): int {
+    printf()
+   
+   fun test2(): number { 
+   
+   }      
+ 
+ 
+    test2() 
+}
+fun main(num: int): int {
+    printf()
+   
+   fun test2(): number { 
+   
+   }      
+ 
+ 
+    test2() 
+}
+fun main(num: int): int {
+    printf()
+   
+   fun test2(): number { 
+   
+   }      
+ 
+ 
+    test2() 
+}
+fun main(num: int): int {
+    printf()
+   
+   fun test2(): number { 
+   
+   }      
+ 
+ 
+    test2() 
+}
+fun main(num: int): int {
+    printf()
+   
+   fun test2(): number { 
+   
+   }      
+ 
+ 
+    test2() 
+}
+fun main(num: int): int {
+    printf()
+   
+   fun test2(): number { 
+   
+   }      
+ 
+ 
+    test2() 
+}
+fun main(num: int): int {
+    printf()
+   
+   fun test2(): number { 
+   
+   }      
+ 
+ 
+    test2() 
+}
+fun main(num: int): int {
+    printf()
+   
+   fun test2(): number { 
+   
+   }      
+ 
+ 
+    test2() 
+}
+fun main(num: int): int {
+    printf()
+   
+   fun test2(): number { 
+   
+   }      
+ 
+ 
+    test2() 
+}
+fun main(num: int): int {
+    printf()
+   
+   fun test2(): number { 
+   
+   }      
+ 
+ 
+    test2() 
+}
+fun main(num: int): int {
+    printf()
+   
+   fun test2(): number { 
+   
+   }      
+ 
+ 
+    test2() 
+}
+fun main(num: int): int {
+    printf()
+   
+   fun test2(): number { 
+   
+   }      
+ 
+ 
+    test2() 
+}
+fun main(num: int): int {
+    printf()
+    
+   fun test2(): number { 
+   
+   }      
+ 
+ 
+    test2() 
+}
+fun main(num: int): int {
+    printf()
+   
+   fun test2(): number { 
+   
+   }      
+ 
+  
+    test2() 
+}
+

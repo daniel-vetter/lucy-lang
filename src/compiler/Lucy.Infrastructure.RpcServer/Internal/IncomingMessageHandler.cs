@@ -69,11 +69,11 @@ public class IncomingMessageHandler
 
         if (result.Error != null)
         {
-            _logger.LogError(result.Error, "Handler failed while processing a incoming '{type}' notification. Processing took {duration}ms", notificationMessage.Method, sw.Elapsed.Milliseconds);
+            _logger.LogError(result.Error, "Handler failed while processing a incoming '{type}' notification. Processing took {duration}ms", notificationMessage.Method, sw.Elapsed.TotalMilliseconds);
         }
         else
         {
-            _logger.LogInformation("Successfully handled incoming '{type}' notification. Processing took {duration}ms", notificationMessage.Method, sw.Elapsed.Milliseconds);
+            _logger.LogInformation("Successfully handled incoming '{type}' notification. Processing took {duration}ms", notificationMessage.Method, sw.Elapsed.TotalMilliseconds);
         }
 
     }
@@ -97,12 +97,12 @@ public class IncomingMessageHandler
         if (result.Error != null)
         {
             await _outgoingMessageWriter.Write(new ResponseErrorMessage(requestMessage.Id, new ErrorDescription(-1, result.Error.Message)));
-            _logger.LogError(result.Error, "Handler failed while processing a incoming '{type}' request. Processing took {duration}ms", requestMessage.Method, sw.Elapsed.Milliseconds);
+            _logger.LogError(result.Error, "Handler failed while processing a incoming '{type}' request. Processing took {duration}ms", requestMessage.Method, sw.Elapsed.TotalMilliseconds);
             return;
         }
         else
         {
-            _logger.LogInformation("Successfully handled incoming '{type}' request. Processing took {duration}ms", requestMessage.Method, sw.Elapsed.Milliseconds);
+            _logger.LogInformation("Successfully handled incoming '{type}' request. Processing took {duration}ms", requestMessage.Method, sw.Elapsed.TotalMilliseconds);
         }
 
         await _outgoingMessageWriter.Write(new ResponseSuccessMessage(requestMessage.Id, _serializer.ObjectToToken(result.Result)));
