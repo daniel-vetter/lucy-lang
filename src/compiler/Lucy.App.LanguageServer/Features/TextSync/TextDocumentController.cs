@@ -42,7 +42,7 @@ internal class TextDocumentController
             if (change.Range == null)
                 _currentWorkspace.AddOrUpdate(textDocument.Uri, change.Text);
             else
-                _currentWorkspace.IncrementelUpdate(textDocument.Uri, new Range2D(
+                _currentWorkspace.IncrementalUpdate(textDocument.Uri, new Range2D(
                     new Position2D(change.Range.Start.Line, change.Range.Start.Character),
                     new Position2D(change.Range.End.Line, change.Range.End.Character)), change.Text);
         }

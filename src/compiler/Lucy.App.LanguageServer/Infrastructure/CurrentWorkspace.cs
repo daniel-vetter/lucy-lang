@@ -80,7 +80,7 @@ public class CurrentWorkspace
         return _workspace.GetFile(documentPath).ConvertTo2D(range1D);
     }
 
-    public void IncrementelUpdate(SystemPath path, Range2D range, string content)
+    public void IncrementalUpdate(SystemPath path, Range2D range, string content)
     {
         if (_workspace == null)
             throw new InvalidOperationException("No workspace was loaded");
