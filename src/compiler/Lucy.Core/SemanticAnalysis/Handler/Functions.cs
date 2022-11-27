@@ -11,24 +11,24 @@ public record FunctionCallInfo(string Name, NodeId DeclarationNodeId, NodeId Nam
 public static class FunctionsHandler
 {
     [GenerateDbExtension] ///<see cref="GetFunctionInfoEx.GetFunctionInfo"/>
-    public static FunctionInfo GetFunctionInfo(IDb db, NodeId functionDeclarationNodeId)
-    {
-        var node = (FunctionDeclarationStatementSyntaxNode)db.GetNodeById(functionDeclarationNodeId);
-        return new FunctionInfo(node.FunctionName.Token.Text, functionDeclarationNodeId, node.FunctionName.Token.NodeId);
-    }
-
-    [GenerateDbExtension] ///<see cref="GetFunctionInfoEx.GetFunctionInfo"/>
     public static FunctionInfo GetFunctionCallInfo(IDb db, NodeId functionCallNodeId)
     {
         var node = (FunctionCallExpressionSyntaxNode)db.GetNodeById(functionCallNodeId);
         return new FunctionInfo(node.FunctionName.Token.Text, functionCallNodeId, node.FunctionName.Token.NodeId);
     }
 
+    [GenerateDbExtension] ///<see cref="GetFunctionInfoEx.GetFunctionInfo"/>
+    public static FunctionInfo GetFunctionInfo(IDb db, NodeId functionDeclarationNodeId)
+    {
+        var node = (FunctionDeclarationStatementSyntaxNode)db.GetNodeById(functionDeclarationNodeId);
+        return new FunctionInfo(node.FunctionName.Token.Text, functionDeclarationNodeId, node.FunctionName.Token.NodeId);
+    }
+
     [GenerateDbExtension] ///<see cref="GetFunctionsInDocumentEx.GetFunctionsInDocument"/>
     public static ComparableReadOnlyList<FunctionInfo> GetFunctionsInDocument(IDb db, string documentPath)
     {
         return db.GetNodeIdByType<FunctionDeclarationStatementSyntaxNode>(documentPath)
-            .Select(x => db.GetFunctionInfo(x))
+            .Select(db.GetFunctionInfo)
             .ToComparableReadOnlyList();
     }
 
@@ -49,7 +49,7 @@ public static class FunctionsHandler
     {
         var result = new ComparableReadOnlyList<FunctionInfo>.Builder();
         var functionCallInfo = db.GetFunctionCallInfo(functionCallExpressionNodeId);
-        NodeId currentNode = functionCallExpressionNodeId;
+        var currentNode = functionCallExpressionNodeId;
 
         while (true)
         {

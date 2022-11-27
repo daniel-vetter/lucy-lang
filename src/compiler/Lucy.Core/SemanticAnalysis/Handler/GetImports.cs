@@ -40,9 +40,7 @@ public static class GetImportsHandler
     private static string GetDirectoryFrom(string path)
     {
         var index = path.LastIndexOf('/');
-        if (index == 0)
-            return "/";
-        return path[..index];
+        return index == 0 ? "/" : path[..index];
     }
 
     private static string CombinePath(string basePath, string toAdd)

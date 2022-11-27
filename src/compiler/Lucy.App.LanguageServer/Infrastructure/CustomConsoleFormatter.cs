@@ -60,7 +60,7 @@ internal class CustomConsoleFormatter : ConsoleFormatter
                     if (key == "{OriginalFormat}")
                         continue;
 
-                    var str = $"\u001b[1m\u001b[36m{value.ToString()}\u001b[39m\u001b[22m";
+                    var str = $"\u001b[1m\u001b[36m{value}\u001b[39m\u001b[22m";
                     template = template.Replace("{" + key + "}", str);
                 }
 
