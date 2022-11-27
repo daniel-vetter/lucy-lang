@@ -28,7 +28,7 @@ public static class GetEntryPointErrorsHandler
                 var node = (FunctionDeclarationStatementSyntaxNode)db.GetNodeById(entryPoint.DeclarationNodeId);
                 var nameNode = node.FunctionName.Token;
 
-                result.Add(new ErrorWithRange(nameNode.NodeId.NodePath, db.GetRangeFromNode(nameNode), "More than one entry point was found. Please ensure the solution has only one 'main' function."));
+                result.Add(new ErrorWithRange(nameNode.NodeId.DocumentPath, db.GetRangeFromNode(nameNode), "More than one entry point was found. Please ensure the solution has only one 'main' function."));
             }
         }
 
