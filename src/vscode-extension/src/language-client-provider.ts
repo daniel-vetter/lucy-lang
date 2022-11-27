@@ -1,5 +1,6 @@
 import { WorkspaceFolder, workspace } from "vscode";
 import { LanguageClient, LanguageClientOptions, ServerOptions, TransportKind } from "vscode-languageclient";
+import * as net from "net";
 
 const _clients: Map<string, LanguageClient> = new Map();
 
@@ -10,10 +11,24 @@ export function getLanguageClientFor(workespaceFolder: WorkspaceFolder): Languag
         return existing;
     }
     
-    const serverOptions: ServerOptions = {
+    let serverOptions: ServerOptions = {
         command: "C:\\OneDrive\\coding\\csharp\\lucy-lang\\src\\compiler\\Lucy.App.LanguageServer\\bin\\Debug\\net7.0\\Lucy.App.LanguageServer.exe",
         transport: TransportKind.stdio
     }
+
+    if (process.env.LUCY_LANGUAGE_SERVER_NETWORK_ENDPOINT_PORT) {
+        serverOptions = () => {
+            let socket = net.connect({
+                port: +process.env.LUCY_LANGUAGE_SERVER_NETWORK_ENDPOINT_PORT!
+            });
+
+            return Promise.resolve({
+                writer: socket,
+                reader: socket
+            })
+        }
+    }
+
     const clientOptions: LanguageClientOptions = {
         documentSelector: [
             { scheme: "file", language: "lucy" }

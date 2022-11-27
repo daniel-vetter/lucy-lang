@@ -4,6 +4,7 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Net;
 using System.Reflection;
 
 
@@ -25,6 +26,7 @@ public class JsonRpcServerBuilder
 {
     private readonly List<Assembly> _assembliesToScan = new();
     private readonly List<JsonConverter> _jsonConverter = new();
+    private IPEndPoint? _networkEndpoint;
 
     public JsonRpcServerBuilder AddControllerFromCurrentAssembly()
     {
@@ -43,8 +45,18 @@ public class JsonRpcServerBuilder
         return this;
     }
 
+    public JsonRpcServerBuilder ListenOnNetworkEndpoint(IPEndPoint networkEndpoint)
+    {
+        _networkEndpoint = networkEndpoint;
+        return this;
+    }
+
     internal JsonRpcConfig CreateConfig()
     {
-        return new JsonRpcConfig(_jsonConverter.ToImmutableArray(), _assembliesToScan.ToImmutableArray());
+        return new JsonRpcConfig(
+            jsonConverter: _jsonConverter.ToImmutableArray(),
+            assembliesToScan: _assembliesToScan.ToImmutableArray(),
+            networkEndpoint: _networkEndpoint
+        );
     }
 }

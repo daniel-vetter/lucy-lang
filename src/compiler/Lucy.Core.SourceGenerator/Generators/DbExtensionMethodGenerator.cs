@@ -6,7 +6,7 @@ using Microsoft.CodeAnalysis.Text;
 
 namespace Lucy.Core.SourceGenerator.Generators;
 
-public class DbExtensionMethodGenerator
+public static class DbExtensionMethodGenerator
 {
     private const string _ns = "Lucy.Core.SemanticAnalysis.Infrastructure";
     private static readonly Logger _logger = new Logger("extension", true);
@@ -144,10 +144,9 @@ public class DbExtensionMethodGenerator
                     failed= true;
                     break;
                 }
-                        
 
-                var typeSymbol = sm.GetSymbolInfo(methodParameter.Type).Symbol as INamedTypeSymbol;
-                if (typeSymbol == null)
+
+                if (sm.GetSymbolInfo(methodParameter.Type).Symbol is not INamedTypeSymbol typeSymbol)
                 {
                     if (_logger.IsEnabled)
                         _logger.Write("Skipped " + method.Identifier.Text + " because the parameter " + methodParameter.Identifier.Text + " type symbol could not be resolved.");

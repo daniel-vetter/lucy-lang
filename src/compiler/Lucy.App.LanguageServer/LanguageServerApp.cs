@@ -3,7 +3,9 @@ using Lucy.Infrastructure.RpcServer;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Threading.Tasks;
+using Lucy.App.LanguageServer.Infrastructure;
 using Lucy.App.LanguageServer.Services;
+using Microsoft.Extensions.Logging;
 
 namespace Lucy.App.LanguageServer;
 
@@ -17,9 +19,15 @@ public class LanguageServerApp
         _jsonRpcServer = jsonRpcServer;
     }
 
-    public static async Task<int> Main() => await CreateServiceCollection().BuildServiceProvider().GetRequiredService<LanguageServerApp>().Run();
+    public static async Task<int> Main()
+    {
+        return await CreateServiceCollection()
+            .BuildServiceProvider()
+            .GetRequiredService<LanguageServerApp>()
+            .Run();
+    }
 
-    public static IServiceCollection CreateServiceCollection()
+    private static IServiceCollection CreateServiceCollection()
     {
         return new ServiceCollection()
             .AddServicesFromCurrentAssembly()
@@ -27,14 +35,25 @@ public class LanguageServerApp
             {
                 b.AddControllerFromCurrentAssembly();
                 b.AddJsonConverter<SystemPathConverter>();
+
+                if (DebugVsCodeRunner.IsVsCodeStartupRequested)
+                    b.ListenOnNetworkEndpoint(DebugVsCodeRunner.NetworkEndpoint);
+            })
+            .AddLogging(x =>
+            {
+                x.AddSimpleConsole();
             });
     }
 
-    internal async Task<int> Run()
+    private async Task<int> Run()
     {
         try
         {
             await _jsonRpcServer.Start();
+
+            if (DebugVsCodeRunner.IsVsCodeStartupRequested)
+                DebugVsCodeRunner.Launch();
+
             await _jsonRpcServer.WaitTillStopped();
             return 0;
         }

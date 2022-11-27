@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Lucy.Common.ServiceDiscovery;
 using Lucy.Infrastructure.RpcServer.Internal;
 using Lucy.Infrastructure.RpcServer.Internal.Infrastructure;
+using Microsoft.Extensions.Logging;
 
 namespace Lucy.Infrastructure.RpcServer;
 
@@ -13,22 +14,25 @@ public class JsonRpcServer
 {
     private bool _running;
     private readonly OutgoingMessageWriter _outgoingMessageWriter;
-    private readonly IncommingMessageHandler _incommingMessageHandler;
+    private readonly IncomingMessageHandler _incomingMessageHandler;
     private readonly OutgoingRequestHandler _outgoingRequestHandler;
     private readonly IEnumerable<IJsonRpcMessageTraceTarget> _traceTargets;
-    private readonly TaskCompletionSource _isDone = new TaskCompletionSource();
+    private readonly ILogger<JsonRpcServer> _logger;
+    private readonly TaskCompletionSource _isDone = new();
 
     public JsonRpcServer(
         OutgoingMessageWriter outgoingMessageWriter,
-        IncommingMessageHandler incommingMessageHandler,
+        IncomingMessageHandler incomingMessageHandler,
         OutgoingRequestHandler outgoingRequestHandler,
-        IEnumerable<IJsonRpcMessageTraceTarget> traceTargets
+        IEnumerable<IJsonRpcMessageTraceTarget> traceTargets,
+        ILogger<JsonRpcServer> logger
     )
     {
         _outgoingMessageWriter = outgoingMessageWriter;
-        _incommingMessageHandler = incommingMessageHandler;
+        _incomingMessageHandler = incomingMessageHandler;
         _outgoingRequestHandler = outgoingRequestHandler;
         _traceTargets = traceTargets;
+        _logger = logger;
     }
 
     public async Task Start()
@@ -36,12 +40,14 @@ public class JsonRpcServer
         if (_running)
             throw new Exception("Server is already running");
 
-        foreach(var traceTarget in _traceTargets)
+        foreach (var traceTarget in _traceTargets)
             await traceTarget.Initialize();
 
         _outgoingMessageWriter.Start();
-        _incommingMessageHandler.Start();
+        _incomingMessageHandler.Start();
         _running = true;
+
+        _logger.LogInformation("Json RPC server started.");
     }
 
     public async Task Stop()
@@ -52,20 +58,22 @@ public class JsonRpcServer
 
         try
         {
-            await _incommingMessageHandler.Stop();
+            await _incomingMessageHandler.Stop();
             await _outgoingMessageWriter.Stop();
         }
         finally
         {
             _running = false;
             _isDone.SetResult();
+
+            _logger.LogInformation("Json RPC server stopped.");
         }
     }
 
     public async Task SendNotification(string name, object? parameter)
     {
         if (!_running)
-            throw new Exception("Can not send a notifiction because the connection is closed");
+            throw new Exception("Can not send a notification because the connection is closed");
 
         await _outgoingRequestHandler.SendNotification(name, parameter);
 
@@ -89,46 +97,46 @@ public class JsonRpcServer
 }
 
 [Service(Lifetime.Singleton)]
-public class IncommingMessageHandler
+public class IncomingMessageHandler
 {
-    private readonly IncommingMessageReader _incommingMessageReader;
+    private readonly IncomingMessageReader _incomingMessageReader;
     private readonly OutgoingRequestHandler _outgoingRequestHandler;
     private readonly JobRunner _jobRunner;
-    private readonly IncommingRequestHandler _incommingRequestHandler;
-    private readonly Worker _worker = new Worker();
+    private readonly Internal.IncomingMessageHandler _incomingMessageHandler;
+    private readonly Worker _worker = new();
 
-    public IncommingMessageHandler(JsonRpcConfig config, IncommingRequestHandler incommingRequestHandler,  IncommingMessageReader incommingMessageReader, OutgoingMessageWriter outgoingMessageWriter, OutgoingRequestHandler outgoingRequestHandler, JsonRpcSerializer serializer, JobRunner jobRunner)
+    public IncomingMessageHandler(Internal.IncomingMessageHandler incomingMessageHandler, IncomingMessageReader incomingMessageReader, OutgoingMessageWriter outgoingMessageWriter, OutgoingRequestHandler outgoingRequestHandler, JsonRpcSerializer serializer, JobRunner jobRunner)
     {
-        _incommingMessageReader = incommingMessageReader;
+        _incomingMessageReader = incomingMessageReader;
         _outgoingRequestHandler = outgoingRequestHandler;
         _jobRunner = jobRunner;
-        _incommingRequestHandler = incommingRequestHandler;
+        _incomingMessageHandler = incomingMessageHandler;
     }
 
     public void Start()
     {
-        _incommingRequestHandler.Start();
+        _incomingMessageHandler.Start();
         _worker.Start(Process);
     }
 
     public async Task Stop()
     {
         await _worker.Stop();
-        await _incommingRequestHandler.Stop();
+        await _incomingMessageHandler.Stop();
     }
 
     private async Task Process(CancellationToken ct)
     {
         while (!ct.IsCancellationRequested)
         {
-            var message = await _incommingMessageReader.ReadNext(ct);
+            var message = await _incomingMessageReader.ReadNext(ct);
             if (message == null)
                 return;
 
             if (message is RequestMessage requestMessage)
-                _incommingRequestHandler.HandleRequest(requestMessage);
+                _incomingMessageHandler.HandleRequest(requestMessage);
             if (message is NotificationMessage notificationMessage)
-                _incommingRequestHandler.HandleNotificion(notificationMessage);
+                _incomingMessageHandler.HandleNotification(notificationMessage);
             if (message is ResponseMessage responseMessage)
                 _outgoingRequestHandler.HandleResponse(responseMessage);
         }
@@ -141,12 +149,14 @@ public class IncommingMessageHandler
 public class OutgoingRequestHandler
 {
     private readonly OutgoingRequestTracker _outgoingRequestTracker;
+    private readonly ILogger<OutgoingRequestHandler> _logger;
     private readonly OutgoingMessageWriter _outgoingMessageWriter;
     private readonly JsonRpcSerializer _serializer;
 
-    public OutgoingRequestHandler(OutgoingMessageWriter outgoingMessageWriter, JsonRpcSerializer serializer, OutgoingRequestTracker outgoingRequestTracker)
+    public OutgoingRequestHandler(OutgoingMessageWriter outgoingMessageWriter, JsonRpcSerializer serializer, OutgoingRequestTracker outgoingRequestTracker, ILogger<OutgoingRequestHandler> logger)
     {
         _outgoingRequestTracker = outgoingRequestTracker;
+        _logger = logger;
         _outgoingMessageWriter = outgoingMessageWriter;
         _serializer = serializer;
     }
@@ -154,12 +164,14 @@ public class OutgoingRequestHandler
     public async Task<TResult> SendRequest<TResult>(string name, object? parameter)
     {
         var tracker = _outgoingRequestTracker.CreateNew<TResult>();
+        _logger.LogInformation("Sending request '{type}'.", name);
         await _outgoingMessageWriter.Write(new RequestMessage(tracker.Id, name, _serializer.ObjectToToken(parameter)));
         return await tracker.ResponseTask;
     }
 
     public async Task SendNotification(string name, object? parameter)
     {
+        _logger.LogInformation("Sending notification '{type}'.", name);
         await _outgoingMessageWriter.Write(new NotificationMessage(name, _serializer.ObjectToToken(parameter)));
     }
 
@@ -167,7 +179,10 @@ public class OutgoingRequestHandler
     {
         var type = _outgoingRequestTracker.GetRequestResultType(response.Id);
         if (type == null)
-            return; //TODO: Logging
+        {
+            _logger.LogError("Received a response message with id {id} but no corresponding request message was send out.", response.Id);
+            return;
+        }
 
         if (response is ResponseSuccessMessage success)
             _outgoingRequestTracker.SetResult(success.Id, _serializer.TokenToObject(success.Result, type));
@@ -184,5 +199,5 @@ public class JsonRpcException : Exception
         Code = code;
     }
 
-    public int Code { get; private set; }
+    public int Code { get; }
 }

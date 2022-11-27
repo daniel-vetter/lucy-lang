@@ -12,7 +12,7 @@ public class OutgoingRequestTracker
 {
     private int _lastId = -1;
 
-    private readonly Dictionary<long, ActiveRequest> _activeRequests = new Dictionary<long, ActiveRequest>();
+    private readonly Dictionary<long, ActiveRequest> _activeRequests = new();
 
     public OutgoingRequest<T> CreateNew<T>()
     {
@@ -30,7 +30,7 @@ public class OutgoingRequestTracker
     public bool SetResult(long id, object? result)
     {
         if (!GetActiveRequest(id, out var ar))
-            return false;
+            throw new Exception($"No active request with {id} found.");
 
         ar.SetResult(result);
         return true;
@@ -39,7 +39,7 @@ public class OutgoingRequestTracker
     public bool SetException(long id, Exception exception)
     {
         if (!GetActiveRequest(id, out var ar))
-            return false;
+            throw new Exception($"No active request with {id} found.");
 
         ar.SetException(exception);
         return true;
@@ -47,19 +47,14 @@ public class OutgoingRequestTracker
 
     internal Type? GetRequestResultType(long id)
     {
-        if (!GetActiveRequest(id, out var ar))
-            return null;
-
-        return ar.ResultType;
+        return GetActiveRequest(id, out var ar) ? ar.ResultType : null;
     }
 
     private bool GetActiveRequest(long id, [NotNullWhen(true)] out ActiveRequest? activeRequest)
     {
         lock (_activeRequests)
         {
-            if (_activeRequests.TryGetValue(id, out activeRequest))
-                return true;
-            return false;
+            return _activeRequests.TryGetValue(id, out activeRequest);
         }
     }
 

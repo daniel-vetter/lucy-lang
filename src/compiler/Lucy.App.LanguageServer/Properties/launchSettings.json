@@ -1,0 +1,12 @@
+{
+  "profiles": {
+    "Lucy.App.LanguageServer": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "LUCY_LANGUAGE_SERVER_RUN_VSCODE_EXTENSION": "$(ProjectDir)..\\..\\vscode-extension",
+        "LUCY_LANGUAGE_SERVER_RUN_VSCODE_EXTENSION_WORKSPACE": "$(ProjectDir)SampleApp"
+
+      }
+    }
+  }
+}

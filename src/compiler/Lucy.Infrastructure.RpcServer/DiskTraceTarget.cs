@@ -18,7 +18,7 @@ public class DiskTraceTarget : IJsonRpcMessageTraceTarget
 {
     private readonly string _file;
     private readonly Channel<string> _channel = Channel.CreateUnbounded<string>();
-    private readonly Worker _worker = new Worker();
+    private readonly Worker _worker = new();
 
     public DiskTraceTarget(string file)
     {
@@ -40,8 +40,8 @@ public class DiskTraceTarget : IJsonRpcMessageTraceTarget
     {
         if (File.Exists(_file))
             File.Delete(_file);
-        using var file = new FileStream(_file, FileMode.CreateNew, FileAccess.ReadWrite, FileShare.ReadWrite);
-        using var stringWriter = new StreamWriter(file);
+        await using var file = new FileStream(_file, FileMode.CreateNew, FileAccess.ReadWrite, FileShare.ReadWrite);
+        await using var stringWriter = new StreamWriter(file);
 
         while (await _channel.Reader.WaitToReadAsync(ct))
         while (_channel.Reader.TryRead(out var message))

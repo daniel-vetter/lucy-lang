@@ -11,29 +11,32 @@ using Lucy.Infrastructure.RpcServer.Internal.Infrastructure;
 namespace Lucy.Infrastructure.RpcServer.Internal;
 
 [Service(Lifetime.Singleton)]
-public class IncommingMessageReader
+public class IncomingMessageReader
 {
     private readonly JsonRpcConfig _config;
     private readonly MessageConverter _messageConverter;
     private readonly JsonRpcSerializer _serializer;
-    private readonly PipeReader _reader;
+    private readonly TransportProvider _transportProvider;
+    private PipeReader? _reader;
 
-    public IncommingMessageReader(JsonRpcConfig config, MessageConverter messageConverter, JsonRpcSerializer serializer)
+    public IncomingMessageReader(JsonRpcConfig config, MessageConverter messageConverter, JsonRpcSerializer serializer, TransportProvider transportProvider)
     {
         _config = config;
         _messageConverter = messageConverter;
         _serializer = serializer;
-        _reader = PipeReader.Create(Console.OpenStandardInput());
+        _transportProvider = transportProvider;
     }
 
-    static ReadOnlySpan<byte> NewLine => new[] { (byte)'\r', (byte)'\n' };
-    static ReadOnlySpan<byte> Colon => new[] { (byte)':' };
-    static ReadOnlySpan<byte> HeaderContentLength => Encoding.UTF8.GetBytes("Content-Length");
+    private static ReadOnlySpan<byte> NewLine => new[] { (byte)'\r', (byte)'\n' };
+    private static ReadOnlySpan<byte> Colon => new[] { (byte)':' };
+    private static ReadOnlySpan<byte> HeaderContentLength => Encoding.UTF8.GetBytes("Content-Length");
 
     public async Task<Message?> ReadNext(CancellationToken cancellationToken)
     {
-        int contentLength = -1;
-        bool headersAreDone = false;
+        _reader ??= PipeReader.Create(await _transportProvider.GetInputStream());
+
+        var contentLength = -1;
+        var headersAreDone = false;
 
         while (true)
         {
@@ -63,9 +66,11 @@ public class IncommingMessageReader
                 if (!TrySplitHeader(ref line, out var name, out var value))
                     throw new Exception("Expected valid header");
 
-                if (HasSameContent(name, HeaderContentLength))
-                    if (!TryParseNumber(value, out contentLength))
-                        throw new Exception("Could not parse header: " + Encoding.UTF8.GetString(HeaderContentLength));
+                if (!HasSameContent(name, HeaderContentLength)) 
+                    continue;
+
+                if (!TryParseNumber(value, out contentLength))
+                    throw new Exception("Could not parse header: " + Encoding.UTF8.GetString(HeaderContentLength));
             }
 
             if (headersAreDone && buffer.Length >= contentLength)
