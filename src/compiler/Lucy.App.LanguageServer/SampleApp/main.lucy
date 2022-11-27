@@ -10,8 +10,10 @@ fun main(num: int): int {
     printf()
    
    fun test2(): number { 
-   
+    void main void
    }      
    
     test2() 
+    test()
+    thisIsAFunction()
 }

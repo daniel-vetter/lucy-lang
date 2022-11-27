@@ -16,20 +16,20 @@ public static class FunctionsHandler
         var node = (FunctionCallExpressionSyntaxNode)db.GetNodeById(functionCallNodeId);
         return new FunctionInfo(node.FunctionName.Token.Text, functionCallNodeId, node.FunctionName.Token.NodeId);
     }
-
-    [GenerateDbExtension] ///<see cref="GetFunctionInfoEx.GetFunctionInfo"/>
-    public static FunctionInfo GetFunctionInfo(IDb db, NodeId functionDeclarationNodeId)
-    {
-        var node = (FunctionDeclarationStatementSyntaxNode)db.GetNodeById(functionDeclarationNodeId);
-        return new FunctionInfo(node.FunctionName.Token.Text, functionDeclarationNodeId, node.FunctionName.Token.NodeId);
-    }
-
+    
     [GenerateDbExtension] ///<see cref="GetFunctionsInDocumentEx.GetFunctionsInDocument"/>
     public static ComparableReadOnlyList<FunctionInfo> GetFunctionsInDocument(IDb db, string documentPath)
     {
         return db.GetNodeIdByType<FunctionDeclarationStatementSyntaxNode>(documentPath)
             .Select(db.GetFunctionInfo)
             .ToComparableReadOnlyList();
+    }
+
+    [GenerateDbExtension] ///<see cref="GetFunctionInfoEx.GetFunctionInfo"/>
+    public static FunctionInfo GetFunctionInfo(IDb db, NodeId functionDeclarationNodeId)
+    {
+        var node = (FunctionDeclarationStatementSyntaxNode)db.GetNodeById(functionDeclarationNodeId);
+        return new FunctionInfo(node.FunctionName.Token.Text, functionDeclarationNodeId, node.FunctionName.Token.NodeId);
     }
 
     [GenerateDbExtension] ///<see cref="GetFunctionsInStatementListEx.GetFunctionsInStatementList"/>
@@ -61,6 +61,11 @@ public static class FunctionsHandler
             result.AddRange(functions.Where(x => x.Name == functionCallInfo.Name));
 
             currentNode = parent;
+        }
+
+        foreach (var import in db.GetImports(functionCallExpressionNodeId.DocumentPath).Valid)
+        {
+            result.AddRange(db.GetFunctionsInDocument(import.Path).Where(x => x.Name == functionCallInfo.Name));
         }
 
         return result.Build();

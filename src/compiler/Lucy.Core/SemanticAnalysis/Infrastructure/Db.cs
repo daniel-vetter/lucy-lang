@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Linq;
+using System.Text.Json;
 
 namespace Lucy.Core.SemanticAnalysis.Infrastructure;
 
@@ -114,7 +115,7 @@ public class Db
     private bool Recalculate(Entry entry)
     {
         if (!_handlers.TryGetValue(entry.Query.GetType(), out var handler))
-            throw new Exception($"For a query of type '{entry.Query.GetType().Name}' is no input provided and no query handler registered.");
+            throw new Exception($"For a query of type '{entry.Query.GetType().Name}' with parameter '{JsonSerializer.Serialize(entry.Query)}' is no input provided and no query handler registered.");
 
         var callContext = new QueryExecutionContext(this);
         var handlerStopwatch = Stopwatch.StartNew();
@@ -212,6 +213,7 @@ public class Db
         private readonly Db _db;
         private TimeSpan _totalTimeInSubQueries = TimeSpan.Zero;
 
+        [DebuggerStepThrough]
         public TQueryResult Query<TQueryResult>(IQuery<TQueryResult> query) where TQueryResult : notnull
         {
             var sw = Stopwatch.StartNew();

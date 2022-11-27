@@ -13,17 +13,10 @@ public static class GetImportErrorsHandler
         foreach (var documentPath in db.GetDocumentList())
         {
             var imports = db.GetImports(documentPath);
-            foreach (var import in imports)
+            foreach (var import in imports.Invalid)
             {
-                if (import.ValidState == ImportValidationResult.Ok)
-                    continue;
-
                 var range = db.GetRangeFromNode(db.GetNodeById(import.NodeId));
-                
-                if (import.ValidState == ImportValidationResult.CouldNotResolve)
-                {
-                    result.Add(new ErrorWithRange(documentPath, range, $"Could not resolve import: '{import.Path}'."));
-                }
+                result.Add(new ErrorWithRange(documentPath, range, $"Could not resolve import: '{import.Path}'."));
             }
         }
         return result.Build();

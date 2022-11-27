@@ -53,7 +53,6 @@ public class SemanticDatabase : IDb, IDisposable
 
     private void AddWorkspaceAsInputs(Workspace workspace)
     {
-
         _db.SetInput(new GetDocumentList(), new GetDocumentListResult(_workspace.Documents.Keys.ToComparableReadOnlyList()));
         foreach (var codeFile in workspace.Documents.Values.OfType<CodeFile>())
         {

@@ -7,34 +7,33 @@ using System.Linq;
 
 namespace Lucy.Core.SemanticAnalysis.Handler;
 
-public record Import(NodeId NodeId, string Path, ImportValidationResult ValidState);
-public enum ImportValidationResult
-{
-    Ok,
-    CouldNotResolve
-}
+public record DocumentImports(ComparableReadOnlyList<Import> Valid, ComparableReadOnlyList<Import> Invalid);
+public record Import(NodeId NodeId, string Path);
 
 public static class GetImportsHandler
 {
     [GenerateDbExtension] ///<see cref="GetImportsEx.GetImports"/>
-    public static ComparableReadOnlyList<Import> GetImports(IDb db, string documentPath)
+    public static DocumentImports GetImports(IDb db, string documentPath)
     {
         var importStatementsIds = db.GetNodeIdsByType<ImportStatementSyntaxNode>(documentPath);
         var importStatements = importStatementsIds.Select(x => (ImportStatementSyntaxNode)db.GetNodeById(x)).ToList();
         var documentList = db.GetDocumentList().ToHashSet();
         var currentDir = GetDirectoryFrom(documentPath);
 
-        var result = new ComparableReadOnlyList<Import>.Builder();
+        var validList = new ComparableReadOnlyList<Import>.Builder();
+        var invalidList = new ComparableReadOnlyList<Import>.Builder();
 
         foreach (var importStatement in importStatements)
         {
             var path = NormalizePath(CombinePath(currentDir, importStatement.Path.Value)) + ".lucy";
-            result.Add(!documentList.Contains(path)
-                ? new Import(importStatement.NodeId, path, ImportValidationResult.CouldNotResolve)
-                : new Import(importStatement.NodeId, path, ImportValidationResult.Ok));
+
+            if (documentList.Contains(path))
+                validList.Add(new Import(importStatement.NodeId, path));
+            else
+                invalidList.Add(new Import(importStatement.NodeId, path));
         }
 
-        return result.Build();
+        return new DocumentImports(validList.Build(), invalidList.Build());
     }
 
     private static string GetDirectoryFrom(string path)

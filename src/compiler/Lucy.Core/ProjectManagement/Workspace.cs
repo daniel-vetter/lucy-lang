@@ -27,7 +27,7 @@ public class Workspace
         var ws = new Workspace();
         foreach (var file in await Task.WhenAll(tasks))
         {
-            var subPath = file.Path.Substring(path.Length).Replace("\\", "/");
+            var subPath = file.Path[path.Length..].Replace("\\", "/");
             ws.AddFile(subPath, file.Content);
         }
         return ws;
@@ -45,7 +45,7 @@ public class Workspace
             _eventSubscriptions.Publish(new DocumentAdded(document));
         }
         else
-            throw new NotSupportedException("Could not determin type of workspace file: " + path);
+            throw new NotSupportedException("Could not determined type of workspace file: " + path);
     }
 
     public void UpdateFile(string path, string content)
@@ -72,10 +72,10 @@ public class Workspace
             throw new Exception("A file named '" + path + "' does not exist.");
 
         if (document is not CodeFile codeFile)
-            throw new Exception($"Incrental update of '{path}' is not supported.");
+            throw new Exception($"Incremental update of '{path}' is not supported.");
 
-        var pre = codeFile.Content.Substring(0, range.Start.Position);
-        var post = codeFile.Content.Substring(range.End.Position);
+        var pre = codeFile.Content[..range.Start.Position];
+        var post = codeFile.Content[range.End.Position..];
 
         UpdateFile(path, pre + content + post);
     }
