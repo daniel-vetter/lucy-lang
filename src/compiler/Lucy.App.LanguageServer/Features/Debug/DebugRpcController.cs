@@ -29,14 +29,6 @@ public class DebugRpcController
         return await _debugViewGenerator.Generate(tree);
     }
 
-    [JsonRpcFunction("debug/getScopeTree")]
-    public async Task<string> GetScopeTree(RpcGetScopeTree input)
-    {
-        var path = _currentWorkspace.ToWorkspacePath(input.Uri);
-        var tree = _currentWorkspace.Analysis.GetScopeTree(path);
-        return await _debugViewGenerator.Generate(tree);
-    }
-
     [JsonRpcFunction("debug/attachDebugger")]
     public Task AttachDebugger()
     {

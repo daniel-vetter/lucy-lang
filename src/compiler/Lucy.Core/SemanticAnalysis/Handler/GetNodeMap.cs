@@ -98,17 +98,15 @@ public static class GetNodeMapHandler
             return null;
 
         var parentId = nodeId.Parent;
-        if (nodeType == db.GetNodeTypeById(parentId))
-            return parentId;
 
-        return db.GetNearestParentNodeOfType(parentId, nodeType);
+        return nodeType == db.GetNodeTypeById(parentId) 
+            ? parentId 
+            : db.GetNearestParentNodeOfType(parentId, nodeType);
     }
 
     public static NodeId? GetNearestParentNodeOfType<T>(this IDb db, NodeId nodeId)
     {
         var parentNodeId = db.GetNearestParentNodeOfType(nodeId, typeof(T));
-        if (parentNodeId == null) 
-            return null;
-        return parentNodeId;
+        return parentNodeId == null ? null : parentNodeId;
     }
 }

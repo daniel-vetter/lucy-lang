@@ -13,9 +13,7 @@ public static class RangeCalculation
     {
         var root = db.GetSyntaxTree(documentPath);
         var result = FindNodeFromPosition(db, position, root, 0);
-        if (result == null)
-            return null;
-        return result.Node;
+        return result?.Node;
     }
 
     [GenerateDbExtension] ///<see cref="GetRangeFromNodeEx.GetRangeFromNode"/>

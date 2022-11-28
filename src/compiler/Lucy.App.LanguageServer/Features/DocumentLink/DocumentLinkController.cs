@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.Immutable;
+﻿using System.Collections.Immutable;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Lucy.App.LanguageServer.Infrastructure;
 using Lucy.App.LanguageServer.Models;
 using Lucy.Common.ServiceDiscovery;

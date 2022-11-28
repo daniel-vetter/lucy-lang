@@ -5,18 +5,19 @@ using System.Linq;
 
 namespace Lucy.Core.SemanticAnalysis.Handler;
 
-public record FunctionInfo(string Name, NodeId DeclarationNodeId, NodeId NameTokenNodeId);
+public record FunctionInfo(string Name, NodeId DeclarationNodeId, NodeId NameTokenNodeId, ComparableReadOnlyList<FunctionParameterInfo> Parameters);
+public record FunctionParameterInfo(string Name, NodeId NameTokenNodeId, NodeId TypeReferenceNodeId);
 public record FunctionCallInfo(string Name, NodeId DeclarationNodeId, NodeId NameTokenNodeId);
 
 public static class FunctionsHandler
 {
     [GenerateDbExtension] ///<see cref="GetFunctionInfoEx.GetFunctionInfo"/>
-    public static FunctionInfo GetFunctionCallInfo(IDb db, NodeId functionCallNodeId)
+    public static FunctionCallInfo GetFunctionCallInfo(IDb db, NodeId functionCallNodeId)
     {
         var node = (FunctionCallExpressionSyntaxNode)db.GetNodeById(functionCallNodeId);
-        return new FunctionInfo(node.FunctionName.Token.Text, functionCallNodeId, node.FunctionName.Token.NodeId);
+        return new FunctionCallInfo(node.FunctionName.Token.Text, functionCallNodeId, node.FunctionName.Token.NodeId);
     }
-    
+
     [GenerateDbExtension] ///<see cref="GetFunctionsInDocumentEx.GetFunctionsInDocument"/>
     public static ComparableReadOnlyList<FunctionInfo> GetFunctionsInDocument(IDb db, string documentPath)
     {
@@ -29,7 +30,19 @@ public static class FunctionsHandler
     public static FunctionInfo GetFunctionInfo(IDb db, NodeId functionDeclarationNodeId)
     {
         var node = (FunctionDeclarationStatementSyntaxNode)db.GetNodeById(functionDeclarationNodeId);
-        return new FunctionInfo(node.FunctionName.Token.Text, functionDeclarationNodeId, node.FunctionName.Token.NodeId);
+
+        var parameters = node.ParameterList.Select(x => new FunctionParameterInfo(
+            x.VariableDeclaration.VariableName.Token.Text,
+            x.VariableDeclaration.VariableName.Token.NodeId,
+            x.VariableDeclaration.TypeReference.NodeId))
+            .ToComparableReadOnlyList();
+
+        return new FunctionInfo(
+            node.FunctionName.Token.Text,
+            functionDeclarationNodeId,
+            node.FunctionName.Token.NodeId,
+            parameters
+        );
     }
 
     [GenerateDbExtension] ///<see cref="GetFunctionsInStatementListEx.GetFunctionsInStatementList"/>

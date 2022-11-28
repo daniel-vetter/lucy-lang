@@ -18,3 +18,4 @@ fun main(num: int): int {
     test()
     thisIsAFunction()
 }
+
