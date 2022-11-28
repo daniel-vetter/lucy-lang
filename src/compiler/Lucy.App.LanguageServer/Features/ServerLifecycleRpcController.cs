@@ -50,6 +50,11 @@ public class ServerLifecycleRpcController
             OpenClose = true
         };
 
+        result.Capabilities.DocumentLinkProvider = new RpcDocumentLinkOptions
+        {
+
+        };
+
         //Enable signature help
         result.Capabilities.SignatureHelpProvider = new RpcSignatureHelpOptions
         {

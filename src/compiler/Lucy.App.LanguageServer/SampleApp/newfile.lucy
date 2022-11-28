@@ -1,4 +1,5 @@
 import "helper"
+import "main"
 
 fun thisIsAFunction(): void {
     test()

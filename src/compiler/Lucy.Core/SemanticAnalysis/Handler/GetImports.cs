@@ -8,7 +8,7 @@ using System.Linq;
 namespace Lucy.Core.SemanticAnalysis.Handler;
 
 public record DocumentImports(ComparableReadOnlyList<Import> Valid, ComparableReadOnlyList<Import> Invalid);
-public record Import(NodeId NodeId, string Path);
+public record Import(NodeId ImportStatementNodeId, NodeId ImportPathTokenNodeId, string Path);
 
 public static class GetImportsHandler
 {
@@ -28,9 +28,9 @@ public static class GetImportsHandler
             var path = NormalizePath(CombinePath(currentDir, importStatement.Path.Value)) + ".lucy";
 
             if (documentList.Contains(path))
-                validList.Add(new Import(importStatement.NodeId, path));
+                validList.Add(new Import(importStatement.NodeId, importStatement.Path.Str.Token.NodeId, path));
             else
-                invalidList.Add(new Import(importStatement.NodeId, path));
+                invalidList.Add(new Import(importStatement.NodeId, importStatement.Path.Str.Token.NodeId, path));
         }
 
         return new DocumentImports(validList.Build(), invalidList.Build());

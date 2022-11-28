@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 using Lucy.App.LanguageServer.Infrastructure;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
-
+// ReSharper disable UnusedAutoPropertyAccessor.Global
 // ReSharper disable UnusedMember.Local
 
 namespace Lucy.App.LanguageServer.Models;
@@ -14,12 +14,12 @@ public class RpcInitializeResult
     /// <summary>
     /// The capabilities the language server provides.
     /// </summary>
-    public RpcServerCapabilities Capabilities { get; set; } = new RpcServerCapabilities();
+    public RpcServerCapabilities Capabilities { get; set; } = new();
 
     /// <summary>
     /// Information about the server.
     /// </summary>
-    public RpcServerInfo ServerInfo { get; set; } = new RpcServerInfo();
+    public RpcServerInfo ServerInfo { get; init; } = new();
 }
 
 /// <summary>
@@ -936,12 +936,12 @@ public class RpcRange
     /// <summary>
     /// The range's start position.
     /// </summary>
-    public RpcPosition Start { get; set; } = new RpcPosition();
+    public required RpcPosition Start { get; init; }
 
     /// <summary>
     /// The range's end position.
     /// </summary>
-    public RpcPosition End { get; set; } = new RpcPosition();
+    public required RpcPosition End { get; init; }
 
     public override string ToString() => $"{Start}-{End}";
 }
@@ -955,7 +955,7 @@ public class RpcTextDocumentContentChangeEvent
     /// <summary>
     /// The range of the document that changed.
     /// </summary>
-    public RpcRange? Range { get; set; } = new RpcRange();
+    public RpcRange? Range { get; set; }
 
     /// <summary>
     /// The new text for the provided range.
@@ -1300,4 +1300,42 @@ public enum RpcSignatureHelpTriggerKind
     /// Signature help was triggered by the cursor moving or by the document content changing.
     /// </summary>
     ContentChange = 3
+}
+
+/// <summary>
+/// 
+/// </summary>
+public class RpcDocumentLinkParams
+{
+    /// <summary>
+    /// The document to provide document links for.
+    /// </summary>
+    public RpcTextDocumentIdentifier TextDocument { get; set; } = null!;
+}
+
+/// <summary>
+/// A document link is a range in a text document that links to an internal or
+/// external resource, like another text document or a web site.
+/// </summary>
+public class RpcDocumentLink
+{
+    /// <summary>
+    /// The range this link applies to.
+    /// </summary>
+    public required RpcRange Range { get; init; }
+
+    /// <summary>
+    /// The uri this link points to. If missing a resolve request is sent later.
+    /// </summary>
+    public SystemPath? Target { get; set; }
+
+    /// <summary>
+    /// The tooltip text when you hover over this link.
+    ///
+    /// If a tooltip is provided, is will be displayed in a string that includes
+    /// instructions on how to trigger the link, such as `{0} (ctrl + click)`.
+    /// The specific instructions vary depending on OS, user settings, and
+    /// localization.
+    /// </summary>
+    public string? Tooltip { get; set; }
 }

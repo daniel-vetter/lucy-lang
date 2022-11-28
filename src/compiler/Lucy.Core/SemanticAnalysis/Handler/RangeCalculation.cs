@@ -26,6 +26,12 @@ public static class RangeCalculation
         return new Range1D(new (start), new (start + len));
     }
 
+    [GenerateDbExtension] ///<see cref="GetRangeFromNodeEx.GetRangeFromNodeId"/>
+    public static Range1D GetRangeFromNodeId(IDb db, NodeId nodeId)
+    {
+        return db.GetRangeFromNode(db.GetNodeById(nodeId));
+    }
+
     private static SearchResult? FindNodeFromPosition(IDb db, Position1D position, SyntaxTreeNode startNode, int offset)
     {
         if (!startNode.GetChildNodes().Any())

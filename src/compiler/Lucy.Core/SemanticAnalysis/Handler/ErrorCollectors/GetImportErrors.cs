@@ -15,7 +15,7 @@ public static class GetImportErrorsHandler
             var imports = db.GetImports(documentPath);
             foreach (var import in imports.Invalid)
             {
-                var range = db.GetRangeFromNode(db.GetNodeById(import.NodeId));
+                var range = db.GetRangeFromNode(db.GetNodeById(import.ImportPathTokenNodeId));
                 result.Add(new ErrorWithRange(documentPath, range, $"Could not resolve import: '{import.Path}'."));
             }
         }

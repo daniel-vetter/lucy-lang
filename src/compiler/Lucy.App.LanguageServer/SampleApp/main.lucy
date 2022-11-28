@@ -1,6 +1,7 @@
 ﻿import "helper"
 import "newfile"
 
+
 extern cdecl "kernel32.dll" "printf_" fun printf(): void
 extern cdecl "kernel32.dll" "allocConsole" fun allocConsole(): void
 
@@ -12,7 +13,7 @@ fun main(num: int): int {
    fun test2(): number { 
     void main void
    }      
-   
+
     test2() 
     test()
     thisIsAFunction()
