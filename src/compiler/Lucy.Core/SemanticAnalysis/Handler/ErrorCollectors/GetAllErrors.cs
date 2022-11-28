@@ -20,6 +20,7 @@ public static class GetErrors
         var result = new ComparableReadOnlyList<Error>.Builder();
         result.AddRange(db.GetImportErrors());
         result.AddRange(db.GetEntryPointErrors());
+        result.AddRange(db.GetAllTypeErrors());
 
         foreach(var document in db.GetDocumentList())
         {
