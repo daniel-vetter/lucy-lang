@@ -3,7 +3,7 @@ using Lucy.Core.SemanticAnalysis.Infrastructure;
 
 namespace Lucy.Core.SemanticAnalysis.Handler
 {
-    public record TypeInfo(NodeId? TypeDeclarationNodeId, string Name);
+    public record TypeInfo(INodeId<SyntaxTreeNode>? TypeDeclarationNodeId, string Name);
     
     public static class PredefinedTypes
     {
@@ -15,9 +15,9 @@ namespace Lucy.Core.SemanticAnalysis.Handler
     public static class Types
     {
         [GenerateDbExtension] ///<see cref="GetTypeInfoFromTypeReferenceIdEx.GetTypeInfoFromTypeReferenceId" />
-        public static TypeInfo? GetTypeInfoFromTypeReferenceId(IDb db, NodeId nodeId)
+        public static TypeInfo? GetTypeInfoFromTypeReferenceId(IDb db, INodeId<TypeReferenceSyntaxNode> nodeId)
         {
-            var node = (TypeReferenceSyntaxNode)db.GetNodeById(nodeId);
+            var node = db.GetNodeById(nodeId);
 
             return node.TypeName.Token.Text switch
             {

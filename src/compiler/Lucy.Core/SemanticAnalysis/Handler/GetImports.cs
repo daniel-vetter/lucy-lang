@@ -8,7 +8,7 @@ using System.Linq;
 namespace Lucy.Core.SemanticAnalysis.Handler;
 
 public record DocumentImports(ComparableReadOnlyList<Import> Valid, ComparableReadOnlyList<Import> Invalid);
-public record Import(NodeId ImportStatementNodeId, NodeId ImportPathTokenNodeId, string Path);
+public record Import(INodeId<SyntaxTreeNode> ImportStatementNodeId, INodeId<TokenNode> ImportPathTokenNodeId, string Path);
 
 public static class GetImportsHandler
 {
@@ -16,7 +16,7 @@ public static class GetImportsHandler
     public static DocumentImports GetImports(IDb db, string documentPath)
     {
         var importStatementsIds = db.GetNodeIdsByType<ImportStatementSyntaxNode>(documentPath);
-        var importStatements = importStatementsIds.Select(x => (ImportStatementSyntaxNode)db.GetNodeById(x)).ToList();
+        var importStatements = importStatementsIds.Select(db.GetNodeById).ToList();
         var documentList = db.GetDocumentList().ToHashSet();
         var currentDir = GetDirectoryFrom(documentPath);
 

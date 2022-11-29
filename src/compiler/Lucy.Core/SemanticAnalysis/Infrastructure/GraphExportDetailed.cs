@@ -83,7 +83,7 @@ public class DetailedGraphExport
             var displayString = value switch
             {
                 null => "",
-                SyntaxTreeNode syntaxTreeNode => syntaxTreeNode.NodeId.ToString(),
+                SyntaxTreeNode syntaxTreeNode => syntaxTreeNode.NodeId.ToString() ?? "",
                 _ => value.ToString() ?? ""
             };
                 

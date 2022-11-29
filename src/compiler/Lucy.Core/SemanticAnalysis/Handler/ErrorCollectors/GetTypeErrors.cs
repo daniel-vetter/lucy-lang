@@ -27,7 +27,7 @@ namespace Lucy.Core.SemanticAnalysis.Handler.ErrorCollectors
                 if (info != null)
                     continue;
 
-                var node = (TypeReferenceSyntaxNode)db.GetNodeById(nodeId);
+                var node = db.GetNodeById(nodeId);
 
                 result.Add(new ErrorWithNodeId(node.TypeName.Token.NodeId, $"The type '{node.TypeName.Token.Text}' could not be found."));
             }

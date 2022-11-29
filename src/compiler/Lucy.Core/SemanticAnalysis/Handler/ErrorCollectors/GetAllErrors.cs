@@ -9,7 +9,7 @@ namespace Lucy.Core.SemanticAnalysis.Handler.ErrorCollectors;
 
 public abstract record Error(string Message);
 public record ErrorWithNode(SyntaxTreeNode Node, string Message) : Error(Message);
-public record ErrorWithNodeId(NodeId NodeId, string Message) : Error(Message);
+public record ErrorWithNodeId(INodeId<SyntaxTreeNode> NodeId, string Message) : Error(Message);
 public record ErrorWithRange(string DocumentPath, Range1D Range, string Message) : Error(Message);
 
 public static class GetErrors

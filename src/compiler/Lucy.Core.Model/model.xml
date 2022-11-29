@@ -7,7 +7,6 @@
 	<MissingExpressionSyntaxNode basedOn="ExpressionSyntaxNode" />
 
 	<SyntaxTreeNode>
-		<NodeId type="NodeId" init="NodeId.Uninitalized" />
 		<SyntaxErrors type="string" list="true" init="new()" />
 	</SyntaxTreeNode>
 	

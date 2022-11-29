@@ -25,7 +25,7 @@ public static class RangeCalculation
     }
 
     [GenerateDbExtension] ///<see cref="GetRangeFromNodeEx.GetRangeFromNodeId"/>
-    public static Range1D GetRangeFromNodeId(IDb db, NodeId nodeId)
+    public static Range1D GetRangeFromNodeId(IDb db, INodeId<SyntaxTreeNode> nodeId)
     {
         return db.GetRangeFromNode(db.GetNodeById(nodeId));
     }

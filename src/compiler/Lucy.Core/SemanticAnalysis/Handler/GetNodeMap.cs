@@ -10,25 +10,30 @@ namespace Lucy.Core.SemanticAnalysis.Handler;
 public static class GetNodeMapHandler
 {
     [GenerateDbExtension] ///<see cref="GetNodeByIdMapEx.GetNodeByIdMap"/>
-    public static ComparableReadOnlyDictionary<NodeId, SyntaxTreeNode> GetNodeByIdMap(IDb db, string documentPath)
+    public static ComparableReadOnlyDictionary<INodeId<SyntaxTreeNode>, SyntaxTreeNode> GetNodeByIdMap(IDb db, string documentPath)
     {
         return db.GetNodeList(db.GetSyntaxTree(documentPath)).ToComparableReadOnlyDictionary(x => x.NodeId, x => x);
     }
 
     [GenerateDbExtension] ///<see cref="GetNodeTypeByIdEx.GetNodeTypeById"/>
-    public static Type GetNodeTypeById(IDb db, NodeId nodeId)
+    public static Type GetNodeTypeById(IDb db, INodeId<SyntaxTreeNode> nodeId)
     {
         return db.GetNodeByIdMap(nodeId.DocumentPath)[nodeId].GetType();
     }
 
     [GenerateDbExtension] ///<see cref="GetNodeByIdEx.GetNodeById"/>
-    public static SyntaxTreeNode GetNodeById(IDb db, NodeId nodeId)
+    public static SyntaxTreeNode GetNodeById(IDb db, INodeId<SyntaxTreeNode> nodeId)
     {
         return db.GetNodeByIdMap(nodeId.DocumentPath)[nodeId];
     }
 
+    public static T GetNodeById<T>(this IDb db, INodeId<T> nodeId) where T : SyntaxTreeNode
+    {
+        return (T)GetNodeByIdEx.GetNodeById(db, nodeId);
+    }
+
     [GenerateDbExtension] ///<see cref="GetNodesByTypeMapEx.GetNodesByTypeMap"/>
-    public static ComparableReadOnlyDictionary<Type, ComparableReadOnlyList<NodeId>> GetNodesByTypeMap(IDb db, string documentPath)
+    public static ComparableReadOnlyDictionary<Type, ComparableReadOnlyList<INodeId<SyntaxTreeNode>>> GetNodesByTypeMap(IDb db, string documentPath)
     {
         return db.GetNodeList(db.GetSyntaxTree(documentPath))
             .GroupBy(x => x.GetType())
@@ -44,16 +49,18 @@ public static class GetNodeMapHandler
     }*/
 
     [GenerateDbExtension] ///<see cref="GetNodesByTypeEx.GetNodesByType"/>
-    public static ComparableReadOnlyList<NodeId> GetNodeIdsByType(IDb db, string documentPath, Type type)
+    public static ComparableReadOnlyList<INodeId<SyntaxTreeNode>> GetNodeIdsByType(IDb db, string documentPath, Type type)
     {
-        if (db.GetNodesByTypeMap(documentPath).TryGetValue(type, out var list))
-            return list.ToComparableReadOnlyList();
-        return new ComparableReadOnlyList<NodeId>();
+        return db.GetNodesByTypeMap(documentPath).TryGetValue(type, out var list) 
+            ? list.ToComparableReadOnlyList() 
+            : new ComparableReadOnlyList<INodeId<SyntaxTreeNode>>();
     }
 
-    public static ComparableReadOnlyList<NodeId> GetNodeIdsByType<T>(this IDb db, string documentPath) where T : SyntaxTreeNode
+    public static ComparableReadOnlyList<INodeId<T>> GetNodeIdsByType<T>(this IDb db, string documentPath) where T : SyntaxTreeNode
     {
-        return db.GetNodeIdsByType(documentPath, typeof(T));
+        return db.GetNodeIdsByType(documentPath, typeof(T))
+            .Cast<INodeId<T>>()
+            .ToComparableReadOnlyList();
     }
 
     /*
@@ -61,12 +68,7 @@ public static class GetNodeMapHandler
     {
         return db.GetNodesByType(documentPath, typeof(T)).Cast<T>().ToComparableReadOnlyList();
     }*/
-
-    public static ComparableReadOnlyList<NodeId> GetNodeIdByType<T>(this IDb db, string documentPath) where T : SyntaxTreeNode
-    {
-        return db.GetNodeIdsByType(documentPath, typeof(T));
-    }
-
+    
     [GenerateDbExtension] ///<see cref="GetNodeListEx.GetNodeList"/>
     public static ComparableReadOnlyList<SyntaxTreeNode> GetNodeList(IDb db, SyntaxTreeNode node)
     {
@@ -92,7 +94,7 @@ public static class GetNodeMapHandler
     }
 
     [GenerateDbExtension] ///<see cref="GetNearestParentNodeOfTypeEx.GetNearestParentNodeOfType"/>
-    public static NodeId? GetNearestParentNodeOfType(IDb db, NodeId nodeId, Type nodeType)
+    public static INodeId<SyntaxTreeNode>? GetNearestParentNodeOfType(IDb db, INodeId<SyntaxTreeNode> nodeId, Type nodeType)
     {
         if (nodeId.IsRoot)
             return null;
@@ -104,9 +106,8 @@ public static class GetNodeMapHandler
             : db.GetNearestParentNodeOfType(parentId, nodeType);
     }
 
-    public static NodeId? GetNearestParentNodeOfType<T>(this IDb db, NodeId nodeId)
+    public static INodeId<T>? GetNearestParentNodeOfType<T>(this IDb db, INodeId<SyntaxTreeNode> nodeId) where T : SyntaxTreeNode
     {
-        var parentNodeId = db.GetNearestParentNodeOfType(nodeId, typeof(T));
-        return parentNodeId == null ? null : parentNodeId;
+        return db.GetNearestParentNodeOfType(nodeId, typeof(T)) as INodeId<T>;
     }
 }

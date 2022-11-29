@@ -29,9 +29,11 @@ internal static class SyntaxTreeModelBuilderGenerator
                 content: x =>
                 {
                     x.WriteConstructor(node);
+                    x.WriteMemberVariables(node);
                     x.WriteProperties(node);
                     x.WriteGetChildNodesMethod(node);
                     x.WriteBuildMethod(node);
+                    x.WriteSetIdMethod(node);
                 });
         }
 
@@ -60,11 +62,14 @@ internal static class SyntaxTreeModelBuilderGenerator
 
                     return name;
                 })
+                .Prepend("new NodeId<"+node.Name+ ">(_nodeId.DocumentPath, _nodeId.NodePath)")
                 .ToArray());
 
             sb.AppendLine($$"""
                         public override {{node.Name}} Build()
                         {
+                            if (_nodeId == null)
+                                throw new Exception("NodeId was not set");
                             return new {{node.Name}}({{props}});
                         }
                     """);
@@ -120,11 +125,17 @@ internal static class SyntaxTreeModelBuilderGenerator
         sb.AppendLine();
     }
 
-    private static void WriteProperties(this StringBuilder sb, Node node)
+    private static void WriteMemberVariables(this StringBuilder sb, Node node)
     {
-        if (node.Properties.Count == 0)
+        if (!node.IsRoot)
             return;
 
+        sb.AppendLine("    protected NodeId? _nodeId;");
+    }
+
+    private static void WriteProperties(this StringBuilder sb, Node node)
+    {
+        sb.AppendLine($"    public {(!node.IsRoot ? "new " : "")}IBuilderNodeId<" + node.Name + "Builder>? NodeId => (IBuilderNodeId<" + node.Name + "Builder>?)_nodeId;");
         foreach (var prop in node.Properties)
             sb.AppendLine($"    public {GetRealType(prop)} {prop.Name} {{ get; set; }}{(prop.Init != null).Then(" = " + prop.Init + ";")}");
         sb.AppendLine();
@@ -143,6 +154,23 @@ internal static class SyntaxTreeModelBuilderGenerator
         }
         sb.AppendLine("    }");
         sb.AppendLine();
+    }
+
+    private static void WriteSetIdMethod(this StringBuilder sb, Node node)
+    {
+        if (node.IsRoot)
+        {
+            sb.AppendLine("    public abstract void SetId(string documentPath, string nodePath);");
+            return;
+        }
+
+        if (node.IsTopMost)
+        {
+            sb.AppendLine("    public override void SetId(string documentPath, string nodePath)");
+            sb.AppendLine("    {");
+            sb.AppendLine("        _nodeId = new BuilderNodeId<"+node.Name+"Builder>(documentPath, nodePath);");
+            sb.AppendLine("    }");
+        }
     }
 
     private static string GetConstructorArguments(Node node)

@@ -72,6 +72,7 @@ internal static class SyntaxTreeModelGenerator
         if (!node.IsRoot)
             return;
 
+        sb.AppendLine("    protected NodeId _nodeId;");
         sb.AppendLine("    protected byte[] _hash = null!;");
         sb.AppendLine("    protected int _hashShort;");
         sb.AppendLine();
@@ -106,6 +107,7 @@ internal static class SyntaxTreeModelGenerator
             sb.AppendLine("    {");
             sb.AppendLine("        using var b = new HashBuilder();");
             sb.AppendLine("        b.Add(" + node.Index + ");");
+            sb.AppendLine("        b.Add(_nodeId);");
             foreach (var property in node.AllProperties)
             {
                 if (property.IsList)
@@ -127,17 +129,23 @@ internal static class SyntaxTreeModelGenerator
     {
         var allParameters = node.AllProperties
             .Select(x => $"{GetRealType(x)} {ToLower(x.Name)}")
+            .Prepend((node.IsTopMost ? "NodeId<"+node.Name+">" : "NodeId") + " nodeId").ToArray()
             .ToArray();
 
         var baseParameters = node.BaseProperties
-            .Select(x => ToLower(x.Name))
-            .ToArray();
+        .Select(x => ToLower(x.Name))
+        .ToArray();
+
+        if (!node.IsRoot)
+            baseParameters = baseParameters.Prepend("nodeId").ToArray();
 
         var paramStr = string.Join(", ", allParameters);
         var baseStr = string.Join(", ", baseParameters);
 
         sb.AppendLine($"    public {node.Name}({paramStr}) : base(" + baseStr + ")");
         sb.AppendLine("    {");
+        if (node.IsRoot)
+            sb.AppendLine("        _nodeId = nodeId;");
         foreach (var prop in node.Properties)
         {
             sb.AppendLine($"        {prop.Name} = {ToLower(prop.Name)};");
@@ -168,9 +176,7 @@ internal static class SyntaxTreeModelGenerator
 
     private static void WriteProperties(this StringBuilder sb, Node node)
     {
-        if (node.Properties.Count == 0)
-            return;
-
+        sb.AppendLine($"    public {(node.IsRoot ? "" : "new")} INodeId<{node.Name}> NodeId => (INodeId<{node.Name}>)_nodeId;");
         foreach (var prop in node.Properties)
         {
             sb.AppendLine($"    public {GetRealType(prop)} {prop.Name} {{ get; }}");

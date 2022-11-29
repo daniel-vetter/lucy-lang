@@ -1,6 +1,5 @@
 ﻿using Lucy.Core.Parsing.Nodes;
 using Lucy.Core.SemanticAnalysis.Infrastructure;
-using Lucy.Core.Model;
 using Lucy.Core.SemanticAnalysis.Inputs;
 using System.Linq;
 
@@ -25,7 +24,7 @@ public static class GetEntryPointErrorsHandler
         {
             foreach (var entryPoint in entryPoints)
             {
-                var node = (FunctionDeclarationStatementSyntaxNode)db.GetNodeById(entryPoint.DeclarationNodeId);
+                var node = db.GetNodeById(entryPoint.DeclarationNodeId);
                 var nameNode = node.FunctionName.Token;
 
                 result.Add(new ErrorWithRange(nameNode.NodeId.DocumentPath, db.GetRangeFromNode(nameNode), "More than one entry point was found. Please ensure the solution has only one 'main' function."));

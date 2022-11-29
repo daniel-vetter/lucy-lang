@@ -1,7 +1,6 @@
 ﻿using Lucy.App.LanguageServer.Infrastructure;
 using Lucy.Common;
 using Lucy.Common.ServiceDiscovery;
-using Lucy.Core.SemanticAnalysis.Handler;
 using Lucy.Core.SemanticAnalysis.Inputs;
 using Lucy.Infrastructure.RpcServer;
 using System.Diagnostics;
@@ -56,11 +55,6 @@ public class DebugRpcController
 }
 
 public class RpcGetSyntaxTree
-{
-    public SystemPath Uri { get; set; } = null!;
-}
-
-public class RpcGetScopeTree
 {
     public SystemPath Uri { get; set; } = null!;
 }

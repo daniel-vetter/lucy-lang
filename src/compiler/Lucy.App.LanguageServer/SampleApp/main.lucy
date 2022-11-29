@@ -9,7 +9,7 @@ extern cdecl "kernel32.dll" "allocConsole" fun allocConsole(): void
 
 fun main(num: int): int {
     printf()
-   
+          
    fun test2(): string { 
     
    }      

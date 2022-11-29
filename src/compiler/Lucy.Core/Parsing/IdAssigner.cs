@@ -19,21 +19,22 @@ internal static class IdAssigner
         {
             var name = node.GetType().Name;
             if (name.EndsWith("SyntaxNodeBuilder"))
-                name = name.Substring(0, name.Length - "SyntaxNodeBuilder".Length);
+                name = name[..^"SyntaxNodeBuilder".Length];
             if (name.EndsWith("NodeBuilder"))
-                name = name.Substring(0, name.Length - "NodeBuilder".Length);
+                name = name[..^"NodeBuilder".Length];
             if (name.EndsWith("Builder"))
-                name = name.Substring(0, name.Length - "Builder".Length);
+                name = name[..^"Builder".Length];
             if (name.EndsWith("TriviaNode"))
-                name = name.Substring(0, name.Length - "TriviaNode".Length);
+                name = name[..^"TriviaNode".Length];
             if (name.EndsWith("Node"))
-                name = name.Substring(0, name.Length - "Node".Length);
+                name = name[..^"Node".Length];
             nodeName = name[0..1].ToLowerInvariant() + name[1..];
             nodeNameCache[type] = nodeName;
         }
-            
-        node.NodeId = nodeIdFactory.CreateId(nodeName);
-        var subFactory = new NodeIdFactory(node.NodeId);
+
+        var nodeId = nodeIdFactory.CreateId(nodeName);
+        node.SetId(nodeId.DocumentPath, nodeId.NodePath);
+        var subFactory = new NodeIdFactory(node.NodeId!);
         foreach (var child in node.GetChildNodes())
         {
             Traverse(child, subFactory, nodeNameCache);
@@ -51,7 +52,7 @@ internal static class IdAssigner
             _documentPath = documentPath;
         }
 
-        public NodeIdFactory(NodeId parent)
+        public NodeIdFactory(IBuilderNodeId<SyntaxTreeNodeBuilder> parent)
         {
             _id = parent.NodePath;
             _documentPath = parent.DocumentPath;

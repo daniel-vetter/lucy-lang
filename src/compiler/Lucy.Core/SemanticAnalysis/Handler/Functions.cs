@@ -5,31 +5,31 @@ using System.Linq;
 
 namespace Lucy.Core.SemanticAnalysis.Handler;
 
-public record FunctionInfo(string Name, NodeId DeclarationNodeId, NodeId NameTokenNodeId, ComparableReadOnlyList<FunctionParameterInfo> Parameters);
-public record FunctionParameterInfo(string Name, NodeId NameTokenNodeId, NodeId TypeReferenceNodeId);
-public record FunctionCallInfo(string Name, NodeId DeclarationNodeId, NodeId NameTokenNodeId);
+public record FunctionInfo(string Name, INodeId<FunctionDeclarationStatementSyntaxNode> DeclarationNodeId, INodeId<TokenNode> NameTokenNodeId, ComparableReadOnlyList<FunctionParameterInfo> Parameters);
+public record FunctionParameterInfo(string Name, INodeId<TokenNode> NameTokenNodeId, INodeId<TypeReferenceSyntaxNode> TypeReferenceNodeId);
+public record FunctionCallInfo(string Name, INodeId<FunctionCallExpressionSyntaxNode> DeclarationNodeId, INodeId<TokenNode> NameTokenNodeId);
 
 public static class FunctionsHandler
 {
     [GenerateDbExtension] ///<see cref="GetFunctionInfoEx.GetFunctionInfo"/>
-    public static FunctionCallInfo GetFunctionCallInfo(IDb db, NodeId functionCallNodeId)
+    public static FunctionCallInfo GetFunctionCallInfo(IDb db, INodeId<FunctionCallExpressionSyntaxNode> functionCallNodeId)
     {
-        var node = (FunctionCallExpressionSyntaxNode)db.GetNodeById(functionCallNodeId);
+        var node = db.GetNodeById(functionCallNodeId);
         return new FunctionCallInfo(node.FunctionName.Token.Text, functionCallNodeId, node.FunctionName.Token.NodeId);
     }
 
     [GenerateDbExtension] ///<see cref="GetFunctionsInDocumentEx.GetFunctionsInDocument"/>
     public static ComparableReadOnlyList<FunctionInfo> GetFunctionsInDocument(IDb db, string documentPath)
     {
-        return db.GetNodeIdByType<FunctionDeclarationStatementSyntaxNode>(documentPath)
+        return db.GetNodeIdsByType<FunctionDeclarationStatementSyntaxNode>(documentPath)
             .Select(db.GetFunctionInfo)
             .ToComparableReadOnlyList();
     }
 
     [GenerateDbExtension] ///<see cref="GetFunctionInfoEx.GetFunctionInfo"/>
-    public static FunctionInfo GetFunctionInfo(IDb db, NodeId functionDeclarationNodeId)
+    public static FunctionInfo GetFunctionInfo(IDb db, INodeId<FunctionDeclarationStatementSyntaxNode> functionDeclarationNodeId)
     {
-        var node = (FunctionDeclarationStatementSyntaxNode)db.GetNodeById(functionDeclarationNodeId);
+        var node = db.GetNodeById(functionDeclarationNodeId);
 
         var parameters = node.ParameterList.Select(x => new FunctionParameterInfo(
             x.VariableDeclaration.VariableName.Token.Text,
@@ -46,23 +46,23 @@ public static class FunctionsHandler
     }
 
     [GenerateDbExtension] ///<see cref="GetFunctionsInStatementListEx.GetFunctionsInStatementList"/>
-    public static ComparableReadOnlyList<FunctionInfo> GetFunctionsInStatementList(IDb db, NodeId statementListNodeId)
+    public static ComparableReadOnlyList<FunctionInfo> GetFunctionsInStatementList(IDb db, INodeId<StatementListSyntaxNode> statementListNodeId)
     {
         var result = new ComparableReadOnlyList<FunctionInfo>.Builder();
-        foreach (var statement in ((StatementListSyntaxNode)db.GetNodeById(statementListNodeId)).Statements)
+        foreach (var statement in db.GetNodeById(statementListNodeId).Statements)
         {
-            if (statement is FunctionDeclarationStatementSyntaxNode)
-                result.Add(db.GetFunctionInfo(statement.NodeId));
+            if (statement is FunctionDeclarationStatementSyntaxNode functionStatement)
+                result.Add(db.GetFunctionInfo(functionStatement.NodeId));
         }
         return result.Build();
     }
 
     [GenerateDbExtension] ///<see cref="GetFunctionCandidatesFromFunctionCallEx.GetFunctionCandidatesFromFunctionCall"/>
-    public static ComparableReadOnlyList<FunctionInfo> GetFunctionCandidatesFromFunctionCall(IDb db, NodeId functionCallExpressionNodeId)
+    public static ComparableReadOnlyList<FunctionInfo> GetFunctionCandidatesFromFunctionCall(IDb db, INodeId<FunctionCallExpressionSyntaxNode> functionCallExpressionNodeId)
     {
         var result = new ComparableReadOnlyList<FunctionInfo>.Builder();
         var functionCallInfo = db.GetFunctionCallInfo(functionCallExpressionNodeId);
-        var currentNode = functionCallExpressionNodeId;
+        INodeId<SyntaxTreeNode> currentNode = functionCallExpressionNodeId;
 
         while (true)
         {

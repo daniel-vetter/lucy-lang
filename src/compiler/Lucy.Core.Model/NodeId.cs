@@ -2,6 +2,40 @@
 
 namespace Lucy.Core.Model;
 
+// ReSharper disable once UnusedTypeParameter
+public interface INodeId<out T> where T : SyntaxTreeNode
+{
+    public string DocumentPath { get; }
+    public string NodePath { get; }
+
+    public bool IsRoot { get; }
+    public INodeId<SyntaxTreeNode> Parent { get; }
+}
+
+// ReSharper disable once UnusedTypeParameter
+public interface IBuilderNodeId<out T>  where T : SyntaxTreeNodeBuilder
+{
+    public string DocumentPath { get; }
+    public string NodePath { get; }
+
+    public bool IsRoot { get; }
+    public INodeId<SyntaxTreeNode> Parent { get; }
+}
+
+public class NodeId<T> : NodeId, INodeId<T> where T: SyntaxTreeNode
+{
+    public NodeId(string documentPath, string nodePath) : base(documentPath, nodePath)
+    {
+    }
+}
+
+public class BuilderNodeId<T> : NodeId, IBuilderNodeId<T> where T : SyntaxTreeNodeBuilder
+{
+    public BuilderNodeId(string documentPath, string nodePath) : base(documentPath, nodePath)
+    {
+    }
+}
+
 public class NodeId : IHashable
 {
     public NodeId(string documentPath, string nodePath)
@@ -14,10 +48,7 @@ public class NodeId : IHashable
         _str = DocumentPath + "!" + NodePath;
         _hash = Encoding.UTF8.GetBytes(_str);
     }
-
-    private static readonly NodeId _unitialized = new NodeId("!", "Uninitalized");
-    public static NodeId Uninitalized => _unitialized;
-
+    
     public string DocumentPath { get; }
     public string NodePath { get; }
 
@@ -39,14 +70,14 @@ public class NodeId : IHashable
     public override string ToString() => _str;
 
     public bool IsRoot => NodePath.IndexOf('.') == -1;
-    public NodeId Parent
+    public INodeId<SyntaxTreeNode> Parent
     {
         get
         {
             var lastIndex = NodePath.LastIndexOf('.');
             if (lastIndex == -1)
                 throw new Exception("Current node is already the root node id.");
-            return new NodeId(DocumentPath, NodePath[..lastIndex]);
+            return new NodeId<SyntaxTreeNode>(DocumentPath, NodePath[..lastIndex]);
         }
     }
 
