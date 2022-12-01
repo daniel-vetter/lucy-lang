@@ -6,12 +6,19 @@ using System.Globalization;
 
 namespace Lucy.Core.Parsing.Nodes.Expressions.Unary;
 
-public class NumberConstantExpressionSyntaxNodeParser
+public static class NumberConstantExpressionSyntaxNodeParser
 {
     public static bool TryRead(Code code, [NotNullWhen(true)] out NumberConstantExpressionSyntaxNodeBuilder? result)
     {
         var start = code.Position;
         var leadingTrivia = TriviaNodeParser.ReadList(code);
+
+        var negativ = false;
+        if (code.Peek() == '-')
+        {
+            code.Read(1);
+            negativ = true;
+        }
 
         if (!CountDigits(code, out var beforeDigitCount))
         {
@@ -22,24 +29,25 @@ public class NumberConstantExpressionSyntaxNodeParser
 
         if (code.Peek(beforeDigitCount) != '.')
         {
-            result = CreateNode(code, leadingTrivia, beforeDigitCount);
+            result = CreateNode(code, leadingTrivia, beforeDigitCount, negativ);
             return true;
         }
             
         if (!CountDigits(code, out var afterDigitCount))
         {
-            result = CreateNode(code, leadingTrivia, beforeDigitCount);
+            result = CreateNode(code, leadingTrivia, beforeDigitCount, negativ);
             return true;
         }
 
-        result = CreateNode(code, leadingTrivia, beforeDigitCount + 1 + afterDigitCount);
+        result = CreateNode(code, leadingTrivia, beforeDigitCount + 1 + afterDigitCount, negativ);
         return true;
     }
 
-    private static NumberConstantExpressionSyntaxNodeBuilder CreateNode(Code code, List<TriviaNodeBuilder> leadingTrivia, int count)
+    private static NumberConstantExpressionSyntaxNodeBuilder CreateNode(Code code, List<TriviaNodeBuilder> leadingTrivia, int count, bool negative)
     {
         var str = code.Read(count);
         var num = double.Parse(str, CultureInfo.InvariantCulture);
+        if (negative) num *= -1;
         var token = new SyntaxElementBuilder(leadingTrivia, new TokenNodeBuilder(str));
         return new NumberConstantExpressionSyntaxNodeBuilder(num, token);
     }
