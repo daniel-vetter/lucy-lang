@@ -7,10 +7,10 @@ namespace Lucy.Core.SemanticAnalysis.Handler;
 public static class GetEntryPointsHandler
 {
     [GenerateDbExtension] ///<see cref="GetEntryPointsEx.GetEntryPoints"/>
-    public static ComparableReadOnlyList<FunctionInfo> GetEntryPoints(IDb db)
+    public static ComparableReadOnlyList<FlatFunctionDeclaration> GetEntryPoints(IDb db)
     {
         var paths = db.GetDocumentList();
-        var result = new ComparableReadOnlyList<FunctionInfo>.Builder();
+        var result = new ComparableReadOnlyList<FlatFunctionDeclaration>.Builder();
         foreach (var path in paths)
         {
             var ids = db.GetEntryPointsInDocument(path);
@@ -20,13 +20,13 @@ public static class GetEntryPointsHandler
     }
 
     [GenerateDbExtension] ///<see cref="GetEntryPointsInDocumentEx.GetEntryPointsInDocument"/>
-    public static ComparableReadOnlyList<FunctionInfo> GetEntryPointsInDocument(IDb db, string documentPath)
+    public static ComparableReadOnlyList<FlatFunctionDeclaration> GetEntryPointsInDocument(IDb db, string documentPath)
     {
         var infos = db.GetFunctionsInDocument(documentPath);
-        var result = new ComparableReadOnlyList<FunctionInfo>.Builder();
+        var result = new ComparableReadOnlyList<FlatFunctionDeclaration>.Builder();
         foreach(var info in infos)
         {
-            if (info.Name == "main")
+            if (info.Name.Text == "main")
                 result.Add(info);
         }
         return result.Build();

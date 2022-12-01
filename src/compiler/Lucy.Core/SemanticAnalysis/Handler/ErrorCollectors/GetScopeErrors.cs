@@ -17,8 +17,8 @@ public static class GetScopeErrorsHandler
             var candidates = db.GetFunctionCandidatesFromFunctionCall(functionCallNodeId);
             if (candidates.Count == 0)
             {
-                var functionCallInfo = db.GetFunctionCallInfo(functionCallNodeId);
-                result.Add(new ErrorWithNodeId(functionCallInfo.NameTokenNodeId, "Could not find a function called: " + functionCallInfo.Name));
+                var functionCallInfo = db.GetFlatFunctionCall(functionCallNodeId);
+                result.Add(new ErrorWithNodeId(functionCallInfo.Name.NodeId, "Could not find a function called: " + functionCallInfo.Name.Text));
             }
         }
 

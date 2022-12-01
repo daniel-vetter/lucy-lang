@@ -5,7 +5,7 @@ namespace Lucy.Core.SemanticAnalysis.Handler
 {
     public record TypeInfo(INodeId<SyntaxTreeNode>? TypeDeclarationNodeId, string Name);
     
-    public static class PredefinedTypes
+    public static class KnownTypes
     {
         public static TypeInfo Void { get; } = new(null, "void");
         public static TypeInfo Int32 { get; } = new(null, "int");
@@ -21,9 +21,9 @@ namespace Lucy.Core.SemanticAnalysis.Handler
 
             return node.TypeName.Token.Text switch
             {
-                "int" => PredefinedTypes.Int32,
-                "string" => PredefinedTypes.String,
-                "void" => PredefinedTypes.Void,
+                "int" => KnownTypes.Int32,
+                "string" => KnownTypes.String,
+                "void" => KnownTypes.Void,
                 _ => null
             };
         }

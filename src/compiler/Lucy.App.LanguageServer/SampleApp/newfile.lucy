@@ -1,6 +1,6 @@
 import "helper"
 import "main"
 
-fun thisIsAFunction(): void {
+fun thisIsAFunction(): string {
     test()
 }

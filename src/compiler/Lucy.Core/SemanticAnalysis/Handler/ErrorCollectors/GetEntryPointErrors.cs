@@ -24,7 +24,7 @@ public static class GetEntryPointErrorsHandler
         {
             foreach (var entryPoint in entryPoints)
             {
-                var node = db.GetNodeById(entryPoint.DeclarationNodeId);
+                var node = db.GetNodeById(entryPoint.NodeId);
                 var nameNode = node.FunctionName.Token;
 
                 result.Add(new ErrorWithRange(nameNode.NodeId.DocumentPath, db.GetRangeFromNode(nameNode), "More than one entry point was found. Please ensure the solution has only one 'main' function."));

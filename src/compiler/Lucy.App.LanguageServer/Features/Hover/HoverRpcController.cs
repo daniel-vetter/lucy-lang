@@ -31,7 +31,7 @@ internal class HoverRpcController
 
         while (true)
         {
-            if (node.NodeId.IsRoot)
+            if (node == null)
                 break;
 
             if (node is TypeReferenceSyntaxNode typeReferenceSyntaxNode)
@@ -42,8 +42,14 @@ internal class HoverRpcController
                     : typeInfo.Name;
                 break;
             }
+
+            if (node is ExpressionSyntaxNode expressionSyntaxNode)
+            {
+                tooltip = _currentWorkspace.Analysis.GetExpressionType(expressionSyntaxNode.NodeId)?.Name ?? "Unknown type";
+                break;
+            }
             
-            node = _currentWorkspace.Analysis.GetNodeById(node.NodeId.Parent);
+            node = _currentWorkspace.Analysis.GetParentNode(node.NodeId);
         }
 
         return new RpcHover

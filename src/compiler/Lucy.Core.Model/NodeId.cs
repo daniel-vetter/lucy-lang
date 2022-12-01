@@ -7,9 +7,6 @@ public interface INodeId<out T> where T : SyntaxTreeNode
 {
     public string DocumentPath { get; }
     public string NodePath { get; }
-
-    public bool IsRoot { get; }
-    public INodeId<SyntaxTreeNode> Parent { get; }
 }
 
 // ReSharper disable once UnusedTypeParameter
@@ -17,9 +14,6 @@ public interface IBuilderNodeId<out T>  where T : SyntaxTreeNodeBuilder
 {
     public string DocumentPath { get; }
     public string NodePath { get; }
-
-    public bool IsRoot { get; }
-    public INodeId<SyntaxTreeNode> Parent { get; }
 }
 
 public class NodeId<T> : NodeId, INodeId<T> where T: SyntaxTreeNode
@@ -68,19 +62,7 @@ public class NodeId : IHashable
     }
 
     public override string ToString() => _str;
-
-    public bool IsRoot => NodePath.IndexOf('.') == -1;
-    public INodeId<SyntaxTreeNode> Parent
-    {
-        get
-        {
-            var lastIndex = NodePath.LastIndexOf('.');
-            if (lastIndex == -1)
-                throw new Exception("Current node is already the root node id.");
-            return new NodeId<SyntaxTreeNode>(DocumentPath, NodePath[..lastIndex]);
-        }
-    }
-
+    
     public static bool operator ==(NodeId? id1, NodeId? id2)
     {
         if (ReferenceEquals(id1, id2)) return true;

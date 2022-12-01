@@ -5,17 +5,14 @@ import "newfile"
 extern cdecl "kernel32.dll" "printf_" fun printf(): void
 extern cdecl "kernel32.dll" "allocConsole" fun allocConsole(): void
 
-
+extern cdecl "kernel32.dll" "GetStdHandle" fun GetStdHandle(nStdHandle: int): int
+extern cdecl "kernel32.dll" "WriteConsoleA" fun WriteConsoleA(hConsoleOutput: int, buffer: string, nNumberOfCharsToWrite: int, lpNumberOfCharsWritten: int, lpReserved: int): int
 
 fun main(num: int): int {
-    printf()
-          
-   fun test2(): string { 
-    
-   }      
 
-    test2() 
-    test()
-    thisIsAFunction()
+    var handle = GetStdHandle(-11)
+    WriteConsoleA(handle, "Hello World", 11, 0, 0)
+
 }
+
 
