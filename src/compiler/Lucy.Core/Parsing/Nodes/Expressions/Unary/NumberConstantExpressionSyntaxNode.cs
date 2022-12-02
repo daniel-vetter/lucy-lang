@@ -13,11 +13,11 @@ public static class NumberConstantExpressionSyntaxNodeParser
         var start = code.Position;
         var leadingTrivia = TriviaNodeParser.ReadList(code);
 
-        var negativ = false;
+        var negative = false;
         if (code.Peek() == '-')
         {
             code.Read(1);
-            negativ = true;
+            negative = true;
         }
 
         if (!CountDigits(code, out var beforeDigitCount))
@@ -29,17 +29,17 @@ public static class NumberConstantExpressionSyntaxNodeParser
 
         if (code.Peek(beforeDigitCount) != '.')
         {
-            result = CreateNode(code, leadingTrivia, beforeDigitCount, negativ);
+            result = CreateNode(code, leadingTrivia, beforeDigitCount, negative);
             return true;
         }
             
         if (!CountDigits(code, out var afterDigitCount))
         {
-            result = CreateNode(code, leadingTrivia, beforeDigitCount, negativ);
+            result = CreateNode(code, leadingTrivia, beforeDigitCount, negative);
             return true;
         }
 
-        result = CreateNode(code, leadingTrivia, beforeDigitCount + 1 + afterDigitCount, negativ);
+        result = CreateNode(code, leadingTrivia, beforeDigitCount + 1 + afterDigitCount, negative);
         return true;
     }
 
@@ -48,7 +48,7 @@ public static class NumberConstantExpressionSyntaxNodeParser
         var str = code.Read(count);
         var num = double.Parse(str, CultureInfo.InvariantCulture);
         if (negative) num *= -1;
-        var token = new SyntaxElementBuilder(leadingTrivia, new TokenNodeBuilder(str));
+        var token = new SyntaxElementBuilder(leadingTrivia, new TokenNodeBuilder((negative ? "-" : "") + str));
         return new NumberConstantExpressionSyntaxNodeBuilder(num, token);
     }
 
