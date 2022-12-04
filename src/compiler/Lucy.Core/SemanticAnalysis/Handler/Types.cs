@@ -27,5 +27,11 @@ namespace Lucy.Core.SemanticAnalysis.Handler
                 _ => null
             };
         }
+
+        [GenerateDbExtension] ///<see cref="GetTypeInfoFromVariableReferenceEx.GetTypeInfoFromVariableReference" />
+        public static TypeInfo? GetTypeInfoFromVariableReference(IDb db, INodeId<VariableReferenceExpressionSyntaxNode> nodeId)
+        {
+            return null;
+        }
     }
 }

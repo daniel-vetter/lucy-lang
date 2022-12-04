@@ -4,21 +4,24 @@ using System.Collections.Generic;
 
 namespace Lucy.Core.Parsing.Nodes.Statements.FunctionDeclaration;
 
-public class FunctionDeclarationParameterSyntaxNodeParser 
+public static class FunctionDeclarationParameterSyntaxNodeParser 
 {
     public static List<FunctionDeclarationParameterSyntaxNodeBuilder> ReadList(Code code)
     {
         var l = new List<FunctionDeclarationParameterSyntaxNodeBuilder>();
         while (true)
         {
-            if (!VariableNameWithTypeDeclarationSyntaxNodeParser.Read(code, out var variableNameWithTypeDeclaration))
+            if (!SyntaxElementParser.TryReadIdentifier(code, out var variableName))
                 break;
 
-            SyntaxElementParser.TryReadExact(code, ",", out var seperator);
+            if (!TypeAnnotationSyntaxNodeParser.TryRead(code, out var variableType))
+                variableType = TypeAnnotationSyntaxNodeParser.Missing("Parameter type expected");
+            
+            SyntaxElementParser.TryReadExact(code, ",", out var separator);
 
-            l.Add(new FunctionDeclarationParameterSyntaxNodeBuilder(variableNameWithTypeDeclaration, seperator));
+            l.Add(new FunctionDeclarationParameterSyntaxNodeBuilder(variableName, variableType, separator));
 
-            if (seperator == null)
+            if (separator == null)
                 break;
         }
 

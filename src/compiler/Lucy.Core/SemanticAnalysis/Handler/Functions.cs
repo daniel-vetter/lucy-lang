@@ -8,10 +8,10 @@ namespace Lucy.Core.SemanticAnalysis.Handler;
 
 public record FlatIdentifier(string Text, INodeId<TokenNode> NodeId);
 public record FlatFunctionDeclaration(INodeId<FunctionDeclarationStatementSyntaxNode> NodeId, FlatIdentifier Name, ComparableReadOnlyList<FlatFunctionDeclarationParameter> Parameters, INodeId<TypeReferenceSyntaxNode> ReturnType);
-public record FlatFunctionDeclarationParameter(INodeId<FunctionDeclarationParameterSyntaxNode> NodeId, FlatIdentifier Name, FlatVariableDeclaration VariableDeclaration);
+public record FlatFunctionDeclarationParameter(INodeId<FunctionDeclarationParameterSyntaxNode> NodeId, FlatIdentifier Name, INodeId<TypeReferenceSyntaxNode> TypeReference);
 
 public record FlatFunctionCall(INodeId<FunctionCallExpressionSyntaxNode> NodeId, FlatIdentifier Name, ComparableReadOnlyList<INodeId<ExpressionSyntaxNode>> Arguments);
-public record FlatVariableDeclaration(INodeId<VariableNameWithTypeDeclarationSyntaxNode> NodeId, INodeId<TypeReferenceSyntaxNode> TypeReferenceNodeId, FlatIdentifier Name);
+public record FlatFunctionParameterDeclaration(INodeId<FunctionDeclarationParameterSyntaxNode> NodeId, INodeId<TypeReferenceSyntaxNode> TypeReferenceNodeId, FlatIdentifier Name);
 public record FunctionParameterInfo(string Name, INodeId<TokenNode> NameTokenNodeId, TypeReferenceInfo TypeReferenceInfo);
 public record TypeReferenceInfo(INodeId<TypeReferenceSyntaxNode> TypeReferenceNodeId, TypeInfo? ResolvedType);
 
@@ -46,17 +46,10 @@ public static class FunctionsHandler
             .Select(x => new FlatFunctionDeclarationParameter(
                 x.NodeId, 
                 new FlatIdentifier(
-                    x.VariableDeclaration.VariableName.Token.Text,
-                    x.VariableDeclaration.VariableName.Token.NodeId
+                    x.VariableName.Token.Text,
+                    x.VariableName.Token.NodeId
                 ),
-                new FlatVariableDeclaration(
-                    x.VariableDeclaration.NodeId,
-                    x.VariableDeclaration.TypeReference.NodeId,
-                    new FlatIdentifier(
-                        x.VariableDeclaration.VariableName.Token.Text, 
-                        x.VariableDeclaration.VariableName.Token.NodeId
-                    )
-                )
+                x.VariableType.TypeReference.NodeId
             )).ToComparableReadOnlyList();
 
         return new FlatFunctionDeclaration(
@@ -66,7 +59,7 @@ public static class FunctionsHandler
                 node.FunctionName.Token.NodeId
             ),
             parameters,
-            node.ReturnType.NodeId
+            node.ReturnType.TypeReference.NodeId
         );
     }
 
@@ -82,52 +75,87 @@ public static class FunctionsHandler
         return result.Build();
     }
 
-    [GenerateDbExtension] ///<see cref="GetFunctionCandidatesFromFunctionCallEx.GetFunctionCandidatesFromFunctionCall"/>
-    public static ComparableReadOnlyList<FlatFunctionDeclaration> GetFunctionCandidatesFromFunctionCall(IDb db, INodeId<FunctionCallExpressionSyntaxNode> nodeId)
+    [GenerateDbExtension] ///<see cref="GetAvailableFunctionsInScopeEx.GetAvailableFunctionsInScope" />
+    public static ComparableReadOnlyList<FlatFunctionDeclaration> GetAvailableFunctionsInScope(IDb db, INodeId<SyntaxTreeNode> scopeTarget)
     {
+        var currentNode = scopeTarget;
         var result = new ComparableReadOnlyList<FlatFunctionDeclaration>.Builder();
-        var functionCallInfo = db.GetFlatFunctionCall(nodeId);
-        INodeId<SyntaxTreeNode> currentNode = nodeId;
-
         while (true)
         {
-            var parent = db.GetNearestParentNodeOfType<StatementListSyntaxNode>(currentNode);
-            if (parent == null)
+            var parentId = db.GetParentNodeIdOfType<StatementListSyntaxNode>(currentNode);
+            if (parentId == null)
                 break;
-
-            var functions = db.GetFunctionsInStatementList(parent);
-            result.AddRange(functions.Where(x => x.Name.Text == functionCallInfo.Name.Text));
-
-            currentNode = parent;
+            
+            result.AddRange(db.GetFunctionsInStatementList(parentId));
+            currentNode = parentId;
         }
 
-        foreach (var import in db.GetImports(nodeId.DocumentPath).Valid)
+        foreach (var import in db.GetImports(scopeTarget.DocumentPath).Valid)
         {
-            result.AddRange(db.GetFunctionsInDocument(import.Path).Where(x => x.Name.Text == functionCallInfo.Name.Text));
+            result.AddRange(db.GetFunctionsInDocument(import.Path));
         }
-
         return result.Build();
     }
 
-    [GenerateDbExtension] ///<see cref="GetMatchingFunctionFromFunctionCallEx.GetMatchingFunctionFromFunctionCall" />
-    public static FlatFunctionDeclaration? GetMatchingFunctionFromFunctionCall(IDb db, INodeId<FunctionCallExpressionSyntaxNode> functionCallExpressionNodeId)
+    [GenerateDbExtension] ///<see cref="GetFunctionsWithNameInScopeEx.GetFunctionsWithNameInScope" />
+    public static ComparableReadOnlyList<FlatFunctionDeclaration> GetFunctionsWithNameInScope(IDb db, INodeId<SyntaxTreeNode> scopeTarget, string name)
+    {
+        return db.GetAvailableFunctionsInScope(scopeTarget)
+            .Where(x => x.Name.Text == name)
+            .ToComparableReadOnlyList();
+    }
+
+
+    [GenerateDbExtension] ///<see cref="GetFunctionCandidatesFromFunctionCallEx.GetFunctionCandidatesFromFunctionCall"/>
+    public static ComparableReadOnlyList<FlatFunctionDeclaration> GetFunctionCandidatesFromFunctionCall(IDb db, INodeId<FunctionCallExpressionSyntaxNode> nodeId)
+    {
+        var functionCallInfo = db.GetFlatFunctionCall(nodeId);
+        return db.GetFunctionsWithNameInScope(functionCallInfo.NodeId, functionCallInfo.Name.Text);
+    }
+
+    [GenerateDbExtension] ///<see cref="GetAllMatchingFunctionsFromFunctionCallEx.GetAllMatchingFunctionsFromFunctionCall" />
+    public static ComparableReadOnlyList<FlatFunctionDeclaration> GetAllMatchingFunctionsFromFunctionCall(IDb db, INodeId<FunctionCallExpressionSyntaxNode> functionCallExpressionNodeId)
     {
         var functionCandidates = db.GetFunctionCandidatesFromFunctionCall(functionCallExpressionNodeId);
 
         var argumentTypes = db.GetFunctionArgumentTypes(functionCallExpressionNodeId);
         if (argumentTypes.Any(x => x is null))
-            return null;
+            return new ComparableReadOnlyList<FlatFunctionDeclaration>();
 
+        var result = new ComparableReadOnlyList<FlatFunctionDeclaration>.Builder();
         foreach (var flatFunctionDeclaration in functionCandidates)
         {
             var functionParameterTypes = db.GetFunctionParameterTypes(flatFunctionDeclaration.NodeId);
             if (functionParameterTypes.Any(x => x is null))
                 continue;
 
-            return flatFunctionDeclaration;
+            if (functionParameterTypes.Count  != argumentTypes.Count)
+                continue;
+
+            var match = true;
+            for (var i = 0; i < argumentTypes.Count; i++)
+            {
+                if (argumentTypes[i] != functionParameterTypes[i])
+                {
+                    match = false;
+                    break;
+                }
+            }
+
+            if (!match)
+                continue;
+            
+            result.Add(flatFunctionDeclaration);
         }
 
-        return null;
+        return result.Build();
+    }
+
+    [GenerateDbExtension] ///<see cref="GetBestMatchingFunctionsFromFunctionCallEx.GetBestMatchingFunctionsFromFunctionCall" />
+    public static FlatFunctionDeclaration? GetBestMatchingFunctionsFromFunctionCall(IDb db, INodeId<FunctionCallExpressionSyntaxNode> functionCallExpressionNodeId)
+    {
+        var all = db.GetAllMatchingFunctionsFromFunctionCall(functionCallExpressionNodeId);
+        return all.Count != 1 ? null : all[0];
     }
 
     [GenerateDbExtension] ///<see cref="GetFunctionParameterTypesEx.GetFunctionParameterTypes" />
@@ -137,8 +165,7 @@ public static class FunctionsHandler
         var parameterTypes = new ComparableReadOnlyList<TypeInfo?>.Builder();
         foreach (var parameter in flat.Parameters)
         {
-            var typeInfo = db.GetTypeInfoFromTypeReferenceId(parameter.VariableDeclaration.TypeReferenceNodeId);
-            parameterTypes.Add(typeInfo);
+            parameterTypes.Add(db.GetTypeInfoFromTypeReferenceId(parameter.TypeReference));
         }
         return parameterTypes.Build();
     }
@@ -169,14 +196,15 @@ public static class FunctionsHandler
             case NumberConstantExpressionSyntaxNode:
                 return KnownTypes.Int32;
             case FunctionCallExpressionSyntaxNode fc:
-                var functionDeclaration = db.GetMatchingFunctionFromFunctionCall(fc.NodeId);
+                var functionDeclaration = db.GetBestMatchingFunctionsFromFunctionCall(fc.NodeId);
                 if (functionDeclaration == null)
                     return null;
 
                 return db.GetTypeInfoFromTypeReferenceId(functionDeclaration.ReturnType);
-                
+            case VariableReferenceExpressionSyntaxNode vr:
+                return db.GetTypeInfoFromVariableReference(vr.NodeId);
             default:
-                throw new ArgumentOutOfRangeException(nameof(node));
+                throw new ArgumentOutOfRangeException(nameof(node), "Can not resolve type of expression node " + node.GetType().Name + " because it is not a known type.");
         }
     }
 }

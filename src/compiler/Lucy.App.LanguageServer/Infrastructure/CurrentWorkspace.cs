@@ -35,7 +35,7 @@ public class CurrentWorkspace
         foreach(var file in files)
             ws.AddFile(file.ToString().Substring(rootPathLength).Replace("\\", "/"), await _fileSystem.ReadAllText(file));
 
-        _semanticDatabase = new SemanticDatabase(ws, "C:\\language-server-output");
+        _semanticDatabase = new SemanticDatabase(ws);
         _workspace = ws;
         _rootPath = path;
     }

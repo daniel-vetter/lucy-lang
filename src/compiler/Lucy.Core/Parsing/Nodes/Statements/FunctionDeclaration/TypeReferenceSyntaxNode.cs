@@ -4,7 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Lucy.Core.Parsing.Nodes.Statements.FunctionDeclaration;
 
-public class TypeReferenceSyntaxNodeParser
+public static class TypeReferenceSyntaxNodeParser
 {
     public static bool TryRead(Code code, [NotNullWhen(true)] out TypeReferenceSyntaxNodeBuilder? result)
     {
@@ -18,7 +18,7 @@ public class TypeReferenceSyntaxNodeParser
         return true;
     }
 
-    internal static TypeReferenceSyntaxNodeBuilder Synthesize(string? errorMessage = null)
+    internal static TypeReferenceSyntaxNodeBuilder Missing(string? errorMessage = null)
     {
         return new TypeReferenceSyntaxNodeBuilder(SyntaxElementParser.Missing(errorMessage));
     }

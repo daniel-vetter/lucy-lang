@@ -27,7 +27,8 @@ internal class HoverRpcController
         if (node == null)
             return new RpcHover();
 
-        string? tooltip = null;
+        var tooltip = "NodeId: " + node.NodeId + "\\\n";
+        tooltip += "Position: " + input.Position + ", " + position.Position + "\\\n";
 
         while (true)
         {
@@ -37,15 +38,15 @@ internal class HoverRpcController
             if (node is TypeReferenceSyntaxNode typeReferenceSyntaxNode)
             {
                 var typeInfo = _currentWorkspace.Analysis.GetTypeInfoFromTypeReferenceId(typeReferenceSyntaxNode.NodeId);
-                tooltip = typeInfo == null 
-                    ? "Unknown type" 
-                    : typeInfo.Name;
+                tooltip += typeInfo == null
+                    ? "Type: Unknown type\\\n"
+                    : "Type: " + typeInfo.Name + "\\\n";
                 break;
             }
 
             if (node is ExpressionSyntaxNode expressionSyntaxNode)
             {
-                tooltip = _currentWorkspace.Analysis.GetExpressionType(expressionSyntaxNode.NodeId)?.Name ?? "Unknown type";
+                tooltip += "Type: " + (_currentWorkspace.Analysis.GetExpressionType(expressionSyntaxNode.NodeId)?.Name ?? "Unknown type") + "\\\n ";
                 break;
             }
             

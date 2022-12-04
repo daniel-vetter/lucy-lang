@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading.Tasks;
 using Lucy.App.LanguageServer.Features.Diagnostics;
@@ -51,6 +52,8 @@ public class ServerLifecycleRpcController
         };
 
         result.Capabilities.DocumentLinkProvider = new RpcDocumentLinkOptions();
+        result.Capabilities.CompletionProvider = new RpcCompletionOptions();
+        result.Capabilities.DefinitionProvider = true;
 
         //Enable signature help
         result.Capabilities.SignatureHelpProvider = new RpcSignatureHelpOptions

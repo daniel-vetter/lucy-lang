@@ -23,19 +23,16 @@ public static class FunctionDeclarationStatementSyntaxNodeParser
         if (!SyntaxElementParser.TryReadIdentifier(code, out var functionName))
             functionName = SyntaxElementParser.Missing("Expected function name");
 
-        if (!SyntaxElementParser.TryReadExact(code, "(", out var openBraket))
-            openBraket = SyntaxElementParser.Missing("Expected '('");
+        if (!SyntaxElementParser.TryReadExact(code, "(", out var openBracket))
+            openBracket = SyntaxElementParser.Missing("Expected '('");
 
         var parameterList = FunctionDeclarationParameterSyntaxNodeParser.ReadList(code);
 
-        if (!SyntaxElementParser.TryReadExact(code, ")", out var closeBraket))
-            closeBraket = SyntaxElementParser.Missing("Expected ')'");
-
-        if (!SyntaxElementParser.TryReadExact(code, ":", out var returnTypeSeperator))
-            returnTypeSeperator = SyntaxElementParser.Missing("Expected ':'");
-
-        if (!TypeReferenceSyntaxNodeParser.TryRead(code, out var returnType))
-            returnType = TypeReferenceSyntaxNodeParser.Synthesize("Expected return type");
+        if (!SyntaxElementParser.TryReadExact(code, ")", out var closeBracket))
+            closeBracket = SyntaxElementParser.Missing("Expected ')'");
+        
+        if (!TypeAnnotationSyntaxNodeParser.TryRead(code, out var returnType))
+            returnType = TypeAnnotationSyntaxNodeParser.Missing("Expected return type");
 
         StatementListSyntaxNodeParser.TryReadStatementBlock(code, out var body);
 
@@ -45,10 +42,9 @@ public static class FunctionDeclarationStatementSyntaxNodeParser
             externFunctionName: functionNameToken,
             funKeyword: funKeyword,
             functionName: functionName,
-            openBraket: openBraket,
+            openBraket: openBracket,
             parameterList: parameterList,
-            closeBraket: closeBraket,
-            returnTypeSeperator: returnTypeSeperator,
+            closeBraket: closeBracket,
             returnType: returnType,
             body: body
         );

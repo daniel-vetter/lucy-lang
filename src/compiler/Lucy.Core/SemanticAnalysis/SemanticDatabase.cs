@@ -4,7 +4,6 @@ using Lucy.Core.SemanticAnalysis.Infrastructure;
 using Lucy.Core.SemanticAnalysis.Inputs;
 using System;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
 
 namespace Lucy.Core.SemanticAnalysis;
@@ -43,11 +42,6 @@ public class SemanticDatabase : IDb, IDisposable
             exporterDetailed.Export(log);
             exporterSummary.Export(log);
             sw2.Stop();
-
-            File.WriteAllText("C:\\temp\\summary.txt", $"""
-                    Log creation: {sw1.Elapsed}
-                    Graph creation: {sw2.Elapsed}
-                    """);
         };
     }
 

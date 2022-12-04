@@ -10,9 +10,1429 @@ extern cdecl "kernel32.dll" "WriteConsoleA" fun WriteConsoleA(hConsoleOutput: in
 
 fun main(num: int): int {
 
+
     var handle = GetStdHandle(-11)
     WriteConsoleA(handle, "Hello World", 11, 0, 0)
 
+
+
+    fun testInInnerScope(): int { }
+    fun tes345t(): void { }
+     
+    
+
+    test()
+    printf("dwad", 12)
+    
+    thisIsAFunction()
 }
 
+
+fun test2Blub(): void {
+     
+}
+
+fun method(): void {
+    
+}
+
+fun main(num: int): int {
+
+
+    var handle = GetStdHandle(-11)
+    WriteConsoleA(handle, "Hello World", 11, 0, 0)
+
+
+
+    fun testInInnerScope(): int { }
+    fun tes345t(): void { }
+     
+    
+
+    test()
+    printf("dwad", 12)
+    
+    thisIsAFunction()
+}
+
+
+fun test2Blub(): void {
+     
+}
+
+fun method(): void {
+    
+}
+fun main(num: int): int {
+
+
+    var handle = GetStdHandle(-11)
+    WriteConsoleA(handle, "Hello World", 11, 0, 0)
+
+
+
+    fun testInInnerScope(): int { }
+    fun tes345t(): void { }
+     
+    
+
+    test()
+    printf("dwad", 12)
+    
+    thisIsAFunction()
+}
+
+
+fun test2Blub(): void {
+     
+}
+
+fun method(): void {
+    
+}
+fun main(num: int): int {
+
+
+    var handle = GetStdHandle(-11)
+    WriteConsoleA(handle, "Hello World", 11, 0, 0)
+
+
+
+    fun testInInnerScope(): int { }
+    fun tes345t(): void { }
+     
+    
+
+    test()
+    printf("dwad", 12)
+    
+    thisIsAFunction()
+}
+
+
+fun test2Blub(): void {
+     
+}
+
+fun method(): void {
+    
+}
+fun main(num: int): int {
+
+
+    var handle = GetStdHandle(-11)
+    WriteConsoleA(handle, "Hello World", 11, 0, 0)
+
+
+
+    fun testInInnerScope(): int { }
+    fun tes345t(): void { }
+     
+    
+
+    test()
+    printf("dwad", 12)
+    
+    thisIsAFunction()
+}
+
+
+fun test2Blub(): void {
+     
+}
+
+fun method(): void {
+    
+}
+fun main(num: int): int {
+
+
+    var handle = GetStdHandle(-11)
+    WriteConsoleA(handle, "Hello World", 11, 0, 0)
+
+
+
+    fun testInInnerScope(): int { }
+    fun tes345t(): void { }
+     
+    
+
+    test()
+    printf("dwad", 12)
+    
+    thisIsAFunction()
+}
+
+
+fun test2Blub(): void {
+     
+}
+
+fun method(): void {
+    
+}
+fun main(num: int): int {
+
+
+    var handle = GetStdHandle(-11)
+    WriteConsoleA(handle, "Hello World", 11, 0, 0)
+
+
+
+    fun testInInnerScope(): int { }
+    fun tes345t(): void { }
+     
+    
+
+    test()
+    printf("dwad", 12)
+    
+    thisIsAFunction()
+}
+
+
+fun test2Blub(): void {
+     
+}
+
+fun method(): void {
+    
+}
+fun main(num: int): int {
+
+
+    var handle = GetStdHandle(-11)
+    WriteConsoleA(handle, "Hello World", 11, 0, 0)
+
+
+
+    fun testInInnerScope(): int { }
+    fun tes345t(): void { }
+     
+    
+
+    test()
+    printf("dwad", 12)
+    
+    thisIsAFunction()
+}
+
+
+fun test2Blub(): void {
+     
+}
+
+fun method(): void {
+    
+}
+fun main(num: int): int {
+
+
+    var handle = GetStdHandle(-11)
+    WriteConsoleA(handle, "Hello World", 11, 0, 0)
+
+
+
+    fun testInInnerScope(): int { }
+    fun tes345t(): void { }
+     
+    
+
+    test()
+    printf("dwad", 12)
+    
+    thisIsAFunction()
+}
+
+
+fun test2Blub(): void {
+     
+}
+
+fun method(): void {
+    
+}
+fun main(num: int): int {
+
+
+    var handle = GetStdHandle(-11)
+    WriteConsoleA(handle, "Hello World", 11, 0, 0)
+
+
+
+    fun testInInnerScope(): int { }
+    fun tes345t(): void { }
+     
+    
+
+    test()
+    printf("dwad", 12)
+    
+    thisIsAFunction()
+}
+
+
+fun test2Blub(): void {
+     
+}
+
+fun method(): void {
+    
+}
+fun main(num: int): int {
+
+
+    var handle = GetStdHandle(-11)
+    WriteConsoleA(handle, "Hello World", 11, 0, 0)
+
+
+
+    fun testInInnerScope(): int { }
+    fun tes345t(): void { }
+     
+    
+
+    test()
+    printf("dwad", 12)
+    
+    thisIsAFunction()
+}
+
+
+fun test2Blub(): void {
+     
+}
+
+fun method(): void {
+    
+}
+fun main(num: int): int {
+
+
+    var handle = GetStdHandle(-11)
+    WriteConsoleA(handle, "Hello World", 11, 0, 0)
+
+
+
+    fun testInInnerScope(): int { }
+    fun tes345t(): void { }
+     
+    
+
+    test()
+    printf("dwad", 12)
+    
+    thisIsAFunction()
+}
+
+
+fun test2Blub(): void {
+     
+}
+
+fun method(): void {
+    
+}
+fun main(num: int): int {
+
+
+    var handle = GetStdHandle(-11)
+    WriteConsoleA(handle, "Hello World", 11, 0, 0)
+
+
+
+    fun testInInnerScope(): int { }
+    fun tes345t(): void { }
+     
+    
+
+    test()
+    printf("dwad", 12)
+    
+    thisIsAFunction()
+}
+
+
+fun test2Blub(): void {
+     
+}
+
+fun method(): void {
+    
+}
+fun main(num: int): int {
+
+
+    var handle = GetStdHandle(-11)
+    WriteConsoleA(handle, "Hello World", 11, 0, 0)
+
+
+
+    fun testInInnerScope(): int { }
+    fun tes345t(): void { }
+     
+    
+
+    test()
+    printf("dwad", 12)
+    
+    thisIsAFunction()
+}
+
+
+fun test2Blub(): void {
+     
+}
+
+fun method(): void {
+    
+}
+fun main(num: int): int {
+
+
+    var handle = GetStdHandle(-11)
+    WriteConsoleA(handle, "Hello World", 11, 0, 0)
+
+
+
+    fun testInInnerScope(): int { }
+    fun tes345t(): void { }
+     
+    
+
+    test()
+    printf("dwad", 12)
+    
+    thisIsAFunction()
+}
+
+
+fun test2Blub(): void {
+     
+}
+
+fun method(): void {
+    
+}
+fun main(num: int): int {
+
+
+    var handle = GetStdHandle(-11)
+    WriteConsoleA(handle, "Hello World", 11, 0, 0)
+
+
+
+    fun testInInnerScope(): int { }
+    fun tes345t(): void { }
+     
+    
+
+    test()
+    printf("dwad", 12)
+    
+    thisIsAFunction()
+}
+
+
+fun test2Blub(): void {
+     
+}
+
+fun method(): void {
+    
+}
+fun main(num: int): int {
+
+
+    var handle = GetStdHandle(-11)
+    WriteConsoleA(handle, "Hello World", 11, 0, 0)
+
+
+
+    fun testInInnerScope(): int { }
+    fun tes345t(): void { }
+     
+ 
+
+    test()
+    printf("dwad", 12)
+    
+    thisIsAFunction()
+}
+
+
+fun test2Blub(): void {
+     
+}
+
+fun method(): void {
+    
+}
+
+fun main(num: int): int {
+
+
+    var handle = GetStdHandle(-11)
+    WriteConsoleA(handle, "Hello World", 11, 0, 0)
+
+
+
+    fun testInInnerScope(): int { }
+    fun tes345t(): void { }
+     
+    
+
+    test()
+    printf("dwad", 12)
+    
+    thisIsAFunction()
+}
+
+
+fun test2Blub(): void {
+     
+}
+
+fun method(): void {
+    
+}
+
+fun main(num: int): int {
+
+
+    var handle = GetStdHandle(-11)
+    WriteConsoleA(handle, "Hello World", 11, 0, 0)
+
+
+
+    fun testInInnerScope(): int { }
+    fun tes345t(): void { }
+     
+    
+
+    test()
+    printf("dwad", 12)
+    
+    thisIsAFunction()
+}
+
+
+fun test2Blub(): void {
+     
+}
+
+fun method(): void {
+    
+}
+fun main(num: int): int {
+
+
+    var handle = GetStdHandle(-11)
+    WriteConsoleA(handle, "Hello World", 11, 0, 0)
+
+
+
+    fun testInInnerScope(): int { }
+    fun tes345t(): void { }
+     
+    
+
+    test()
+    printf("dwad", 12)
+    
+    thisIsAFunction()
+}
+
+
+fun test2Blub(): void {
+     
+}
+
+fun method(): void {
+    
+}
+fun main(num: int): int {
+
+
+    var handle = GetStdHandle(-11)
+    WriteConsoleA(handle, "Hello World", 11, 0, 0)
+
+
+
+    fun testInInnerScope(): int { }
+    fun tes345t(): void { }
+     
+    
+
+    test()
+    printf("dwad", 12)
+    
+    thisIsAFunction()
+}
+
+
+fun test2Blub(): void {
+     
+}
+
+fun method(): void {
+    
+}
+fun main(num: int): int {
+
+
+    var handle = GetStdHandle(-11)
+    WriteConsoleA(handle, "Hello World", 11, 0, 0)
+
+
+
+    fun testInInnerScope(): int { }
+    fun tes345t(): void { }
+     
+    
+
+    test()
+    printf("dwad", 12)
+    
+    thisIsAFunction()
+}
+
+
+fun test2Blub(): void {
+     
+}
+
+fun method(): void {
+    
+}
+fun main(num: int): int {
+
+
+    var handle = GetStdHandle(-11)
+    WriteConsoleA(handle, "Hello World", 11, 0, 0)
+
+
+
+    fun testInInnerScope(): int { }
+    fun tes345t(): void { }
+     
+    
+
+    test()
+    printf("dwad", 12)
+    
+    thisIsAFunction()
+}
+
+
+fun test2Blub(): void {
+     
+}
+
+fun method(): void {
+    
+}
+fun main(num: int): int {
+
+
+    var handle = GetStdHandle(-11)
+    WriteConsoleA(handle, "Hello World", 11, 0, 0)
+
+
+
+    fun testInInnerScope(): int { }
+    fun tes345t(): void { }
+     
+    
+
+    test()
+    printf("dwad", 12)
+    
+    thisIsAFunction()
+}
+
+
+fun test2Blub(): void {
+     
+}
+
+fun method(): void {
+    
+}
+fun main(num: int): int {
+
+
+    var handle = GetStdHandle(-11)
+    WriteConsoleA(handle, "Hello World", 11, 0, 0)
+
+
+
+    fun testInInnerScope(): int { }
+    fun tes345t(): void { }
+     
+    
+
+    test()
+    printf("dwad", 12)
+    
+    thisIsAFunction()
+}
+
+
+fun test2Blub(): void {
+     
+}
+
+fun method(): void {
+    
+}
+fun main(num: int): int {
+
+
+    var handle = GetStdHandle(-11)
+    WriteConsoleA(handle, "Hello World", 11, 0, 0)
+
+
+
+    fun testInInnerScope(): int { }
+    fun tes345t(): void { }
+     
+    
+
+    test()
+    printf("dwad", 12)
+    
+    thisIsAFunction()
+}
+
+
+fun test2Blub(): void {
+     
+}
+
+fun method(): void {
+    
+}
+fun main(num: int): int {
+
+
+    var handle = GetStdHandle(-11)
+    WriteConsoleA(handle, "Hello World", 11, 0, 0)
+
+
+
+    fun testInInnerScope(): int { }
+    fun tes345t(): void { }
+     
+    
+
+    test()
+    printf("dwad", 12)
+    
+    thisIsAFunction()
+}
+
+
+fun test2Blub(): void {
+     
+}
+
+fun method(): void {
+    
+}
+fun main(num: int): int {
+
+
+    var handle = GetStdHandle(-11)
+    WriteConsoleA(handle, "Hello World", 11, 0, 0)
+
+
+
+    fun testInInnerScope(): int { }
+    fun tes345t(): void { }
+     
+    
+
+    test()
+    printf("dwad", 12)
+    
+    thisIsAFunction()
+}
+
+
+fun test2Blub(): void {
+     
+}
+
+fun method(): void {
+    
+}
+fun main(num: int): int {
+
+
+    var handle = GetStdHandle(-11)
+    WriteConsoleA(handle, "Hello World", 11, 0, 0)
+
+
+
+    fun testInInnerScope(): int { }
+    fun tes345t(): void { }
+     
+    
+
+    test()
+    printf("dwad", 12)
+    
+    thisIsAFunction()
+}
+
+
+fun test2Blub(): void {
+     
+}
+
+fun method(): void {
+    
+}
+fun main(num: int): int {
+
+
+    var handle = GetStdHandle(-11)
+    WriteConsoleA(handle, "Hello World", 11, 0, 0)
+
+
+
+    fun testInInnerScope(): int { }
+    fun tes345t(): void { }
+     
+    
+
+    test()
+    printf("dwad", 12)
+    
+    thisIsAFunction()
+}
+
+
+fun test2Blub(): void {
+     
+}
+
+fun method(): void {
+    
+}
+fun main(num: int): int {
+
+
+    var handle = GetStdHandle(-11)
+    WriteConsoleA(handle, "Hello World", 11, 0, 0)
+
+
+
+    fun testInInnerScope(): int { }
+    fun tes345t(): void { }
+     
+    
+
+    test()
+    printf("dwad", 12)
+    
+    thisIsAFunction()
+}
+
+
+fun test2Blub(): void {
+     
+}
+
+fun method(): void {
+    
+}
+fun main(num: int): int {
+
+
+    var handle = GetStdHandle(-11)
+    WriteConsoleA(handle, "Hello World", 11, 0, 0)
+
+
+
+    fun testInInnerScope(): int { }
+    fun tes345t(): void { }
+     
+    
+
+    test()
+    printf("dwad", 12)
+    
+    thisIsAFunction()
+}
+
+
+fun test2Blub(): void {
+     
+}
+
+fun method(): void {
+    
+}
+fun main(num: int): int {
+
+
+    var handle = GetStdHandle(-11)
+    WriteConsoleA(handle, "Hello World", 11, 0, 0)
+
+
+
+    fun testInInnerScope(): int { }
+    fun tes345t(): void { }
+     
+    
+
+    test()
+    printf("dwad", 12)
+    
+    thisIsAFunction()
+}
+
+
+fun test2Blub(): void {
+     
+}
+
+fun method(): void {
+    
+}
+fun main(num: int): int {
+
+
+    var handle = GetStdHandle(-11)
+    WriteConsoleA(handle, "Hello World", 11, 0, 0)
+
+
+
+    fun testInInnerScope(): int { }
+    fun tes345t(): void { }
+     
+ 
+
+    test()
+    printf("dwad", 12)
+    
+    thisIsAFunction()
+}
+
+
+fun test2Blub(): void {
+     
+}
+
+fun method(): void {
+    
+}
+fun main(num: int): int {
+
+
+    var handle = GetStdHandle(-11)
+    WriteConsoleA(handle, "Hello World", 11, 0, 0)
+
+
+
+    fun testInInnerScope(): int { }
+    fun tes345t(): void { }
+     
+    
+
+    test()
+    printf("dwad", 12)
+    
+    thisIsAFunction()
+}
+
+
+fun test2Blub(): void {
+     
+}
+
+fun method(): void {
+    
+}
+
+fun main(num: int): int {
+
+
+    var handle = GetStdHandle(-11)
+    WriteConsoleA(handle, "Hello World", 11, 0, 0)
+
+
+
+    fun testInInnerScope(): int { }
+    fun tes345t(): void { }
+     
+    
+
+    test()
+    printf("dwad", 12)
+    
+    thisIsAFunction()
+}
+
+
+fun test2Blub(): void {
+     
+}
+
+fun method(): void {
+    
+}
+fun main(num: int): int {
+
+
+    var handle = GetStdHandle(-11)
+    WriteConsoleA(handle, "Hello World", 11, 0, 0)
+
+
+
+    fun testInInnerScope(): int { }
+    fun tes345t(): void { }
+     
+    
+
+    test()
+    printf("dwad", 12)
+    
+    thisIsAFunction()
+}
+
+
+fun test2Blub(): void {
+     
+}
+
+fun method(): void {
+    
+}
+fun main(num: int): int {
+
+
+    var handle = GetStdHandle(-11)
+    WriteConsoleA(handle, "Hello World", 11, 0, 0)
+
+
+
+    fun testInInnerScope(): int { }
+    fun tes345t(): void { }
+     
+    
+
+    test()
+    printf("dwad", 12)
+    
+    thisIsAFunction()
+}
+
+
+fun test2Blub(): void {
+     
+}
+
+fun method(): void {
+    
+}
+fun main(num: int): int {
+
+
+    var handle = GetStdHandle(-11)
+    WriteConsoleA(handle, "Hello World", 11, 0, 0)
+
+
+
+    fun testInInnerScope(): int { }
+    fun tes345t(): void { }
+     
+    
+
+    test()
+    printf("dwad", 12)
+    
+    thisIsAFunction()
+}
+
+
+fun test2Blub(): void {
+     
+}
+
+fun method(): void {
+    
+}
+fun main(num: int): int {
+
+
+    var handle = GetStdHandle(-11)
+    WriteConsoleA(handle, "Hello World", 11, 0, 0)
+
+
+
+    fun testInInnerScope(): int { }
+    fun tes345t(): void { }
+     
+    
+
+    test()
+    printf("dwad", 12)
+    
+    thisIsAFunction()
+}
+
+
+fun test2Blub(): void {
+     
+}
+
+fun method(): void {
+    
+}
+fun main(num: int): int {
+
+
+    var handle = GetStdHandle(-11)
+    WriteConsoleA(handle, "Hello World", 11, 0, 0)
+
+
+
+    fun testInInnerScope(): int { }
+    fun tes345t(): void { }
+     
+    
+
+    test()
+    printf("dwad", 12)
+    
+    thisIsAFunction()
+}
+
+
+fun test2Blub(): void {
+     
+}
+
+fun method(): void {
+    
+}
+fun main(num: int): int {
+
+
+    var handle = GetStdHandle(-11)
+    WriteConsoleA(handle, "Hello World", 11, 0, 0)
+
+
+test2Blub()
+    fun testInInnerScope(): int { }
+    fun tes345t(): void { }
+     
+    
+
+    test()
+    printf("dwad", 12)
+      
+    thisIsAFunction()
+}
+
+
+fun test2Blub(): void {
+     
+}
+
+fun method(): void {
+    
+}
+fun main(num: int): int {
+
+
+    var handle = GetStdHandle(-11)
+    WriteConsoleA(handle, "Hello World", 11, 0, 0)
+
+
+
+    fun testInInnerScope(): int { }
+    fun tes345t(): void { }
+     
+    
+
+    test()
+    printf("dwad", 12)
+    
+    thisIsAFunction()
+}
+
+
+fun test2Blub(): void {
+     
+}
+
+fun method(): void {
+    
+}
+fun main(num: int): int {
+
+
+    var handle = GetStdHandle(-11)
+    WriteConsoleA(handle, "Hello World", 11, 0, 0)
+
+
+
+    fun testInInnerScope(): int { }
+    fun tes345t(): void { }
+     
+    
+
+    test()
+    printf("dwad", 12)
+    
+    thisIsAFunction()
+}
+
+
+fun test2Blub(): void {
+     
+}
+
+fun method(): void {
+    
+}
+fun main(num: int): int {
+
+
+    var handle = GetStdHandle(-11)
+    WriteConsoleA(handle, "Hello World", 11, 0, 0)
+
+
+
+    fun testInInnerScope(): int { }
+    fun tes345t(): void { }
+     
+    
+
+    test()
+    printf("dwad", 12)
+    
+    thisIsAFunction()
+}
+
+
+fun test2Blub(): void {
+     
+}
+
+fun method(): void {
+    
+}
+fun main(num: int): int {
+
+
+    var handle = GetStdHandle(-11)
+    WriteConsoleA(handle, "Hello World", 11, 0, 0)
+
+
+
+    fun testInInnerScope(): int { }
+    fun tes345t(): void { }
+     
+    
+
+    test()
+    printf("dwad", 12)
+    
+    thisIsAFunction()
+}
+
+
+fun test2Blub(): void {
+     
+}
+
+fun method(): void {
+    
+}
+fun main(num: int): int {
+
+
+    var handle = GetStdHandle(-11)
+    WriteConsoleA(handle, "Hello World", 11, 0, 0)
+
+
+
+    fun testInInnerScope(): int { }
+    fun tes345t(): void { }
+     
+    
+
+    test()
+    printf("dwad", 12)
+    
+    thisIsAFunction()
+}
+
+
+fun test2Blub(): void {
+     
+}
+
+fun method(): void {
+    
+}
+fun main(num: int): int {
+
+
+    var handle = GetStdHandle(-11)
+    WriteConsoleA(handle, "Hello World", 11, 0, 0)
+
+
+
+    fun testInInnerScope(): int { }
+    fun tes345t(): void { }
+     
+    
+
+    test()
+    printf("dwad", 12)
+    
+    thisIsAFunction()
+}
+
+
+fun test2Blub(): void {
+     
+}
+
+fun method(): void {
+    
+}
+fun main(num: int): int {
+
+
+    var handle = GetStdHandle(-11)
+    WriteConsoleA(handle, "Hello World", 11, 0, 0)
+
+
+
+    fun testInInnerScope(): int { }
+    fun tes345t(): void { }
+     
+    
+
+    test()
+    printf("dwad", 12)
+    
+    thisIsAFunction()
+}
+
+
+fun test2Blub(): void {
+     
+}
+
+fun method(): void {
+    
+}
+fun main(num: int): int {
+
+
+    var handle = GetStdHandle(-11)
+    WriteConsoleA(handle, "Hello World", 11, 0, 0)
+
+
+
+    fun testInInnerScope(): int { }
+    fun tes345t(): void { }
+     
+    
+
+    test()
+    printf("dwad", 12)
+    
+    thisIsAFunction()
+}
+
+
+fun test2Blub(): void {
+     
+}
+
+fun method(): void {
+    
+}
+fun main(num: int): int {
+
+
+    var handle = GetStdHandle(-11)
+    WriteConsoleA(handle, "Hello World", 11, 0, 0)
+
+
+
+    fun testInInnerScope(): int { }
+    fun tes345t(): void { }
+     
+ 
+
+    test()
+    printf("dwad", 12)
+    
+    thisIsAFunction()
+}
+
+
+fun test2Blub(): void {
+     
+}
+
+fun method(): void {
+    
+}
+fun main(num: int): int {
+
+
+    var handle = GetStdHandle(-11)
+    WriteConsoleA(handle, "Hello World", 11, 0, 0)
+
+
+
+    fun testInInnerScope(): int { }
+    fun tes345t(): void { }
+     
+    
+
+    test()
+    printf("dwad", 12)
+    
+    thisIsAFunction()
+}
+  
+
+fun test2Blub(): void {
+       
+}
+
+fun method(): void {
+    
+}
+
+fun main(num: int): int {
+
+
+    var handle = GetStdHandle(-11)
+    WriteConsoleA(handle, "Hello World", 11, 0, 0)
+
+
+
+    fun testInInnerScope(): int { }
+    fun tes345t(): void { }
+         
+                           
+
+    test()
+    printf("dwad", 12)
+    
+    thisIsAFunction()
+}
 

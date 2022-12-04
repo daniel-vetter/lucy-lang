@@ -44,6 +44,13 @@
 		<Expression type="ExpressionSyntaxNode" />
 	</ExpressionStatementSyntaxNode>
 
+	<VariableDeclarationStatementSyntaxNode basedOn="StatementSyntaxNode">
+		<VarKeyword type="SyntaxElement" />
+		<VariableName type="SyntaxElement" />
+		<EqualSign type="SyntaxElement" />
+		<Expression type="ExpressionSyntaxNode" />
+	</VariableDeclarationStatementSyntaxNode>
+
 	<ImportStatementSyntaxNode basedOn="StatementSyntaxNode">
 		<ImportKeyword type="SyntaxElement" />
 		<Path type="StringConstantExpressionSyntaxNode" />
@@ -59,15 +66,14 @@
 		<Token type="SyntaxElement" />
 	</NumberConstantExpressionSyntaxNode>
 
+	<TypeAnnotationSyntaxNode basedOn="SyntaxTreeNode">
+		<Seperator type="SyntaxElement" />
+		<TypeReference type="TypeReferenceSyntaxNode" />
+	</TypeAnnotationSyntaxNode>
+
 	<TypeReferenceSyntaxNode basedOn="SyntaxTreeNode">
 		<TypeName type="SyntaxElement" />
 	</TypeReferenceSyntaxNode>
-
-	<VariableNameWithTypeDeclarationSyntaxNode basedOn="SyntaxTreeNode">
-		<VariableName type="SyntaxElement" />
-		<Seperator type="SyntaxElement" />
-		<TypeReference type="TypeReferenceSyntaxNode" />
-	</VariableNameWithTypeDeclarationSyntaxNode>
 
 	<FunctionDeclarationStatementSyntaxNode basedOn="StatementSyntaxNode">
 		<Modifiers type="SyntaxElement" list="true" />
@@ -78,13 +84,13 @@
 		<OpenBraket type="SyntaxElement" />
 		<ParameterList type="FunctionDeclarationParameterSyntaxNode" list="true" />
 		<CloseBraket type="SyntaxElement" />
-		<ReturnTypeSeperator type="SyntaxElement" />
-		<ReturnType type="TypeReferenceSyntaxNode" />
+		<ReturnType type="TypeAnnotationSyntaxNode" />
 		<Body type="StatementListSyntaxNode" optional="true" />
 	</FunctionDeclarationStatementSyntaxNode>
 
 	<FunctionDeclarationParameterSyntaxNode basedOn="SyntaxTreeNode">
-		<VariableDeclaration type="VariableNameWithTypeDeclarationSyntaxNode" />
+		<VariableName type="SyntaxElement" />
+		<VariableType type="TypeAnnotationSyntaxNode" />
 		<Seperator type="SyntaxElement" optional="true" />
 	</FunctionDeclarationParameterSyntaxNode>
 
