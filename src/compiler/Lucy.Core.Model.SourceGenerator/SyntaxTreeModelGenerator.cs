@@ -1,4 +1,5 @@
-﻿using Microsoft.CodeAnalysis;
+﻿using System.Collections.Immutable;
+using Microsoft.CodeAnalysis;
 using System.Text;
 
 namespace Lucy.Core.Model.SourceGenerator;
@@ -75,6 +76,7 @@ internal static class SyntaxTreeModelGenerator
         sb.AppendLine("    protected NodeId _nodeId;");
         sb.AppendLine("    protected byte[] _hash = null!;");
         sb.AppendLine("    protected int _hashShort;");
+        sb.AppendLine("    protected ImmutableArray<SyntaxTreeNode> _childNodes;");
         sb.AppendLine();
     }
 
@@ -82,28 +84,16 @@ internal static class SyntaxTreeModelGenerator
     {
         if (node.IsRoot)
         {
-            sb.AppendLine("    protected abstract byte[] BuildHash();");
-            sb.AppendLine();
-            sb.AppendLine("    protected void EnsureHashIsBuild()");
-            sb.AppendLine("    {");
-            sb.AppendLine("        _hash = BuildHash();");
-            sb.AppendLine();
-            sb.AppendLine("        var hc = new HashCode();");
-            sb.AppendLine("        hc.AddBytes(GetFullHash());");
-            sb.AppendLine("        _hashShort = hc.ToHashCode();");
-            sb.AppendLine("    }");
-            sb.AppendLine();
             sb.AppendLine("    public byte[] GetFullHash()");
             sb.AppendLine("    {");
             sb.AppendLine("        return _hash;");
             sb.AppendLine("    }");
             sb.AppendLine();
         }
-
-
+        
         if (node.IsTopMost)
         {
-            sb.AppendLine("    protected override byte[] BuildHash()");
+            sb.AppendLine("    private void EnsureHashIsBuild()");
             sb.AppendLine("    {");
             sb.AppendLine("        using var b = new HashBuilder();");
             sb.AppendLine("        b.Add(" + node.Index + ");");
@@ -119,7 +109,10 @@ internal static class SyntaxTreeModelGenerator
                 else
                     sb.AppendLine("        b.Add(" + property.Name + ");");
             }
-            sb.AppendLine("        return b.Build();");
+            sb.AppendLine("        _hash = b.Build();");
+            sb.AppendLine("        var hc = new HashCode();");
+            sb.AppendLine("        hc.AddBytes(_hash);");
+            sb.AppendLine("        _hashShort = hc.ToHashCode();");
             sb.AppendLine("    }");
             sb.AppendLine();
         }
@@ -150,8 +143,13 @@ internal static class SyntaxTreeModelGenerator
         {
             sb.AppendLine($"        {prop.Name} = {ToLower(prop.Name)};");
         }
+
         if (node.IsTopMost)
+        {
             sb.AppendLine("        EnsureHashIsBuild();");
+            sb.AppendLine("        EnsureChildNodeListIsBuild();");
+        }
+            
         sb.AppendLine("    }");
         sb.AppendLine();
     }
@@ -187,17 +185,16 @@ internal static class SyntaxTreeModelGenerator
 
     private static void WriteGetChildNodesMethod(this StringBuilder sb, Node node)
     {
-        if (node.BasedOn == null)
+        if (node.IsRoot)
         {
-            sb.AppendLine("    public abstract IEnumerable<SyntaxTreeNode> GetChildNodes();");
+            sb.AppendLine("    public ImmutableArray<SyntaxTreeNode> GetChildNodes() => _childNodes;");
         }
-        else
-        {
-            if (!node.IsTopMost)
-                return;
 
-            sb.AppendLine("    public override IEnumerable<SyntaxTreeNode> GetChildNodes()");
+        if (node.IsTopMost)
+        {
+            sb.AppendLine("    private void EnsureChildNodeListIsBuild()");
             sb.AppendLine("    {");
+            sb.AppendLine("        var nodes = ImmutableArray.CreateBuilder<SyntaxTreeNode>();");
             int count = 0;
             foreach (var prop in node.Properties.Where(x => x.TypeIsNode))
             {
@@ -215,13 +212,11 @@ internal static class SyntaxTreeModelGenerator
 
                 }
 
-                sb.AppendLine(padding + "yield return " + (prop.IsList ? "entry" : prop.Name) + ";");
+                sb.AppendLine(padding + "nodes.Add(" + (prop.IsList ? "entry" : prop.Name) + ");");
                 count++;
             }
 
-            if (count == 0)
-                sb.AppendLine("        yield break;");
-
+            sb.AppendLine("        _childNodes = nodes.ToImmutable();");
             sb.AppendLine("    }");
         }
         sb.AppendLine();
