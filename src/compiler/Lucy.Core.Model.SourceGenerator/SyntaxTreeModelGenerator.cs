@@ -129,7 +129,7 @@ internal static class SyntaxTreeModelGenerator
     {
         var allParameters = node.AllProperties
             .Select(x => $"{GetRealType(x)} {ToLower(x.Name)}")
-            .Prepend((node.IsTopMost ? "NodeId<"+node.Name+">" : "NodeId") + " nodeId").ToArray()
+            .Prepend("INodeId<"+node.Name+">" + " nodeId").ToArray()
             .ToArray();
 
         var baseParameters = node.BaseProperties
@@ -145,7 +145,7 @@ internal static class SyntaxTreeModelGenerator
         sb.AppendLine($"    public {node.Name}({paramStr}) : base(" + baseStr + ")");
         sb.AppendLine("    {");
         if (node.IsRoot)
-            sb.AppendLine("        _nodeId = nodeId;");
+            sb.AppendLine("        _nodeId = (NodeId)nodeId;");
         foreach (var prop in node.Properties)
         {
             sb.AppendLine($"        {prop.Name} = {ToLower(prop.Name)};");

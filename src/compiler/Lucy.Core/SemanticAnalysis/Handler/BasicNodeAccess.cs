@@ -80,7 +80,7 @@ public static class BasicNodeAccess
         var lastIndex = nodeId.NodePath.LastIndexOf('.');
         if (lastIndex == -1)
             return null;
-        var parentNodeId = new NodeId<SyntaxTreeNode>(nodeId.DocumentPath, nodeId.NodePath[..lastIndex]);
+        var parentNodeId = new NodeId<SyntaxTreeNode, SyntaxTreeNodeBuilder>(nodeId.DocumentPath, nodeId.NodePath[..lastIndex]);
 
         return db.GetNodeById(parentNodeId);
     }

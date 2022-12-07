@@ -62,7 +62,7 @@ internal static class SyntaxTreeModelBuilderGenerator
 
                     return name;
                 })
-                .Prepend("new NodeId<"+node.Name+ ">(_nodeId.DocumentPath, _nodeId.NodePath)")
+                .Prepend("(INodeId<"+node.Name+">)_nodeId")
                 .ToArray());
 
             sb.AppendLine($$"""
@@ -168,7 +168,7 @@ internal static class SyntaxTreeModelBuilderGenerator
         {
             sb.AppendLine("    public override void SetId(string documentPath, string nodePath)");
             sb.AppendLine("    {");
-            sb.AppendLine("        _nodeId = new BuilderNodeId<"+node.Name+"Builder>(documentPath, nodePath);");
+            sb.AppendLine("        _nodeId = new NodeId<" + node.Name + ", " +node.Name+"Builder>(documentPath, nodePath);");
             sb.AppendLine("    }");
         }
     }

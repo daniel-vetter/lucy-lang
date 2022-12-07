@@ -16,23 +16,16 @@ public interface IBuilderNodeId<out T>  where T : SyntaxTreeNodeBuilder
     public string NodePath { get; }
 }
 
-public class NodeId<T> : NodeId, INodeId<T> where T: SyntaxTreeNode
+public sealed class NodeId<TNode, TBuilder> : NodeId, INodeId<TNode>, IBuilderNodeId<TBuilder> where TNode: SyntaxTreeNode where TBuilder : SyntaxTreeNodeBuilder
 {
     public NodeId(string documentPath, string nodePath) : base(documentPath, nodePath)
     {
     }
 }
 
-public class BuilderNodeId<T> : NodeId, IBuilderNodeId<T> where T : SyntaxTreeNodeBuilder
-{
-    public BuilderNodeId(string documentPath, string nodePath) : base(documentPath, nodePath)
-    {
-    }
-}
-
 public class NodeId : IHashable
 {
-    public NodeId(string documentPath, string nodePath)
+    protected NodeId(string documentPath, string nodePath)
     {
         if (documentPath.Length == 0 || (documentPath[0] != '/' && documentPath[0] != '!'))
             throw new ArgumentException("Invalid document path");
