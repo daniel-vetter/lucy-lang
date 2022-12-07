@@ -16,6 +16,7 @@ export function activate(context: ExtensionContext) {
     context.subscriptions.push(commands.registerCommand("lucy.openAssembly", async () => await openAssembly()));
     context.subscriptions.push(commands.registerCommand("lucy.attachDebugger", async () => await attachDebugger()));
     context.subscriptions.push(commands.registerCommand("lucy.attachProfiler", async () => await attachProfiler()));
+    context.subscriptions.push(commands.registerCommand("lucy.exportProfiler", async () => await exportProfiler()));
 }
 
 
@@ -46,6 +47,13 @@ async function attachProfiler(): Promise<void> {
     var client = getSingleLanguageClient();
     if (client != undefined) {
         await client.sendRequest<string>("debug/attachProfiler");
+    }
+}
+
+async function exportProfiler(): Promise<void> {
+    var client = getSingleLanguageClient();
+    if (client != undefined) {
+        await client.sendRequest<string>("debug/exportProfiler");
     }
 }
 

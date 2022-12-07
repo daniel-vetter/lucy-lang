@@ -1,5 +1,8 @@
-﻿using System.Security.Cryptography;
+﻿using System.Diagnostics;
+using System.Runtime.CompilerServices;
+using System.Security.Cryptography;
 using System.Text;
+using System.Xml.Xsl;
 
 namespace Lucy.Core.Model;
 
@@ -53,8 +56,12 @@ public class HashBuilder : IDisposable
         _bw.Write((byte)0x06);
         _bw.Write(number);
     }
+    
+    public byte[] Build()
+    {
+        return MD5.HashData(_ms.GetBuffer().AsSpan()[..(int) _ms.Length]);
+    }
 
-    public byte[] Build() => SHA256.HashData(_ms.GetBuffer().AsSpan()[..(int)_ms.Length]);
     public void Dispose()
     {
         _bw.Dispose();

@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Linq;
 using System.Text.Json;
+using Lucy.Common;
 
 namespace Lucy.Core.SemanticAnalysis.Infrastructure;
 
@@ -89,17 +91,20 @@ public class Db
 
     public TQueryResult Query<TQueryResult>(IQuery<TQueryResult> query) where TQueryResult : notnull
     {
+        
         _lastQueryCalculations.Clear();
         _lastQuery = query;
         var sw = Stopwatch.StartNew();
         var result = (TQueryResult)(Query((IQuery) query).Result ?? throw new Exception("Query was not executed."));
         _lastQueryDuration = sw.Elapsed;
         OnQueryDone?.Invoke();
+        
         return result;
     }
 
     private Entry Query(IQuery query)
     {
+        Profiler.Start("Query " + query.GetType().Name);
         if (!_entries.TryGetValue(query, out var entry))
         {
             entry = new Entry(query, null, 0, 0, false, new List<Entry>());
@@ -108,12 +113,13 @@ public class Db
         }
 
         EnsureEntryIsUpToDate(entry);
-
+        Profiler.End("Query " + query.GetType().Name);
         return entry;
     }
 
     private bool Recalculate(Entry entry)
     {
+        //Profiler.Start("Calc " + entry.Query.GetType().Name);
         if (!_handlers.TryGetValue(entry.Query.GetType(), out var handler))
             throw new Exception($"For a query of type '{entry.Query.GetType().Name}' with parameter '{JsonSerializer.Serialize(entry.Query)}' is no input provided and no query handler registered.");
 
@@ -145,6 +151,7 @@ public class Db
 
         _lastQueryCalculations.Add(entry, new RecordedCalculation(_lastQueryCalculations.Count, query: entry.Query, handlerStopwatch.Elapsed - callContext.TotalTimeInSubQueries, handlerStopwatch.Elapsed, overheadStopwatch.Elapsed, resultType));
 
+        //Profiler.End("Calc " + entry.Query.GetType().Name);
         return resultType != ResultType.WasTheSame;
     }
 

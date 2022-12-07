@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Lucy.App.LanguageServer.Infrastructure;
 using Lucy.App.LanguageServer.Models;
+using Lucy.Common;
 using Lucy.Common.ServiceDiscovery;
 using Lucy.Core.SemanticAnalysis.Handler.ErrorCollectors;
 using Lucy.Infrastructure.RpcServer;
@@ -26,6 +27,8 @@ public class DiagnosticsReporter
 
     public async Task Report()
     {
+        Profiler.Start("Reporting errors");
+
         var errors = _currentWorkspace.Analysis.GetAllErrors();
 
         var documentsToReport = errors
@@ -62,6 +65,8 @@ public class DiagnosticsReporter
                 Uri = _currentWorkspace.ToSystemPath(documentWithError.DocumentPath)
             });
         }
+
+        Profiler.End("Reporting errors");
     }
 
     private record ReportJob(string DocumentPath, ErrorWithRange[] Errors);

@@ -4,7 +4,8 @@
       "commandName": "Project",
       "environmentVariables": {
         "LUCY_LANGUAGE_SERVER_RUN_VSCODE_EXTENSION": "$(ProjectDir)..\\..\\vscode-extension",
-        "LUCY_LANGUAGE_SERVER_RUN_VSCODE_EXTENSION_WORKSPACE": "$(ProjectDir)SampleApp"
+        //"LUCY_LANGUAGE_SERVER_RUN_VSCODE_EXTENSION_WORKSPACE": "$(ProjectDir)SampleApp"
+        "LUCY_LANGUAGE_SERVER_RUN_VSCODE_EXTENSION_WORKSPACE": "C:\\lucy-sample-project"
 
       }
     }

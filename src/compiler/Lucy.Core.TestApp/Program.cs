@@ -1,11 +1,55 @@
-﻿using BenchmarkDotNet.Attributes;
+﻿using System.Collections.Immutable;using System.Diagnostics;
 using Lucy.Core.ProjectManagement;
 using Lucy.Core.SemanticAnalysis;
 using Lucy.Core.SemanticAnalysis.Handler.ErrorCollectors;
-using Lucy.Core.SemanticAnalysis.Infrastructure;
-using Lucy.Core.TestApp;
 
-var ws = new Workspace();
+
+//Profiler.Attach();
+var total = Stopwatch.StartNew();
+var sw = Stopwatch.StartNew();
+var ws = await Workspace.CreateFromPath("C:\\lucy-sample-project");
+
+Console.WriteLine("Project loaded: " + sw.Elapsed.TotalMilliseconds);
+
+sw.Restart();
+var sa = new SemanticDatabase(ws);
+Console.WriteLine("Semantic buildup: " + sw.Elapsed.TotalMilliseconds);
+
+sw.Restart();
+var errors = sa.GetAllErrors();
+Console.WriteLine("GetAllErrors found " + errors.Count + " in " + sw.Elapsed.TotalMilliseconds);
+
+Console.WriteLine("TOTAL: " + total.Elapsed.TotalMilliseconds);
+
+var data = sa.GetLastQueryExecutionLog().Calculations
+    .GroupBy(x => x.Query.GetType())
+    .Select(x => new
+    {
+        QueryName = x.Key.Name, 
+        Count = x.Count(),
+        Time = x.Select(y => y.ExlusiveHandlerExecutionTime).Sum(y => y.TotalMilliseconds)
+    })
+    .ToArray();
+
+Console.WriteLine("Calc total time: " + data.Sum(x => x.Time));
+
+
+foreach (var calcs in data.OrderByDescending(x => x.Time))
+{
+    Console.WriteLine(calcs.QueryName + " - " + calcs.Count + " - " + calcs.Time);
+}
+
+
+
+
+//Profiler.ExportAndShow();
+
+/*
+foreach (var error in errors)
+    Console.WriteLine(error.ToString());
+*/
+
+/*
 var changeReader = new TestCaseReader(ws, "./SampleApp");
 
 var sdb = new SemanticDatabase(ws, "./graphOutput");
@@ -55,3 +99,4 @@ namespace Lucy.Core.TestApp
     }
 }
 
+*/

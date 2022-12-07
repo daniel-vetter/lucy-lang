@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Lucy.Common;
 using Lucy.Common.ServiceDiscovery;
 using Newtonsoft.Json.Linq;
 
@@ -33,7 +34,7 @@ public class FunctionCaller
     private object?[] Parse(JToken? json, CallableFunction function)
     {
         if (function.Parameters.Length == 0)
-            return new object[0];
+            return Array.Empty<object>();
 
         if (function.SingleParameter)
         {
@@ -51,14 +52,11 @@ public class FunctionCaller
         var result = new List<object?>();
         if (json is JObject obj)
         {
-            foreach(var p in function.Parameters)
+            foreach (var p in function.Parameters)
             {
                 var name = p.Name ?? throw new Exception("missing parameter name");
                 var prop = obj.Property(name);
-                if (prop == null)
-                    result.Add(null);
-                else
-                    result.Add(_serializer.TokenToObject(prop.Value, p.ParameterType));
+                result.Add(prop == null ? null : _serializer.TokenToObject(prop.Value, p.ParameterType));
             }
         }
 

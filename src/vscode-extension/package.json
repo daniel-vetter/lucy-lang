@@ -57,6 +57,10 @@
 			{
 				"command": "lucy.attachProfiler",
 				"title": "Lucy: Attach Profiler to Language Server"
+			},
+			{
+				"command": "lucy.exportProfiler",
+				"title": "Lucy: Export custom profiler log"
 			}
 		]
 	},

@@ -36,9 +36,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lucy.Emitter", "Lucy.Emitte
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Lucy.Core.SourceGenerator", "Lucy.Core.SourceGenerator\Lucy.Core.SourceGenerator.csproj", "{A1BCC02E-141F-4E9E-A0E3-7DB47E7B3225}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lucy.Core.Model", "Lucy.Core.Model\Lucy.Core.Model.csproj", "{F1C85349-0DC7-47D9-A16D-00A1F4D0EFCA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Lucy.Core.Model", "Lucy.Core.Model\Lucy.Core.Model.csproj", "{F1C85349-0DC7-47D9-A16D-00A1F4D0EFCA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lucy.Core.Model.SourceGenerator", "Lucy.Core.Model.SourceGenerator\Lucy.Core.Model.SourceGenerator.csproj", "{B74513AD-6DB4-4E1B-856C-299EA87B278A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Lucy.Core.Model.SourceGenerator", "Lucy.Core.Model.SourceGenerator\Lucy.Core.Model.SourceGenerator.csproj", "{B74513AD-6DB4-4E1B-856C-299EA87B278A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lucy.Test.SampleProjectGenerator", "Lucy.Test.SampleProjectGenerator\Lucy.Test.SampleProjectGenerator.csproj", "{5C7F5717-D75B-4E0A-B82D-E440842C3855}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -110,6 +112,10 @@ Global
 		{B74513AD-6DB4-4E1B-856C-299EA87B278A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B74513AD-6DB4-4E1B-856C-299EA87B278A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B74513AD-6DB4-4E1B-856C-299EA87B278A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5C7F5717-D75B-4E0A-B82D-E440842C3855}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5C7F5717-D75B-4E0A-B82D-E440842C3855}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5C7F5717-D75B-4E0A-B82D-E440842C3855}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5C7F5717-D75B-4E0A-B82D-E440842C3855}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

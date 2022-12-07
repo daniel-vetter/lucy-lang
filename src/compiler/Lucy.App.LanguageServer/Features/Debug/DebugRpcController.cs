@@ -42,6 +42,13 @@ public class DebugRpcController
         return Task.CompletedTask;
     }
 
+    [JsonRpcFunction("debug/exportProfiler")]
+    public Task ExportProfiler()
+    {
+        Profiler.ExportAndShow();
+        return Task.CompletedTask;
+    }
+
     /*
     [JsonRpcFunction("debug/getAssembly")]
     public string GetAssembly()

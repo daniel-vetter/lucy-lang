@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using Lucy.Common;
 
 namespace Lucy.Core.Parsing;
 
@@ -17,14 +18,16 @@ internal static class IdAssigner
     private static void Traverse(string documentPath, SyntaxTreeNodeBuilder node, StringBuilder sb,
         Dictionary<Type, string> nodeNameCache)
     {
+        Profiler.Start("IdAssign: " + node.NodeId);
         sb.Append('.');
         var start = sb.Length;
         var dict = new Dictionary<string, int>();
         foreach (var childNode in node.GetChildNodes())
         {
-            var type = node.GetType();
+            var type = childNode.GetType();
             if (!nodeNameCache.TryGetValue(type, out var nodeName))
             {
+                Profiler.Start("AddCacheEntry");
                 var name = node.GetType().Name;
                 if (name.EndsWith("SyntaxNodeBuilder"))
                     name = name[..^"SyntaxNodeBuilder".Length];
@@ -38,6 +41,7 @@ internal static class IdAssigner
                     name = name[..^"Node".Length];
                 nodeName = name[..1].ToLowerInvariant() + name[1..];
                 nodeNameCache[type] = nodeName;
+                Profiler.End("AddCacheEntry");
             }
 
             sb.Length = start;
@@ -50,5 +54,7 @@ internal static class IdAssigner
             childNode.SetId(documentPath, sb.ToString());
             Traverse(documentPath, childNode, sb, nodeNameCache);
         }
+
+        Profiler.End("IdAssign: " + node.NodeId);
     }
 }

@@ -24,6 +24,11 @@ public class SemanticDatabase : IDb, IDisposable
         RegisterTraceListener(traceOutputDir);
     }
 
+    public QueryExectionLog GetLastQueryExecutionLog()
+    {
+        return _db.GetLastQueryExecutionLog();
+    }
+
     private void RegisterTraceListener(string? graphOutputDir)
     {
         if (graphOutputDir == null)
