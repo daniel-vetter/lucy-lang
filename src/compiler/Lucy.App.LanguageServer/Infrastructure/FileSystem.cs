@@ -146,7 +146,7 @@ public class FileSystem : IFileSystem
 
     public Task<SystemPath[]> GetFilesInDirectory(SystemPath path)
     {
-        return Task.FromResult(Directory.GetFiles(path.ToString()).Select(x => new SystemPath(x)).ToArray());
+        return Task.FromResult(Directory.GetFiles(path.ToString(), "*.*", SearchOption.AllDirectories).Select(x => new SystemPath(x)).ToArray());
     }
 
     public async Task<string> ReadAllText(SystemPath file)

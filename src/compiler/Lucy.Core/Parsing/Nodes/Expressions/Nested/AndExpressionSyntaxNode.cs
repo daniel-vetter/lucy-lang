@@ -1,32 +1,33 @@
 ﻿using Lucy.Core.Model;
-using Lucy.Core.Parsing.Nodes.Token;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Lucy.Core.Parsing.Nodes.Expressions.Nested;
 
 internal static class AndExpressionSyntaxNodeParser
 {
-    public static bool TryReadOrInner(Code code, [NotNullWhen(true)] out ExpressionSyntaxNodeBuilder? result)
+    public static bool TryReadOrInner(Reader reader, [NotNullWhen(true)] out ExpressionSyntaxNodeBuilder? result)
     {
-        if (!OrExpressionSyntaxNodeParser.TryReadOrInner(code, out result))
-            return false;
+        result = TryReadOrInner(reader);
+        return result != null;
+    }
 
-        while (true)
+    public static ExpressionSyntaxNodeBuilder? TryReadOrInner(Reader reader)
+    {
+        return reader.WithCache(nameof(AndExpressionSyntaxNodeParser), static code =>
         {
-            if (!SyntaxElementParser.TryReadKeyword(code, "and", out var andToken))
-                return true;
+            if (!OrExpressionSyntaxNodeParser.TryReadOrInner(code, out var result))
+                return null;
 
-            if (!OrExpressionSyntaxNodeParser.TryReadOrInner(code, out var right))
+            while (true)
             {
-                right = new MissingExpressionSyntaxNodeBuilder()
-                {
-                    SyntaxErrors = { { "Expected expression" } }
-                };
-                result = new AndExpressionSyntaxNodeBuilder(result, andToken, right);
-                return true;
-            }
+                if (!TokenNodeParser.TryReadKeyword(code, "and", out var andToken))
+                    return result;
 
-            result = new AndExpressionSyntaxNodeBuilder(result, andToken, right);
-        }
+                if (!OrExpressionSyntaxNodeParser.TryReadOrInner(code, out var right))
+                    return new AndExpressionSyntaxNodeBuilder(result, andToken, ExpressionSyntaxNodeParser.Missing("Expression expected"));
+
+                result = new AndExpressionSyntaxNodeBuilder(result, andToken, right);
+            }
+        });
     }
 }

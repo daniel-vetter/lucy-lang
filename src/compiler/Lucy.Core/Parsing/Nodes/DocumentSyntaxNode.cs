@@ -4,13 +4,15 @@ using Lucy.Core.Model;
 
 namespace Lucy.Core.Parsing.Nodes;
 
-public class DocumentRootSyntaxNodeParser
+public static class DocumentRootSyntaxNodeParser
 {
-    public static DocumentRootSyntaxNodeBuilder ReadDocumentSyntaxNode(Code code)
+    public static DocumentRootSyntaxNodeBuilder ReadDocumentSyntaxNode(Reader reader)
     {
-        var statementList = StatementListSyntaxNodeParser.ReadStatementsWithoutBlock(code);
-        var trailingTrivia = TriviaNodeParser.ReadList(code);
-            
-        return new DocumentRootSyntaxNodeBuilder(statementList, trailingTrivia);
+        return reader.WithCache(nameof(DocumentRootSyntaxNodeParser), static code =>
+        {
+            var leadingTrivia = TriviaParser.Read(code);
+            var statementList = StatementListSyntaxNodeParser.ReadStatementsWithoutBlock(code);
+            return new DocumentRootSyntaxNodeBuilder(leadingTrivia, statementList);
+        });
     }
 }

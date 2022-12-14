@@ -1,6 +1,5 @@
 ﻿using Lucy.Core.Model;
 using Lucy.Core.Parsing.Nodes.Trivia;
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 
@@ -8,57 +7,52 @@ namespace Lucy.Core.Parsing.Nodes.Expressions.Unary;
 
 public static class NumberConstantExpressionSyntaxNodeParser
 {
-    public static bool TryRead(Code code, [NotNullWhen(true)] out NumberConstantExpressionSyntaxNodeBuilder? result)
+    public static bool TryRead(Reader reader, [NotNullWhen(true)] out NumberConstantExpressionSyntaxNodeBuilder? result)
     {
-        var start = code.Position;
-        var leadingTrivia = TriviaNodeParser.ReadList(code);
-
-        var negative = false;
-        if (code.Peek() == '-')
-        {
-            code.Read(1);
-            negative = true;
-        }
-
-        if (!CountDigits(code, out var beforeDigitCount))
-        {
-            code.SeekTo(start);
-            result = null;
-            return false;
-        }
-
-        if (code.Peek(beforeDigitCount) != '.')
-        {
-            result = CreateNode(code, leadingTrivia, beforeDigitCount, negative);
-            return true;
-        }
-            
-        if (!CountDigits(code, out var afterDigitCount))
-        {
-            result = CreateNode(code, leadingTrivia, beforeDigitCount, negative);
-            return true;
-        }
-
-        result = CreateNode(code, leadingTrivia, beforeDigitCount + 1 + afterDigitCount, negative);
-        return true;
+        result = TryRead(reader);
+        return result != null;
     }
 
-    private static NumberConstantExpressionSyntaxNodeBuilder CreateNode(Code code, List<TriviaNodeBuilder> leadingTrivia, int count, bool negative)
+    public static NumberConstantExpressionSyntaxNodeBuilder? TryRead(Reader reader)
     {
-        var str = code.Read(count);
+        return reader.WithCache(nameof(NumberConstantExpressionSyntaxNodeParser), static code =>
+        {
+            var negative = false;
+            if (code.Peek() == '-')
+            {
+                code.Read(1);
+                negative = true;
+            }
+
+            if (!CountDigits(code, out var beforeDigitCount))
+                return null;
+
+            if (code.Peek(beforeDigitCount) != '.')
+                return CreateNode(code, TriviaParser.Read(code), beforeDigitCount, negative);
+
+            if (!CountDigits(code, out var afterDigitCount))
+                return CreateNode(code, TriviaParser.Read(code), beforeDigitCount, negative);
+
+            return CreateNode(code, TriviaParser.Read(code), beforeDigitCount + 1 + afterDigitCount, negative);
+        });
+    }
+
+    private static NumberConstantExpressionSyntaxNodeBuilder CreateNode(Reader reader, string? trailingTrivia, int count, bool negative)
+    {
+        var str = reader.Read(count);
         var num = double.Parse(str, CultureInfo.InvariantCulture);
         if (negative) num *= -1;
-        var token = new SyntaxElementBuilder(leadingTrivia, new TokenNodeBuilder((negative ? "-" : "") + str));
+        var token = new TokenNodeBuilder((negative ? "-" : "") + str, trailingTrivia);
         return new NumberConstantExpressionSyntaxNodeBuilder(num, token);
     }
 
-    private static bool CountDigits(Code code, out int count)
+    private static bool CountDigits(Reader reader, out int count)
     {
         count = 0;
         while (true)
         {
-            var ch = code.Peek(count);
-            if (ch < '0' || ch > '9')
+            var ch = reader.Peek(count);
+            if (ch is < '0' or > '9')
                 break;
             count++;
         }

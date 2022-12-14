@@ -1,5 +1,4 @@
-﻿using System.Collections.Immutable;
-using Microsoft.CodeAnalysis;
+﻿using Microsoft.CodeAnalysis;
 using System.Text;
 
 namespace Lucy.Core.Model.SourceGenerator;
@@ -100,14 +99,33 @@ internal static class SyntaxTreeModelGenerator
             sb.AppendLine("        b.Add(_nodeId);");
             foreach (var property in node.AllProperties)
             {
-                if (property.IsList)
+                if (property.IsOptional)
                 {
-                    sb.AppendLine("        b.BeginList();");
-                    sb.AppendLine("        foreach(var entry in " + property.Name + ")");
-                    sb.AppendLine("            b.Add(entry);");
+                    sb.AppendLine("        if (" + property.Name + " == null)");
+                    sb.AppendLine("            b.AddNull();");
+                    sb.AppendLine("        else");
+                    sb.AppendLine("        {");
+                    if (property.IsList)
+                    {
+                        sb.AppendLine("            b.BeginList();");
+                        sb.AppendLine("            foreach(var entry in " + property.Name + ")");
+                        sb.AppendLine("                b.Add(entry);");
+                    }
+                    else
+                        sb.AppendLine("            b.Add(" + property.Name + ");");
+                    sb.AppendLine("        }");
                 }
                 else
-                    sb.AppendLine("        b.Add(" + property.Name + ");");
+                {
+                    if (property.IsList)
+                    {
+                        sb.AppendLine("        b.BeginList();");
+                        sb.AppendLine("        foreach(var entry in " + property.Name + ")");
+                        sb.AppendLine("            b.Add(entry);");
+                    }
+                    else
+                        sb.AppendLine("        b.Add(" + property.Name + ");");
+                }
             }
             sb.AppendLine("        _hash = b.Build();");
             sb.AppendLine("        var hc = new HashCode();");
@@ -162,12 +180,12 @@ internal static class SyntaxTreeModelGenerator
     private static string GetRealType(NodeProperty property)
     {
         var name = property.Type;
+        
+        if (property.IsList)
+            name = "ImmutableArray<" + name + ">";
 
         if (property.IsOptional)
             name += "?";
-
-        if (property.IsList)
-            name = "ImmutableArray<" + name + ">";
 
         return name;
     }

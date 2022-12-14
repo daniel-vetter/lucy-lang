@@ -78,7 +78,11 @@ public static class RangeCalculation
             len += db.GetNodeRangeLength(child);
 
         if (node is TokenNode token)
+        {
             len += token.Text.Length;
+            if (token.TrailingTrivia != null)
+                len += token.TrailingTrivia.Length;
+        }
 
         return len;
     }

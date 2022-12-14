@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using Lucy.Core.Model;
 
 namespace Lucy.Core.Parsing.Nodes;
 

@@ -1,15 +1,19 @@
-﻿using System.Collections.Immutable;using System.Diagnostics;
-using Lucy.Core.ProjectManagement;
+﻿using Lucy.Core.ProjectManagement;
 using Lucy.Core.SemanticAnalysis;
 using Lucy.Core.SemanticAnalysis.Handler.ErrorCollectors;
+using System.Diagnostics;
 
 
 //Profiler.Attach();
 var total = Stopwatch.StartNew();
 var sw = Stopwatch.StartNew();
-var ws = await Workspace.CreateFromPath("C:\\lucy-sample-project");
+//Console.WriteLine(GC.GetTotalMemory(true) / 1024.0 / 1024.0);
+//Console.ReadLine();
+var ws = await Workspace.CreateFromPath("C:\\lucy-sample-project-big");
+
 
 Console.WriteLine("Project loaded: " + sw.Elapsed.TotalMilliseconds);
+Console.WriteLine("Project loaded:  MEMORY: " + GC.GetTotalMemory(true) / 1024.0 / 1024.0);
 
 sw.Restart();
 var sa = new SemanticDatabase(ws);
@@ -19,7 +23,9 @@ sw.Restart();
 var errors = sa.GetAllErrors();
 Console.WriteLine("GetAllErrors found " + errors.Count + " in " + sw.Elapsed.TotalMilliseconds);
 
-Console.WriteLine("TOTAL: " + total.Elapsed.TotalMilliseconds);
+Console.WriteLine("TOTAL TIME: " + total.Elapsed.TotalMilliseconds);
+Console.WriteLine("TOTAL MEMORY: " + GC.GetTotalMemory(true) / 1024.0 / 1024.0);
+
 
 var data = sa.GetLastQueryExecutionLog().Calculations
     .GroupBy(x => x.Query.GetType())
@@ -40,7 +46,8 @@ foreach (var calcs in data.OrderByDescending(x => x.Time))
 }
 
 
-
+Console.WriteLine(GC.GetTotalMemory(true) / 1024.0 / 1024.0);
+Console.ReadLine();
 
 //Profiler.ExportAndShow();
 

@@ -33,8 +33,8 @@ public class CurrentWorkspace
         var files = await _fileSystem.GetFilesInDirectory(path);
             
         foreach(var file in files)
-            ws.AddFile(file.ToString().Substring(rootPathLength).Replace("\\", "/"), await _fileSystem.ReadAllText(file));
-
+            ws.AddDocument(file.ToString()[rootPathLength..].Replace("\\", "/"), await _fileSystem.ReadAllText(file));
+        
         _semanticDatabase = new SemanticDatabase(ws);
         _workspace = ws;
         _rootPath = path;
@@ -50,7 +50,7 @@ public class CurrentWorkspace
         if (_workspace.ContainsFile(workspacePath))
             _workspace.UpdateFile(workspacePath, content);
         else
-            _workspace.AddFile(ToWorkspacePath(path), content);
+            _workspace.AddDocument(ToWorkspacePath(path), content);
     }
 
     public Position1D ToPosition1D(SystemPath systemPath, Position2D position2D) => ToPosition1D(ToWorkspacePath(systemPath), position2D);
@@ -59,7 +59,7 @@ public class CurrentWorkspace
         if (_workspace == null)
             throw new InvalidOperationException("No workspace was loaded");
 
-        return _workspace.GetFile(documentPath).ConvertTo1D(position2D);
+        return _workspace.GetFile(documentPath).LineBreakMap.To1D(position2D);
     }
 
     public Position2D ToPosition2D(SystemPath systemPath, Position1D position1D) => ToPosition2D(ToWorkspacePath(systemPath), position1D);
@@ -68,7 +68,7 @@ public class CurrentWorkspace
         if (_workspace == null)
             throw new InvalidOperationException("No workspace was loaded");
 
-        return _workspace.GetFile(documentPath).ConvertTo2D(position1D);
+        return _workspace.GetFile(documentPath).LineBreakMap.To2D(position1D);
     }
 
     public Range2D ToRange2D(SystemPath systemPath, Range1D range1D) => ToRange2D(ToWorkspacePath(systemPath), range1D);
@@ -77,7 +77,7 @@ public class CurrentWorkspace
         if (_workspace == null)
             throw new InvalidOperationException("No workspace was loaded");
 
-        return _workspace.GetFile(documentPath).ConvertTo2D(range1D);
+        return _workspace.GetFile(documentPath).LineBreakMap.To2D(range1D);
     }
 
     public void IncrementalUpdate(SystemPath path, Range2D range, string content)

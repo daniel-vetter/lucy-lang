@@ -3,12 +3,16 @@ using Lucy.Core.Model;
 
 namespace Lucy.Core.Parsing.Nodes.Statements;
 
-public class ExpressionStatementSyntaxNodeParser
+public static class ExpressionStatementSyntaxNodeParser
 {
-    public static ExpressionStatementSyntaxNodeBuilder? Read(Code code)
+    public static ExpressionStatementSyntaxNodeBuilder? Read(Reader reader)
     {
-        if (ExpressionSyntaxNodeParser.TryRead(code, out var result))
-            return new ExpressionStatementSyntaxNodeBuilder(result);
-        return null;
+        return reader.WithCache(nameof(ExpressionStatementSyntaxNodeParser), static code =>
+        {
+            if (ExpressionSyntaxNodeParser.TryRead(code, out var result))
+                return new ExpressionStatementSyntaxNodeBuilder(result);
+            return null;
+        });
+
     }
 }

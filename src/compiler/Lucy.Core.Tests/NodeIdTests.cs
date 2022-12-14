@@ -5,6 +5,7 @@ namespace Lucy.Core.Tests;
 
 public class NodeIdTests
 {
+    /*
     [Test]
     public void Different_typed_nodeIds_with_same_content_should_be_equal()
     {
@@ -44,4 +45,5 @@ public class NodeIdTests
         nodeId1.Equals(nodeId2).ShouldBe(false);
         (nodeId1 == nodeId2).ShouldBe(false);
     }
+    */
 }

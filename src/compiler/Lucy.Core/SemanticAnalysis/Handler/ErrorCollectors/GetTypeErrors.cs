@@ -29,7 +29,7 @@ namespace Lucy.Core.SemanticAnalysis.Handler.ErrorCollectors
 
                 var node = db.GetNodeById(nodeId);
 
-                result.Add(new ErrorWithNodeId(node.TypeName.Token.NodeId, $"The type '{node.TypeName.Token.Text}' could not be found."));
+                result.Add(new ErrorWithNodeId(node.TypeName.NodeId, $"The type '{node.TypeName.Text}' could not be found."));
             }
 
             return result.Build();

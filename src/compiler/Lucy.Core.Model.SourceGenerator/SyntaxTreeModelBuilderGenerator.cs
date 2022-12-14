@@ -160,13 +160,13 @@ internal static class SyntaxTreeModelBuilderGenerator
     {
         if (node.IsRoot)
         {
-            sb.AppendLine("    public abstract void SetId(string documentPath, string nodePath);");
+            sb.AppendLine("    public abstract void SetId(string documentPath, byte[] nodePath);");
             return;
         }
 
         if (node.IsTopMost)
         {
-            sb.AppendLine("    public override void SetId(string documentPath, string nodePath)");
+            sb.AppendLine("    public override void SetId(string documentPath, byte[] nodePath)");
             sb.AppendLine("    {");
             sb.AppendLine("        _nodeId = new NodeId<" + node.Name + ", " +node.Name+"Builder>(documentPath, nodePath);");
             sb.AppendLine("    }");

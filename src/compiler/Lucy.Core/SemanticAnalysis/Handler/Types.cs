@@ -19,7 +19,7 @@ namespace Lucy.Core.SemanticAnalysis.Handler
         {
             var node = db.GetNodeById(nodeId);
 
-            return node.TypeName.Token.Text switch
+            return node.TypeName.Text switch
             {
                 "int" => KnownTypes.Int32,
                 "string" => KnownTypes.String,

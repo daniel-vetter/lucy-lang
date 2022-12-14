@@ -8,7 +8,12 @@ public class LineBreakMap
     private readonly List<int> _lineStart;
     private readonly List<int> _lineLengths;
 
-    public LineBreakMap(string content)
+    public static LineBreakMap CreateFrom(string content)
+    {
+        return new LineBreakMap(content);
+    }
+
+    private LineBreakMap(string content)
     {
         var lengths = new List<int>();
         var starts = new List<int>();
@@ -38,7 +43,7 @@ public class LineBreakMap
     public Position2D To2D(Position1D position)
     {
         if (position.Position < 0)
-            throw new ArgumentException("Invalid position: " + position.Position, nameof(position.Position));
+            throw new ArgumentException($"Invalid position: {position.Position}", nameof(position.Position));
 
         if (_lineStart.Count == 0)
             return new Position2D(0, 0);
@@ -54,15 +59,17 @@ public class LineBreakMap
         });
 
         if (index == -1)
-            throw new Exception("Invalid position: " + position);
+            throw new Exception($"Invalid position: {position}");
 
         return new Position2D(index, position.Position - _lineStart[index]);
     }
 
+    public Range2D To2D(Range1D range) => new Range2D(To2D(range.Start), To2D(range.End));
+
     public Position1D To1D(Position2D position)
     {
-        if (position.Line < 0) throw new ArgumentException("Invalid line: " + position.Line, nameof(position));
-        if (position.Character < 0) throw new ArgumentException("Invalid character: " + position.Character, nameof(position));
+        if (position.Line < 0) throw new ArgumentException($"Invalid line: {position.Line}", nameof(position));
+        if (position.Character < 0) throw new ArgumentException($"Invalid character: {position.Character}", nameof(position));
 
         if (_lineStart.Count == 0)
             return new Position1D(0);
@@ -76,6 +83,8 @@ public class LineBreakMap
 
         return new Position1D(_lineStart[position.Line] + c);
     }
+
+    public Range1D To1D(Range2D range) => new Range1D(To1D(range.Start), To1D(range.End));
 
     private int FindIndex(Func<int, int> compare)
     {

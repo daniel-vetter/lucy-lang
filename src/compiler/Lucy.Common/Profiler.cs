@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Security.Cryptography;
 using System.Text.Json;
 using System.Threading;
 
@@ -23,14 +24,14 @@ public static class Profiler
             Directory.CreateDirectory(dir);
 
         File.WriteAllText(file, cmd);
-
+        
         Process.Start(new ProcessStartInfo(file)
         {
             WorkingDirectory= dir,
             UseShellExecute = true
         });
 
-        Thread.Sleep(1000);
+        Thread.Sleep(5000);
     }
 
     private static readonly List<RecordedEvent> _events = new();

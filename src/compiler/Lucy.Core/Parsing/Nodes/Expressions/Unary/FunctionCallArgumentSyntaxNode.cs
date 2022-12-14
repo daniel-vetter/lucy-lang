@@ -1,27 +1,39 @@
 ﻿using Lucy.Core.Model;
-using Lucy.Core.Parsing.Nodes.Token;
 using System.Collections.Generic;
 
 namespace Lucy.Core.Parsing.Nodes.Expressions.Unary;
 
-public class FunctionCallArgumentSyntaxNodeParser
+public static class FunctionCallArgumentSyntaxNodeParser
 {
-    public static List<FunctionCallArgumentSyntaxNodeBuilder> Read(Code code)
+    private const string _listCacheKey = "List" + nameof(FunctionCallArgumentSyntaxNodeParser);
+
+    public static List<FunctionCallArgumentSyntaxNodeBuilder> Read(Reader reader)
     {
-        var result = new List<FunctionCallArgumentSyntaxNodeBuilder>();
-        while (true)
+        return reader.WithCache(_listCacheKey, static code =>
         {
-            if (!ExpressionSyntaxNodeParser.TryRead(code, out var expression))
-                break;
+            var result = new List<FunctionCallArgumentSyntaxNodeBuilder>();
+            while (true)
+            {
+                var next = code.WithCache(nameof(FunctionCallArgumentSyntaxNodeParser), static code =>
+                {
+                    if (!ExpressionSyntaxNodeParser.TryRead(code, out var expression))
+                        return null;
 
-            SyntaxElementParser.TryReadExact(code, ",", out var seperator);
+                    var separator = TokenNodeParser.TryReadExact(code, ",");
 
-            result.Add(new FunctionCallArgumentSyntaxNodeBuilder(expression, seperator));
+                    return new FunctionCallArgumentSyntaxNodeBuilder(expression, separator);
+                });
 
-            if (seperator == null)
-                break;
-        }
+                if (next == null)
+                    break;
 
-        return result;
+                result.Add(next);
+
+                if (next.Seperator == null)
+                    break;
+            }
+
+            return result;
+        });
     }
 }

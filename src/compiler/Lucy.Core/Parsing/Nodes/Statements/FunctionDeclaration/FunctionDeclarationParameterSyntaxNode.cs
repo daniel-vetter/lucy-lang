@@ -1,30 +1,42 @@
-﻿using Lucy.Core.Model;
-using Lucy.Core.Parsing.Nodes.Token;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using Lucy.Core.Model;
 
 namespace Lucy.Core.Parsing.Nodes.Statements.FunctionDeclaration;
 
 public static class FunctionDeclarationParameterSyntaxNodeParser 
 {
-    public static List<FunctionDeclarationParameterSyntaxNodeBuilder> ReadList(Code code)
+    private const string _listCacheKey = "List" + nameof(FunctionDeclarationParameterSyntaxNodeParser);
+
+    public static List<FunctionDeclarationParameterSyntaxNodeBuilder> Read(Reader reader)
     {
-        var l = new List<FunctionDeclarationParameterSyntaxNodeBuilder>();
-        while (true)
+        return reader.WithCache(_listCacheKey, static code =>
         {
-            if (!SyntaxElementParser.TryReadIdentifier(code, out var variableName))
-                break;
+            var l = new List<FunctionDeclarationParameterSyntaxNodeBuilder>();
+            while (true)
+            {
+                var next = code.WithCache(nameof(FunctionDeclarationParameterSyntaxNodeParser), static code =>
+                {
+                    if (!TokenNodeParser.TryReadIdentifier(code, out var variableName))
+                        return null;
 
-            if (!TypeAnnotationSyntaxNodeParser.TryRead(code, out var variableType))
-                variableType = TypeAnnotationSyntaxNodeParser.Missing("Parameter type expected");
-            
-            SyntaxElementParser.TryReadExact(code, ",", out var separator);
+                    if (!TypeAnnotationSyntaxNodeParser.TryRead(code, out var variableType))
+                        variableType = TypeAnnotationSyntaxNodeParser.Missing("Parameter type expected");
 
-            l.Add(new FunctionDeclarationParameterSyntaxNodeBuilder(variableName, variableType, separator));
+                    TokenNodeParser.TryReadExact(code, ",", out var separator);
 
-            if (separator == null)
-                break;
-        }
+                    return new FunctionDeclarationParameterSyntaxNodeBuilder(variableName, variableType, separator);
+                });
 
-        return l;
+                if (next == null)
+                    break;
+                
+                l.Add(next);
+
+                if (next.Seperator == null)
+                    break;
+            }
+
+            return l;
+        });
     }
 }

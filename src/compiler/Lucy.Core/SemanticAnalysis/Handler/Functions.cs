@@ -24,7 +24,7 @@ public static class FunctionsHandler
 
         return new FlatFunctionCall(
             functionCallNodeId, 
-            new FlatIdentifier(node.FunctionName.Token.Text, node.FunctionName.Token.NodeId),
+            new FlatIdentifier(node.FunctionName.Text, node.FunctionName.NodeId),
             node.ArgumentList.Select(x => x.Expression.NodeId).ToComparableReadOnlyList()
         );
     }
@@ -46,8 +46,8 @@ public static class FunctionsHandler
             .Select(x => new FlatFunctionDeclarationParameter(
                 x.NodeId, 
                 new FlatIdentifier(
-                    x.VariableName.Token.Text,
-                    x.VariableName.Token.NodeId
+                    x.VariableName.Text,
+                    x.VariableName.NodeId
                 ),
                 x.VariableType.TypeReference.NodeId
             )).ToComparableReadOnlyList();
@@ -55,8 +55,8 @@ public static class FunctionsHandler
         return new FlatFunctionDeclaration(
             node.NodeId,
             new FlatIdentifier(
-                node.FunctionName.Token.Text, 
-                node.FunctionName.Token.NodeId
+                node.FunctionName.Text, 
+                node.FunctionName.NodeId
             ),
             parameters,
             node.ReturnType.TypeReference.NodeId

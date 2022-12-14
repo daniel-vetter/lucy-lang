@@ -3,35 +3,31 @@ using Lucy.Core.Model;
 
 namespace Lucy.Core.Parsing.Nodes.Expressions.Unary;
 
-internal class UnaryExpression
+internal static class UnaryExpression
 {
-    public static bool TryRead(Code code, [NotNullWhen(true)] out ExpressionSyntaxNodeBuilder? result)
+    public static bool TryRead(Reader reader, [NotNullWhen(true)] out ExpressionSyntaxNodeBuilder? result)
     {
-        if (FunctionCallExpressionSyntaxNodeParser.TryRead(code, out var functionCallExpressionSyntaxNode))
-        {
-            result = functionCallExpressionSyntaxNode;
-            return true;
-        }
-            
-        if (StringConstantExpressionSyntaxNodeParser.TryRead(code, out var stringConstantExpressionSyntaxNode))
-        {
-            result = stringConstantExpressionSyntaxNode;
-            return true;
-        }
+        result = TryRead(reader);
+        return result != null;
+    }
 
-        if (NumberConstantExpressionSyntaxNodeParser.TryRead(code, out var numberConstantExpressionSyntaxNode))
+    public static ExpressionSyntaxNodeBuilder? TryRead(Reader reader)
+    {
+        return reader.WithCache<ExpressionSyntaxNodeBuilder?>(nameof(UnaryExpression), static code =>
         {
-            result = numberConstantExpressionSyntaxNode;
-            return true;
-        }
-            
-        if (VariableReferenceExpressionSyntaxNodeParser.TryRead(code, out var variableReferenceExpressionSyntaxNode))
-        {
-            result = variableReferenceExpressionSyntaxNode;
-            return true;
-        }
+            if (FunctionCallExpressionSyntaxNodeParser.TryRead(code, out var functionCallExpressionSyntaxNode))
+                return functionCallExpressionSyntaxNode;
 
-        result = null;
-        return false;
+            if (StringConstantExpressionSyntaxNodeParser.TryRead(code, out var stringConstantExpressionSyntaxNode))
+                return stringConstantExpressionSyntaxNode;
+
+            if (NumberConstantExpressionSyntaxNodeParser.TryRead(code, out var numberConstantExpressionSyntaxNode))
+                return numberConstantExpressionSyntaxNode;
+
+            if (VariableReferenceExpressionSyntaxNodeParser.TryRead(code, out var variableReferenceExpressionSyntaxNode))
+                return variableReferenceExpressionSyntaxNode;
+
+            return null;
+        });
     }
 }

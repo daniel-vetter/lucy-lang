@@ -74,15 +74,42 @@ public static class BasicNodeAccess
         return list.Build();
     }
 
+    [GenerateDbExtension]
+    public static ComparableReadOnlyDictionary<INodeId<SyntaxTreeNode>, INodeId<SyntaxTreeNode>?> GetParentMap(IDb db, string documentPath)
+    {
+        var dict = new ComparableReadOnlyDictionary<INodeId<SyntaxTreeNode>, INodeId<SyntaxTreeNode>?>.Builder();
+
+        void Traverse(SyntaxTreeNode parent)
+        {
+            foreach (var child in parent.GetChildNodes())
+            {
+                dict.Add(child.NodeId, parent.NodeId);
+                Traverse(child);
+            }
+        }
+
+        var root = db.GetSyntaxTree(documentPath);
+        Traverse(root);
+        dict.Add(root.NodeId, null);
+
+        return dict.Build();
+    }
+
     [GenerateDbExtension] ///<see cref="GetParentNodeEx.GetParentNode" />
     public static SyntaxTreeNode? GetParentNode(IDb db, INodeId<SyntaxTreeNode> nodeId)
     {
+        var map = db.GetParentMap(nodeId.DocumentPath);
+        if (map.TryGetValue(nodeId, out var parentId) && parentId != null)
+            return db.GetNodeById(parentId);
+        return null;
+     /*   
         var lastIndex = nodeId.NodePath.LastIndexOf('.');
         if (lastIndex == -1)
             return null;
         var parentNodeId = new NodeId<SyntaxTreeNode, SyntaxTreeNodeBuilder>(nodeId.DocumentPath, nodeId.NodePath[..lastIndex]);
 
         return db.GetNodeById(parentNodeId);
+       */ 
     }
 
     [GenerateDbExtension] ///<see cref="GetParentNodeIdOfTypeEx.GetParentNodeIdOfType"/>

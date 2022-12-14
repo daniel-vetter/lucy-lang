@@ -1,38 +1,40 @@
-﻿using Lucy.Core.Model;
-using Lucy.Core.Parsing.Nodes.Token;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using Lucy.Core.Model;
 
 namespace Lucy.Core.Parsing.Nodes.Statements.FunctionDeclaration;
 
 internal static class FunctionDeclarationModifierList
 {
-    public static List<SyntaxElementBuilder> Read(Code code)
+    public static List<TokenNodeBuilder> Read(Reader reader)
     {
-        var l = new List<SyntaxElementBuilder>();
-
-        while (true)
+        return reader.WithCache(nameof(FunctionDeclarationModifierList), static code =>
         {
-            if (SyntaxElementParser.TryReadKeyword(code, "extern", out var externKeyword))
+            var l = new List<TokenNodeBuilder>();
+
+            while (true)
             {
-                l.Add(externKeyword);
-                continue;
+                if (TokenNodeParser.TryReadKeyword(code, "extern", out var externKeyword))
+                {
+                    l.Add(externKeyword);
+                    continue;
+                }
+
+                if (TokenNodeParser.TryReadKeyword(code, "cdecl", out var cdeclKeyword))
+                {
+                    l.Add(cdeclKeyword);
+                    continue;
+                }
+
+                if (TokenNodeParser.TryReadKeyword(code, "stdcall", out var stdcallKeyword))
+                {
+                    l.Add(stdcallKeyword);
+                    continue;
+                }
+
+                break;
             }
 
-            if (SyntaxElementParser.TryReadKeyword(code, "cdecl", out var cdeclKeyword))
-            {
-                l.Add(cdeclKeyword);
-                continue;
-            }
-
-            if (SyntaxElementParser.TryReadKeyword(code, "stdcall", out var stdcallKeyword))
-            {
-                l.Add(stdcallKeyword);
-                continue;
-            }
-
-            break;
-        }
-
-        return l;
+            return l;
+        });
     }
 }

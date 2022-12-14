@@ -28,9 +28,9 @@ public static class GetImportsHandler
             var path = NormalizePath(CombinePath(currentDir, importStatement.Path.Value)) + ".lucy";
 
             if (documentList.Contains(path))
-                validList.Add(new Import(importStatement.NodeId, importStatement.Path.Str.Token.NodeId, path));
+                validList.Add(new Import(importStatement.NodeId, importStatement.Path.Str.NodeId, path));
             else
-                invalidList.Add(new Import(importStatement.NodeId, importStatement.Path.Str.Token.NodeId, path));
+                invalidList.Add(new Import(importStatement.NodeId, importStatement.Path.Str.NodeId, path));
         }
 
         return new DocumentImports(validList.Build(), invalidList.Build());

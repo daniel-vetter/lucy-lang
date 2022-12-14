@@ -1,32 +1,32 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using Lucy.Core.Model;
-using Lucy.Core.Parsing.Nodes.Token;
 
 namespace Lucy.Core.Parsing.Nodes.Statements.FunctionDeclaration;
 
 public static class TypeAnnotationSyntaxNodeParser
 {
-    public static bool TryRead(Code code, [NotNullWhen(true)] out TypeAnnotationSyntaxNodeBuilder? result)
+    public static bool TryRead(Reader reader, [NotNullWhen(true)] out TypeAnnotationSyntaxNodeBuilder? result)
     {
-        var t = code.BeginTransaction();
+        result = TryRead(reader);
+        return result != null;
+    }
 
-        if (!SyntaxElementParser.TryReadExact(code, ":", out var separator))
+    public static TypeAnnotationSyntaxNodeBuilder? TryRead(Reader reader)
+    {
+        return reader.WithCache(nameof(TypeAnnotationSyntaxNodeParser), static code =>
         {
-            result = null;
-            return false;
-        }
+            if (!TokenNodeParser.TryReadExact(code, ":", out var separator))
+                return null;
+            
+            if (!TypeReferenceSyntaxNodeParser.TryRead(code, out var typeReference))
+                typeReference = TypeReferenceSyntaxNodeParser.Missing("Type expected");
 
-        t.Commit();
-
-        if (!TypeReferenceSyntaxNodeParser.TryRead(code, out var typeReference))
-            typeReference = TypeReferenceSyntaxNodeParser.Missing("Type expected");
-
-        result = new TypeAnnotationSyntaxNodeBuilder(separator, typeReference);
-        return true;
+            return new TypeAnnotationSyntaxNodeBuilder(separator, typeReference);
+        });
     }
 
     public static TypeAnnotationSyntaxNodeBuilder Missing(string? errorMessage = null)
     {
-        return new TypeAnnotationSyntaxNodeBuilder(SyntaxElementParser.Missing(errorMessage), TypeReferenceSyntaxNodeParser.Missing());
+        return new TypeAnnotationSyntaxNodeBuilder(TokenNodeParser.Missing(errorMessage), TypeReferenceSyntaxNodeParser.Missing());
     }
 }

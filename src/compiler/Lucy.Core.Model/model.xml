@@ -2,42 +2,22 @@
 
 	<StatementSyntaxNode basedOn="SyntaxTreeNode" />
 	<ExpressionSyntaxNode basedOn="SyntaxTreeNode" />
-	<TriviaNode basedOn="SyntaxTreeNode" />
 
 	<MissingExpressionSyntaxNode basedOn="ExpressionSyntaxNode" />
 
 	<SyntaxTreeNode>
-		<SyntaxErrors type="string" list="true" init="new()" />
+		<SyntaxErrors type="string" list="true" optional="true" init="null"/>
 	</SyntaxTreeNode>
 	
 	<TokenNode basedOn="SyntaxTreeNode">
 		<Text type="string" />
+		<TrailingTrivia type="string" optional="true" />
 	</TokenNode>
 	
-	<SyntaxElement basedOn="SyntaxTreeNode">
-		<LeadingTrivia type="TriviaNode" list="true"/>
-		<Token type="TokenNode" />
-	</SyntaxElement>
-	
-	<MultiLineCommentTriviaNode basedOn="TriviaNode">
-		<Start type="TokenNode" />
-		<Content type="TokenNode" />
-		<End type="TokenNode" optional="true" />
-	</MultiLineCommentTriviaNode>
-
-	<SingleLineCommentTriviaNode basedOn="TriviaNode">
-		<Start type="TokenNode" />
-		<Content type="TokenNode" />
-	</SingleLineCommentTriviaNode>
-
-	<WhitespaceTriviaNode basedOn="TriviaNode">
-		<Token type="TokenNode" />
-	</WhitespaceTriviaNode>
-
 	<StatementListSyntaxNode basedOn="StatementSyntaxNode">
-		<BlockStart type="SyntaxElement" optional="true" />
+		<BlockStart type="TokenNode" optional="true" />
 		<Statements type="StatementSyntaxNode" list="true" />
-		<BlockEnd type="SyntaxElement"  optional="true" />
+		<BlockEnd type="TokenNode"  optional="true" />
 	</StatementListSyntaxNode>
 
 	<ExpressionStatementSyntaxNode basedOn="StatementSyntaxNode">
@@ -45,106 +25,106 @@
 	</ExpressionStatementSyntaxNode>
 
 	<VariableDeclarationStatementSyntaxNode basedOn="StatementSyntaxNode">
-		<VarKeyword type="SyntaxElement" />
-		<VariableName type="SyntaxElement" />
-		<EqualSign type="SyntaxElement" />
+		<VarKeyword type="TokenNode" />
+		<VariableName type="TokenNode" />
+		<EqualSign type="TokenNode" />
 		<Expression type="ExpressionSyntaxNode" />
 	</VariableDeclarationStatementSyntaxNode>
 
 	<ImportStatementSyntaxNode basedOn="StatementSyntaxNode">
-		<ImportKeyword type="SyntaxElement" />
+		<ImportKeyword type="TokenNode" />
 		<Path type="StringConstantExpressionSyntaxNode" />
 	</ImportStatementSyntaxNode>
 
 	<StringConstantExpressionSyntaxNode basedOn="ExpressionSyntaxNode">
 		<Value type="string" />
-		<Str type="SyntaxElement" />
+		<Str type="TokenNode" />
 	</StringConstantExpressionSyntaxNode>
 
 	<NumberConstantExpressionSyntaxNode basedOn="ExpressionSyntaxNode">
 		<Value type="double" />
-		<Token type="SyntaxElement" />
+		<Token type="TokenNode" />
 	</NumberConstantExpressionSyntaxNode>
 
 	<TypeAnnotationSyntaxNode basedOn="SyntaxTreeNode">
-		<Seperator type="SyntaxElement" />
+		<Seperator type="TokenNode" />
 		<TypeReference type="TypeReferenceSyntaxNode" />
 	</TypeAnnotationSyntaxNode>
 
 	<TypeReferenceSyntaxNode basedOn="SyntaxTreeNode">
-		<TypeName type="SyntaxElement" />
+		<TypeName type="TokenNode" />
 	</TypeReferenceSyntaxNode>
 
 	<FunctionDeclarationStatementSyntaxNode basedOn="StatementSyntaxNode">
-		<Modifiers type="SyntaxElement" list="true" />
+		<Modifiers type="TokenNode" list="true" />
 		<ExternLibraryName type="StringConstantExpressionSyntaxNode" optional="true" />
 		<ExternFunctionName type="StringConstantExpressionSyntaxNode" optional="true" />
-		<FunKeyword type="SyntaxElement" />
-		<FunctionName type="SyntaxElement" />
-		<OpenBraket type="SyntaxElement" />
+		<FunKeyword type="TokenNode" />
+		<FunctionName type="TokenNode" />
+		<OpenBraket type="TokenNode" />
 		<ParameterList type="FunctionDeclarationParameterSyntaxNode" list="true" />
-		<CloseBraket type="SyntaxElement" />
+		<CloseBraket type="TokenNode" />
 		<ReturnType type="TypeAnnotationSyntaxNode" />
 		<Body type="StatementListSyntaxNode" optional="true" />
 	</FunctionDeclarationStatementSyntaxNode>
 
 	<FunctionDeclarationParameterSyntaxNode basedOn="SyntaxTreeNode">
-		<VariableName type="SyntaxElement" />
+		<VariableName type="TokenNode" />
 		<VariableType type="TypeAnnotationSyntaxNode" />
-		<Seperator type="SyntaxElement" optional="true" />
+		<Seperator type="TokenNode" optional="true" />
 	</FunctionDeclarationParameterSyntaxNode>
 
 	<FunctionCallExpressionSyntaxNode basedOn="ExpressionSyntaxNode">
-		<FunctionName type="SyntaxElement" />
-		<OpenBraket type="SyntaxElement" />
+		<FunctionName type="TokenNode" />
+		<OpenBraket type="TokenNode" />
 		<ArgumentList type="FunctionCallArgumentSyntaxNode" list="true" />
-		<CloseBraket type="SyntaxElement" />
+		<CloseBraket type="TokenNode" />
 	</FunctionCallExpressionSyntaxNode>
 
 	<FunctionCallArgumentSyntaxNode basedOn="SyntaxTreeNode">
 		<Expression type="ExpressionSyntaxNode" />
-		<Seperator type="SyntaxElement" optional="true" />
+		<Seperator type="TokenNode" optional="true" />
 	</FunctionCallArgumentSyntaxNode>
 
 	<AdditionExpressionSyntaxNode basedOn="ExpressionSyntaxNode">
 		<Left type="ExpressionSyntaxNode" />
-		<PlusToken type="SyntaxElement" />
+		<PlusToken type="TokenNode" />
 		<Right type="ExpressionSyntaxNode" />
 	</AdditionExpressionSyntaxNode>
 
 	<AndExpressionSyntaxNode basedOn="ExpressionSyntaxNode">
 		<Left type="ExpressionSyntaxNode" />
-		<AndToken type="SyntaxElement" />
+		<AndToken type="TokenNode" />
 		<Right type="ExpressionSyntaxNode" />
 	</AndExpressionSyntaxNode>
 
 	<OrExpressionSyntaxNode basedOn="ExpressionSyntaxNode">
 		<Left type="ExpressionSyntaxNode" />
-		<OrToken type="SyntaxElement" />
+		<OrToken type="TokenNode" />
 		<Right type="ExpressionSyntaxNode" />
 	</OrExpressionSyntaxNode>
 
 	<IfExpressionSyntaxNode basedOn="ExpressionSyntaxNode">
 		<Condition type="ExpressionSyntaxNode" />
-		<IfToken type="SyntaxElement" />
+		<IfToken type="TokenNode" />
 		<ThenExpression type="ExpressionSyntaxNode" />
-		<ElseToken type="SyntaxElement" />
+		<ElseToken type="TokenNode" />
 		<ElseExpression type="ExpressionSyntaxNode" />
 	</IfExpressionSyntaxNode>
 
 	<MemberAccessExpressionSyntaxNode basedOn="ExpressionSyntaxNode">
 		<Target type="ExpressionSyntaxNode" />
-		<DotToken type="SyntaxElement" />
-		<MemberToken type="SyntaxElement" />
+		<DotToken type="TokenNode" />
+		<MemberToken type="TokenNode" />
 	</MemberAccessExpressionSyntaxNode>
 
 	<DocumentRootSyntaxNode basedOn="SyntaxTreeNode">
+		<LeadingTrivia type="string" optional="true" />
 		<StatementList type="StatementListSyntaxNode" />
-		<TrailingTrivia type="TriviaNode" list="true" />
 	</DocumentRootSyntaxNode>
 
 	<VariableReferenceExpressionSyntaxNode basedOn="ExpressionSyntaxNode">
-		<Token type="SyntaxElement" />
+		<Token type="TokenNode" />
 	</VariableReferenceExpressionSyntaxNode>
 </Model>
 

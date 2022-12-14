@@ -34,7 +34,7 @@ public class SemanticDatabase : IDb, IDisposable
         if (graphOutputDir == null)
             return;
 
-        var exporterDetailed = new DetailedGraphExport(graphOutputDir);
+        //var exporterDetailed = new DetailedGraphExport(graphOutputDir);
         var exporterSummary = new SummaryGraphExport(graphOutputDir);
 
         _db.OnQueryDone = () =>
@@ -44,7 +44,7 @@ public class SemanticDatabase : IDb, IDisposable
             sw1.Stop();
 
             var sw2 = Stopwatch.StartNew();
-            exporterDetailed.Export(log);
+          //  exporterDetailed.Export(log);
             exporterSummary.Export(log);
             sw2.Stop();
         };
@@ -53,11 +53,10 @@ public class SemanticDatabase : IDb, IDisposable
     private void AddWorkspaceAsInputs(Workspace workspace)
     {
         _db.SetInput(new GetDocumentList(), new GetDocumentListResult(_workspace.Documents.Keys.ToComparableReadOnlyList()));
-        foreach (var codeFile in workspace.Documents.Values.OfType<CodeFile>())
+        foreach (var codeFile in workspace.Documents.Values.OfType<CodeWorkspaceDocument>())
         {
-            _db.SetInput(new GetSyntaxTree(codeFile.Path), new GetSyntaxTreeResult(codeFile.SyntaxTree.Build()));
+            _db.SetInput(new GetSyntaxTree(codeFile.Path), new GetSyntaxTreeResult(codeFile.ParserResult.RootNode.Build()));
         }
-
     }
 
     private void RegisterHandler()
@@ -89,9 +88,9 @@ public class SemanticDatabase : IDb, IDisposable
         if (@event is DocumentAdded documentAdded)
         {
             _db.SetInput(new GetDocumentList(), new GetDocumentListResult(_workspace.Documents.Keys.ToComparableReadOnlyList()));
-            if (documentAdded.Document is CodeFile codeFile)
+            if (documentAdded.Document is CodeWorkspaceDocument codeFile)
             {
-                _db.SetInput(new GetSyntaxTree(codeFile.Path), new GetSyntaxTreeResult(codeFile.SyntaxTree.Build()));
+                _db.SetInput(new GetSyntaxTree(codeFile.Path), new GetSyntaxTreeResult(codeFile.ParserResult.RootNode.Build()));
             }
 
             else
@@ -99,9 +98,9 @@ public class SemanticDatabase : IDb, IDisposable
         }
         if (@event is DocumentChanged documentChanged)
         {
-            if (documentChanged.NewDocument is CodeFile codeFile)
+            if (documentChanged.NewDocument is CodeWorkspaceDocument codeFile)
             {
-                _db.SetInput(new GetSyntaxTree(codeFile.Path), new GetSyntaxTreeResult(codeFile.SyntaxTree.Build()));
+                _db.SetInput(new GetSyntaxTree(codeFile.Path), new GetSyntaxTreeResult(codeFile.ParserResult.RootNode.Build()));
             }
         }
         if (@event is DocumentRemoved documentRemoved)

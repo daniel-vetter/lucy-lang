@@ -1,51 +1,54 @@
 ﻿using Lucy.Core.Parsing.Nodes.Trivia;
 using System.Diagnostics.CodeAnalysis;
 using Lucy.Core.Model;
-using Lucy.Core.Parsing.Nodes.Token;
 
 namespace Lucy.Core.Parsing.Nodes.Expressions.Unary;
 
-public class StringConstantExpressionSyntaxNodeParser
+public static class StringConstantExpressionSyntaxNodeParser
 {
-    public static StringConstantExpressionSyntaxNodeBuilder Missing(string? errorMessage = null)
+    public static bool TryRead(Reader reader, [NotNullWhen(true)] out StringConstantExpressionSyntaxNodeBuilder? result)
     {
-        var node = new StringConstantExpressionSyntaxNodeBuilder("", SyntaxElementParser.Missing(errorMessage));
-        return node;
+        result = TryRead(reader);
+        return result != null;
     }
 
-    public static bool TryRead(Code code, [NotNullWhen(true)] out StringConstantExpressionSyntaxNodeBuilder? result)
+    public static StringConstantExpressionSyntaxNodeBuilder? TryRead(Reader reader)
     {
-        var start = code.Position;
-        var leadingTrivia = TriviaNodeParser.ReadList(code);
-
-        if (code.Peek() != '\"')
+        return reader.WithCache(nameof(StringConstantExpressionSyntaxNodeParser), static code =>
         {
-            code.SeekTo(start);
-            result = null;
-            return false;
-        }
+            if (code.Peek() != '\"')
+                return null;
 
-        int len = 1;
-        while (true)
-        {
-            if (code.Peek(len) == '\0')
+            var len = 1;
+            while (true)
             {
-                var str = code.Read(len);
-                var token = new SyntaxElementBuilder(leadingTrivia, new TokenNodeBuilder(str));
-                token.SyntaxErrors.Add("Unterminated string detected. Missing '\"'");
-                result = new StringConstantExpressionSyntaxNodeBuilder(str.Substring(1), token);
-                return true;
-            }
+                if (code.Peek(len) == '\0')
+                {
+                    var str = code.Read(len);
+                    var trailingTrivia = TriviaParser.Read(code);
+                    var token = new TokenNodeBuilder(str, trailingTrivia)
+                    {
+                        SyntaxErrors = new() { "Unterminated string detected. Missing '\"'" }
+                    };
+                    return new StringConstantExpressionSyntaxNodeBuilder(str[1..], token);
+                }
 
-            if (code.Peek(len) == '"')
-            {
-                var str = code.Read(len + 1);
-                var token = new SyntaxElementBuilder(leadingTrivia, new TokenNodeBuilder(str));
-                result = new StringConstantExpressionSyntaxNodeBuilder(str.Substring(1, str.Length - 2), token);
-                return true;
-            }
+                if (code.Peek(len) == '"')
+                {
+                    var str = code.Read(len + 1);
+                    var trailingTrivia = TriviaParser.Read(code);
+                    var token = new TokenNodeBuilder(str, trailingTrivia);
+                    return new StringConstantExpressionSyntaxNodeBuilder(str.Substring(1, str.Length - 2), token);
+                }
 
-            len++;
-        }
+                len++;
+            }
+        });
+    }
+
+    public static StringConstantExpressionSyntaxNodeBuilder Missing(string? errorMessage = null)
+    {
+        var node = new StringConstantExpressionSyntaxNodeBuilder("", TokenNodeParser.Missing(errorMessage));
+        return node;
     }
 }

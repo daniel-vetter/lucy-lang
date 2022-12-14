@@ -38,7 +38,8 @@ public static class GetSyntaxErrors
 
     private static void Traverse(IDb db, SyntaxTreeNode node, ComparableReadOnlyList<Error>.Builder list)
     {
-        list.AddRange(node.SyntaxErrors.Select(x => new ErrorWithRange(node.NodeId.DocumentPath, db.GetRangeFromNode(node), x)));
+        if (node.SyntaxErrors.HasValue)
+            list.AddRange(node.SyntaxErrors.Value.Select(x => new ErrorWithRange(node.NodeId.DocumentPath, db.GetRangeFromNode(node), x)));
 
         foreach(var child in node.GetChildNodes())
         {

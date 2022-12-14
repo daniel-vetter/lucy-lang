@@ -92,9 +92,9 @@ public class DebugViewGenerator
         {
             sb.Append("<span style='opacity: 0.5'>&lt;null&gt;</span>");
         }
-        else if (value is SyntaxElement se)
+        else if (value is TokenNode se)
         {
-            sb.Append($"{value.GetType().Name} <span class=\"string\">\"{se.Token.Text}\"</span>");
+            sb.Append($"{value.GetType().Name} <span class=\"string\">\"{se.Text}\"</span>");
         }
         else if (value is string str)
         {

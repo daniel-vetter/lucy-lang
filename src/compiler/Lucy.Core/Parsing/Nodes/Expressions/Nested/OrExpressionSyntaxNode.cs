@@ -1,30 +1,33 @@
 ﻿using Lucy.Core.Model;
-using Lucy.Core.Parsing.Nodes.Token;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Lucy.Core.Parsing.Nodes.Expressions.Nested;
 
-internal class OrExpressionSyntaxNodeParser
+internal static class OrExpressionSyntaxNodeParser
 {
-    public static bool TryReadOrInner(Code code, [NotNullWhen(true)] out ExpressionSyntaxNodeBuilder? result)
+    public static bool TryReadOrInner(Reader reader, [NotNullWhen(true)] out ExpressionSyntaxNodeBuilder? result)
     {
-        if (!AdditionExpressionSyntaxNodeParser.TryReadOrInner(code, out result))
-            return false;
-            
-        while (true)
-        {
-            if (!SyntaxElementParser.TryReadKeyword(code, "or", out var orToken))
-            {
-                return true;
-            }
-                
-            if (!AdditionExpressionSyntaxNodeParser.TryReadOrInner(code, out var right))
-            {
-                result = new OrExpressionSyntaxNodeBuilder(result, orToken, ExpressionSyntaxNodeParser.Missing("Expression expected"));
-                return true;
-            }
+        result = TryReadOrInner(reader);
+        return result != null;
+    }
 
-            result = new OrExpressionSyntaxNodeBuilder(result, orToken, right);
-        }
+    public static ExpressionSyntaxNodeBuilder? TryReadOrInner(Reader reader)
+    {
+        return reader.WithCache(nameof(OrExpressionSyntaxNodeParser), static code =>
+        {
+            if (!AdditionExpressionSyntaxNodeParser.TryReadOrInner(code, out var result))
+                return null;
+
+            while (true)
+            {
+                if (!TokenNodeParser.TryReadKeyword(code, "or", out var orToken))
+                    return result;
+
+                if (!AdditionExpressionSyntaxNodeParser.TryReadOrInner(code, out var right))
+                    return new OrExpressionSyntaxNodeBuilder(result, orToken, ExpressionSyntaxNodeParser.Missing("Expression expected"));
+
+                result = new OrExpressionSyntaxNodeBuilder(result, orToken, right);
+            }
+        });
     }
 }

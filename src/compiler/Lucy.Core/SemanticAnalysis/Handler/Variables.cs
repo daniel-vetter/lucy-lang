@@ -16,7 +16,7 @@ namespace Lucy.Core.SemanticAnalysis.Handler
 
             return new FlatVariableDeclaration(
                 node.NodeId,
-                new FlatIdentifier(node.VariableName.Token.Text, node.VariableName.Token.NodeId),
+                new FlatIdentifier(node.VariableName.Text, node.VariableName.NodeId),
                 node.Expression.NodeId
             );
         }

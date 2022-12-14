@@ -1,30 +1,32 @@
 ﻿using Lucy.Core.Model;
-using Lucy.Core.Parsing.Nodes.Token;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Lucy.Core.Parsing.Nodes.Expressions.Unary;
 
-public class FunctionCallExpressionSyntaxNodeParser
+public static class FunctionCallExpressionSyntaxNodeParser
 {
-    public static bool TryRead(Code code, [NotNullWhen(true)] out FunctionCallExpressionSyntaxNodeBuilder? result)
+    public static bool TryRead(Reader reader, [NotNullWhen(true)] out FunctionCallExpressionSyntaxNodeBuilder? result)
     {
-        using var t = code.BeginTransaction();
-        result = null;
+        result = TryRead(reader);
+        return result != null;
+    }
 
-        if (!SyntaxElementParser.TryReadIdentifier(code, out var functionName))
-            return false;
+    public static FunctionCallExpressionSyntaxNodeBuilder? TryRead(Reader reader)
+    {
+        return reader.WithCache(nameof(FunctionCallExpressionSyntaxNodeParser), static code =>
+        {
+            if (!TokenNodeParser.TryReadIdentifier(code, out var functionName))
+                return null;
 
-        if (!SyntaxElementParser.TryReadExact(code, "(", out var openBraket))
-            return false;
+            if (!TokenNodeParser.TryReadExact(code, "(", out var openBracket))
+                return null;
 
-        t.Commit();
+            var argumentList = FunctionCallArgumentSyntaxNodeParser.Read(code);
 
-        var argumentList = FunctionCallArgumentSyntaxNodeParser.Read(code);
+            if (!TokenNodeParser.TryReadExact(code, ")", out var closeBracket))
+                closeBracket = TokenNodeParser.Missing("Expected ')'.");
 
-        if (!SyntaxElementParser.TryReadExact(code, ")", out var closeBraket))
-            closeBraket = SyntaxElementParser.Missing("Expected ')'.");
-
-        result = new FunctionCallExpressionSyntaxNodeBuilder(functionName, openBraket, argumentList, closeBraket);
-        return true;
+            return new FunctionCallExpressionSyntaxNodeBuilder(functionName, openBracket, argumentList, closeBracket);
+        });
     }
 }

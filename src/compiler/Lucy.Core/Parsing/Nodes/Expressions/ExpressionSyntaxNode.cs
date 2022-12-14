@@ -1,4 +1,5 @@
-﻿using Lucy.Core.Model;
+﻿using System.Collections.Generic;
+using Lucy.Core.Model;
 using Lucy.Core.Parsing.Nodes.Expressions.Nested;
 using System.Diagnostics.CodeAnalysis;
 
@@ -10,9 +11,10 @@ public abstract class ExpressionSyntaxNodeParser
     {
         var node = new MissingExpressionSyntaxNodeBuilder();
         if (errorMessage != null)
-            node.SyntaxErrors.Add(errorMessage);
+            node.SyntaxErrors = new List<string> { errorMessage };
         return node;
     }
 
-    public static bool TryRead(Code code, [NotNullWhen(true)] out ExpressionSyntaxNodeBuilder? result) => IfExpressionSyntaxNodeParser.TryReadOrInner(code, out result);
+    public static bool TryRead(Reader reader, [NotNullWhen(true)] out ExpressionSyntaxNodeBuilder? result) 
+        => IfExpressionSyntaxNodeParser.TryReadOrInner(reader, out result);
 }
