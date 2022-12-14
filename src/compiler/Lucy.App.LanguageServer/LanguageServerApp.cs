@@ -34,9 +34,6 @@ public class LanguageServerApp
 
     private static IServiceCollection CreateServiceCollection()
     {
-
-        Profiler.Attach();
-
         return new ServiceCollection()
             .AddServicesFromCurrentAssembly()
             .AddJsonRpcServer(b =>

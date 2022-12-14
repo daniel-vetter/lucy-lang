@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Net;
 
 namespace Lucy.App.LanguageServer.Infrastructure
@@ -22,10 +23,19 @@ namespace Lucy.App.LanguageServer.Infrastructure
 
         public static void Launch()
         {
-            var appDir = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-            var vsCodeDir = Path.Combine(appDir, "Programs\\Microsoft VS Code\\code.exe");
+            var vsCodePossiblePath = new[]
+            {
+                "C:\\Program Files\\Microsoft VS Code\\Code.exe",
+                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Programs\\Microsoft VS Code\\code.exe")
+            };
+
+            var vsCodePath = vsCodePossiblePath
+                .FirstOrDefault(File.Exists);
+
+            if (vsCodePath == null)
+                throw new Exception("Could not find vscode executable. Please make sure Visuals Studio Code is installed.");
             
-            var info = new ProcessStartInfo(vsCodeDir)
+            var info = new ProcessStartInfo(vsCodePath)
             {
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
