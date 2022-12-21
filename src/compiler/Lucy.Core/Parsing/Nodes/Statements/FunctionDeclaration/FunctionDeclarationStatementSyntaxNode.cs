@@ -1,39 +1,40 @@
 ﻿using Lucy.Core.Parsing.Nodes.Expressions.Unary;
 using Lucy.Core.Model;
+using Lucy.Core.Parsing.Nodes.Token;
 
 namespace Lucy.Core.Parsing.Nodes.Statements.FunctionDeclaration;
 
 public static class FunctionDeclarationStatementSyntaxNodeParser
 {
-    public static FunctionDeclarationStatementSyntaxNodeBuilder? Read(Reader reader)
+    public static FunctionDeclarationStatementSyntaxNode? Read(Reader reader)
     {
-        return reader.WithCache(nameof(FunctionDeclarationStatementSyntaxNodeParser), static code =>
+        return reader.WithCache(nameof(FunctionDeclarationStatementSyntaxNodeParser), static r =>
         {
-            var modifier = FunctionDeclarationModifierList.Read(code);
+            var modifier = FunctionDeclarationModifierList.Read(r);
 
-            StringConstantExpressionSyntaxNodeParser.TryRead(code, out var libraryNameToken);
-            StringConstantExpressionSyntaxNodeParser.TryRead(code, out var functionNameToken);
+            StringConstantExpressionSyntaxNodeParser.TryRead(r, out var libraryNameToken);
+            StringConstantExpressionSyntaxNodeParser.TryRead(r, out var functionNameToken);
 
-            if (!TokenNodeParser.TryReadKeyword(code, "fun", out var funKeyword))
+            if (!TokenNodeParser.TryReadKeyword(r, "fun", out var funKeyword))
                 return null;
 
-            if (!TokenNodeParser.TryReadIdentifier(code, out var functionName))
+            if (!TokenNodeParser.TryReadIdentifier(r, out var functionName))
                 functionName = TokenNodeParser.Missing("Expected function name");
 
-            if (!TokenNodeParser.TryReadExact(code, "(", out var openBracket))
+            if (!TokenNodeParser.TryReadExact(r, "(", out var openBracket))
                 openBracket = TokenNodeParser.Missing("Expected '('");
 
-            var parameterList = FunctionDeclarationParameterSyntaxNodeParser.Read(code);
+            var parameterList = FunctionDeclarationParameterSyntaxNodeParser.Read(r);
 
-            if (!TokenNodeParser.TryReadExact(code, ")", out var closeBracket))
+            if (!TokenNodeParser.TryReadExact(r, ")", out var closeBracket))
                 closeBracket = TokenNodeParser.Missing("Expected ')'");
 
-            if (!TypeAnnotationSyntaxNodeParser.TryRead(code, out var returnType))
+            if (!TypeAnnotationSyntaxNodeParser.TryRead(r, out var returnType))
                 returnType = TypeAnnotationSyntaxNodeParser.Missing("Expected return type");
 
-            var body = StatementListSyntaxNodeParser.TryReadStatementBlock(code);
+            var body = StatementListSyntaxNodeParser.TryReadStatementBlock(r);
 
-            return new FunctionDeclarationStatementSyntaxNodeBuilder(
+            return FunctionDeclarationStatementSyntaxNode.Create(
                 modifiers: modifier,
                 externLibraryName: libraryNameToken,
                 externFunctionName: functionNameToken,

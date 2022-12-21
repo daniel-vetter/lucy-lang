@@ -24,7 +24,7 @@ public class Workspace
             Path = x,
             Content = await File.ReadAllTextAsync(x)
         }));
-
+        
         var ws = new Workspace();
         foreach (var document in data)
             ws.AddDocument(document.Path, document.Content);
@@ -44,7 +44,7 @@ public class Workspace
             Path = path,
             Content = content,
             LineBreakMap = LineBreakMap.CreateFrom(content),
-            ParserResult = ParserResult.CreateFrom(content)
+            ParserResult = ParserResult.CreateFrom(path, content)
         };
 
         _documents = _documents.Add(path, document);
@@ -63,7 +63,7 @@ public class Workspace
                 Path = path,
                 Content = content,
                 LineBreakMap = LineBreakMap.CreateFrom(content),
-                ParserResult = ParserResult.CreateFrom(content)
+                ParserResult = ParserResult.CreateFrom(path, content)
             };
 
             _documents = _documents.SetItem(path, newDocument);

@@ -1,27 +1,28 @@
 ﻿using Lucy.Core.Model;
 using Lucy.Core.Parsing.Nodes.Expressions;
+using Lucy.Core.Parsing.Nodes.Token;
 
 namespace Lucy.Core.Parsing.Nodes.Statements
 {
     public static class VariableDeclarationStatementSyntaxNodeParser
     {
-        public static VariableDeclarationStatementSyntaxNodeBuilder? Read(Reader reader)
+        public static VariableDeclarationStatementSyntaxNode? Read(Reader reader)
         {
-            return reader.WithCache(nameof(VariableDeclarationStatementSyntaxNodeParser), static code =>
+            return reader.WithCache(nameof(VariableDeclarationStatementSyntaxNodeParser), static r =>
             {
-                if (!TokenNodeParser.TryReadKeyword(code, "var", out var varKeyword))
+                if (!TokenNodeParser.TryReadKeyword(r, "var", out var varKeyword))
                     return null;
 
-                if (!TokenNodeParser.TryReadIdentifier(code, out var variableName))
+                if (!TokenNodeParser.TryReadIdentifier(r, out var variableName))
                     variableName = TokenNodeParser.Missing("Variable name expected");
 
-                if (!TokenNodeParser.TryReadExact(code, "=", out var equalSign))
+                if (!TokenNodeParser.TryReadExact(r, "=", out var equalSign))
                     equalSign = TokenNodeParser.Missing("'=' expected");
 
-                if (!ExpressionSyntaxNodeParser.TryRead(code, out var expression))
+                if (!ExpressionSyntaxNodeParser.TryRead(r, out var expression))
                     expression = ExpressionSyntaxNodeParser.Missing("Expression expected");
 
-                return new VariableDeclarationStatementSyntaxNodeBuilder(varKeyword, variableName, equalSign, expression);
+                return VariableDeclarationStatementSyntaxNode.Create(varKeyword, variableName, equalSign, expression);
             });
         }
     }

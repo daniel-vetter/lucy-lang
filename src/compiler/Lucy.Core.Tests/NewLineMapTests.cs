@@ -8,7 +8,7 @@ public class LineBreakMapTests
     [Test]
     public void Test_conversion_from_1D_to_2D()
     {
-        var map = new LineBreakMap("AB\nCD");
+        var map = LineBreakMap.CreateFrom("AB\nCD");
 
         map.To2D(new Position1D(0)).ShouldBe(new Position2D(0, 0));
         map.To2D(new Position1D(1)).ShouldBe(new Position2D(0, 1));
@@ -23,7 +23,7 @@ public class LineBreakMapTests
     [Test]
     public void Test_empty_strings_work()
     {
-        var map = new LineBreakMap("");
+        var map = LineBreakMap.CreateFrom("");
         map.To2D(new Position1D(0)).ShouldBe(new Position2D(0, 0));
         map.To2D(new Position1D(1)).ShouldBe(new Position2D(0, 0));
 
@@ -36,7 +36,7 @@ public class LineBreakMapTests
     [Test]
     public void Test_conversion_from_2D_to_1D()
     {
-        var map = new LineBreakMap("AB\nCD");
+        var map = LineBreakMap.CreateFrom("AB\nCD");
 
         map.To1D(new Position2D(0, 0)).ShouldBe(new Position1D(0));
         map.To1D(new Position2D(0, 1)).ShouldBe(new Position1D(1));

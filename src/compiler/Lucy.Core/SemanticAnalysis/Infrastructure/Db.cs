@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
@@ -20,6 +19,7 @@ public class Db
     private IQuery? _lastQuery;
 
     //TODO: Garbage collection
+    //TODO: Better monitoring system so if no monitoring is requested, no performance impact is noticable
 
     public Action? OnQueryDone { get; set; }
 
@@ -94,9 +94,9 @@ public class Db
         
         _lastQueryCalculations.Clear();
         _lastQuery = query;
-        var sw = Stopwatch.StartNew();
+        //var sw = Stopwatch.StartNew();
         var result = (TQueryResult)(Query((IQuery) query).Result ?? throw new Exception("Query was not executed."));
-        _lastQueryDuration = sw.Elapsed;
+        _lastQueryDuration = TimeSpan.Zero; //sw.Elapsed;
         OnQueryDone?.Invoke();
         
         return result;
@@ -124,12 +124,12 @@ public class Db
             throw new Exception($"For a query of type '{entry.Query.GetType().Name}' with parameter '{JsonSerializer.Serialize(entry.Query)}' is no input provided and no query handler registered.");
 
         var callContext = new QueryExecutionContext(this);
-        var handlerStopwatch = Stopwatch.StartNew();
+        //var handlerStopwatch = Stopwatch.StartNew();
         var result = handler.Handle(callContext, entry.Query);
-        handlerStopwatch.Stop();
+        //handlerStopwatch.Stop();
 
         ResultType resultType;
-        var overheadStopwatch = Stopwatch.StartNew();
+       // var overheadStopwatch = Stopwatch.StartNew();
 
         if (entry.IsInput)
             throw new Exception("The result of this query was already set as an input. It can not be changed to an result of an query handler.");
@@ -147,9 +147,9 @@ public class Db
         entry.Dependencies = callContext.Dependencies;
         entry.LastChecked = _currentRevision;
 
-        overheadStopwatch.Stop();
+        //overheadStopwatch.Stop();
 
-        _lastQueryCalculations.Add(entry, new RecordedCalculation(_lastQueryCalculations.Count, query: entry.Query, handlerStopwatch.Elapsed - callContext.TotalTimeInSubQueries, handlerStopwatch.Elapsed, overheadStopwatch.Elapsed, resultType));
+        _lastQueryCalculations.Add(entry, new RecordedCalculation(_lastQueryCalculations.Count, query: entry.Query, /*handlerStopwatch.Elapsed - callContext.TotalTimeInSubQueries*/ TimeSpan.Zero, TimeSpan.Zero, TimeSpan.Zero, /*handlerStopwatch.Elapsed, overheadStopwatch.Elapsed*/ resultType));
 
         Profiler.End("Calc " + entry.Query.GetType().Name);
         return resultType != ResultType.WasTheSame;
@@ -223,11 +223,11 @@ public class Db
         [DebuggerStepThrough]
         public TQueryResult Query<TQueryResult>(IQuery<TQueryResult> query) where TQueryResult : notnull
         {
-            var sw = Stopwatch.StartNew();
+            //var sw = Stopwatch.StartNew();
             var resultEntry = _db.Query((IQuery) query);
             Dependencies.Add(resultEntry);
-            sw.Stop();
-            _totalTimeInSubQueries += sw.Elapsed;
+            //sw.Stop();
+            _totalTimeInSubQueries += TimeSpan.Zero; // sw.Elapsed;
             return (TQueryResult)(resultEntry.Result ?? throw new Exception("Query was not executed."));
         }
     }

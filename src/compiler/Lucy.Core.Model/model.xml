@@ -6,7 +6,7 @@
 	<MissingExpressionSyntaxNode basedOn="ExpressionSyntaxNode" />
 
 	<SyntaxTreeNode>
-		<SyntaxErrors type="string" list="true" optional="true" init="null"/>
+		<SyntaxErrors type="string" list="true" init="ImmutableArray&lt;string&gt;.Empty" />
 	</SyntaxTreeNode>
 	
 	<TokenNode basedOn="SyntaxTreeNode">

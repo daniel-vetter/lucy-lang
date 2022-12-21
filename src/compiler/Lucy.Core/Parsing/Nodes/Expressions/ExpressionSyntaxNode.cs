@@ -1,20 +1,20 @@
-﻿using System.Collections.Generic;
-using Lucy.Core.Model;
+﻿using Lucy.Core.Model;
 using Lucy.Core.Parsing.Nodes.Expressions.Nested;
 using System.Diagnostics.CodeAnalysis;
+using System.Collections.Immutable;
 
 namespace Lucy.Core.Parsing.Nodes.Expressions;
 
 public abstract class ExpressionSyntaxNodeParser
 {
-    public static ExpressionSyntaxNodeBuilder Missing(string? errorMessage = null)
+    public static ExpressionSyntaxNode Missing(string? errorMessage = null)
     {
-        var node = new MissingExpressionSyntaxNodeBuilder();
-        if (errorMessage != null)
-            node.SyntaxErrors = new List<string> { errorMessage };
-        return node;
+        return new MissingExpressionSyntaxNode(
+            nodeId: null,
+            syntaxErrors: errorMessage == null ? ImmutableArray<string>.Empty : ImmutableArray.Create(errorMessage)
+        );
     }
 
-    public static bool TryRead(Reader reader, [NotNullWhen(true)] out ExpressionSyntaxNodeBuilder? result) 
+    public static bool TryRead(Reader reader, [NotNullWhen(true)] out ExpressionSyntaxNode? result) 
         => IfExpressionSyntaxNodeParser.TryReadOrInner(reader, out result);
 }

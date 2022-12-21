@@ -1,7 +1,4 @@
-﻿using Lucy.Core.Model;
-using Shouldly;
-
-namespace Lucy.Core.Tests;
+﻿namespace Lucy.Core.Tests;
 
 public class NodeIdTests
 {

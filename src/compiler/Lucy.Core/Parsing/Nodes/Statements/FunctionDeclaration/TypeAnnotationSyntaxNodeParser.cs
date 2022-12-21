@@ -1,32 +1,34 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
 using Lucy.Core.Model;
+using Lucy.Core.Parsing.Nodes.Token;
 
 namespace Lucy.Core.Parsing.Nodes.Statements.FunctionDeclaration;
 
 public static class TypeAnnotationSyntaxNodeParser
 {
-    public static bool TryRead(Reader reader, [NotNullWhen(true)] out TypeAnnotationSyntaxNodeBuilder? result)
+    public static bool TryRead(Reader reader, [NotNullWhen(true)] out TypeAnnotationSyntaxNode? result)
     {
         result = TryRead(reader);
         return result != null;
     }
 
-    public static TypeAnnotationSyntaxNodeBuilder? TryRead(Reader reader)
+    public static TypeAnnotationSyntaxNode? TryRead(Reader reader)
     {
-        return reader.WithCache(nameof(TypeAnnotationSyntaxNodeParser), static code =>
+        return reader.WithCache(nameof(TypeAnnotationSyntaxNodeParser), static r =>
         {
-            if (!TokenNodeParser.TryReadExact(code, ":", out var separator))
+            if (!TokenNodeParser.TryReadExact(r, ":", out var separator))
                 return null;
             
-            if (!TypeReferenceSyntaxNodeParser.TryRead(code, out var typeReference))
+            if (!TypeReferenceSyntaxNodeParser.TryRead(r, out var typeReference))
                 typeReference = TypeReferenceSyntaxNodeParser.Missing("Type expected");
 
-            return new TypeAnnotationSyntaxNodeBuilder(separator, typeReference);
+            return TypeAnnotationSyntaxNode.Create(separator, typeReference);
         });
     }
 
-    public static TypeAnnotationSyntaxNodeBuilder Missing(string? errorMessage = null)
+    public static TypeAnnotationSyntaxNode Missing(string? errorMessage = null)
     {
-        return new TypeAnnotationSyntaxNodeBuilder(TokenNodeParser.Missing(errorMessage), TypeReferenceSyntaxNodeParser.Missing());
+        return new TypeAnnotationSyntaxNode(null, TokenNodeParser.Missing(errorMessage), TypeReferenceSyntaxNodeParser.Missing(), ImmutableArray<string>.Empty);
     }
 }

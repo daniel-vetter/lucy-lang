@@ -1,17 +1,18 @@
 ﻿using Lucy.Core.Model;
+using Lucy.Core.Parsing.Nodes.Token;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Lucy.Core.Parsing.Nodes.Expressions.Nested;
 
 internal static class OrExpressionSyntaxNodeParser
 {
-    public static bool TryReadOrInner(Reader reader, [NotNullWhen(true)] out ExpressionSyntaxNodeBuilder? result)
+    public static bool TryReadOrInner(Reader reader, [NotNullWhen(true)] out ExpressionSyntaxNode? result)
     {
         result = TryReadOrInner(reader);
         return result != null;
     }
 
-    public static ExpressionSyntaxNodeBuilder? TryReadOrInner(Reader reader)
+    public static ExpressionSyntaxNode? TryReadOrInner(Reader reader)
     {
         return reader.WithCache(nameof(OrExpressionSyntaxNodeParser), static code =>
         {
@@ -24,9 +25,9 @@ internal static class OrExpressionSyntaxNodeParser
                     return result;
 
                 if (!AdditionExpressionSyntaxNodeParser.TryReadOrInner(code, out var right))
-                    return new OrExpressionSyntaxNodeBuilder(result, orToken, ExpressionSyntaxNodeParser.Missing("Expression expected"));
+                    return OrExpressionSyntaxNode.Create(result, orToken, ExpressionSyntaxNodeParser.Missing("Expression expected"));
 
-                result = new OrExpressionSyntaxNodeBuilder(result, orToken, right);
+                result = OrExpressionSyntaxNode.Create(result, orToken, right);
             }
         });
     }

@@ -23,18 +23,15 @@ internal static class SyntaxTreeModelGenerator
             var basedOn = new List<string>();
             if (node.BasedOn != null)
                 basedOn.Add(node.BasedOn);
-            if (node.IsRoot)
-                basedOn.Add("IHashable");
-            basedOn.Add("IEquatable<" + node.Name + "?>");
 
-            sb.AppendLine($"public {(node.IsTopMost ? "" : "abstract ")}class {node.Name} : " + string.Join(", ", basedOn));
+            sb.AppendLine($"public {(node.IsTopMost ? "" : "abstract ")}class {node.Name} {(basedOn.Count > 0 ? ": " + string.Join(", ", basedOn) : "")}");
             sb.AppendLine("{");
             sb.WriteConstructor(node);
+            sb.WriteCreateMethod(node);
             sb.WriteProperties(node);
             sb.WriteMemberVariables(node);
             sb.WriteGetChildNodesMethod(node);
-            sb.WriteHashBuilder(node);
-            sb.WriteEqualsMethods(node);
+            sb.WriteSetIdMethod(node);
             sb.AppendLine("}");
             sb.AppendLine();
         }
@@ -42,26 +39,23 @@ internal static class SyntaxTreeModelGenerator
         productionContext.AddSource("SyntaxTreeModel.g.cs", sb.ToString());
     }
 
-    private static void WriteEqualsMethods(this StringBuilder sb, Node node)
+    private static void WriteSetIdMethod(this StringBuilder sb, Node node)
     {
-
-        sb.AppendLine("    public bool Equals(" + node.Name + "? other)");
-        sb.AppendLine("    {");
-        sb.AppendLine("        return other is not null && _hash.AsSpan().SequenceEqual(other._hash);");
-        sb.AppendLine("    }");
-        sb.AppendLine();
-
         if (node.IsRoot)
         {
-            sb.AppendLine("    public override bool Equals(object? obj)");
+            sb.AppendLine("    public abstract void AssignNewNodeId(string documentPath);");
+            sb.AppendLine();
+            sb.AppendLine("    public void AssignExistingNodeId(INodeId<SyntaxTreeNode> id)");
             sb.AppendLine("    {");
-            sb.AppendLine($"        return Equals(obj as {node.Name});");
+            sb.AppendLine($"        _nodeId = (NodeId)id;");
             sb.AppendLine("    }");
             sb.AppendLine();
-
-            sb.AppendLine("    public override int GetHashCode()");
+        }
+        if (node.IsTopMost)
+        {
+            sb.AppendLine("    public override void AssignNewNodeId(string documentPath)");
             sb.AppendLine("    {");
-            sb.AppendLine("        return _hashShort;");
+            sb.AppendLine($"        _nodeId = new NodeId<{node.Name}>(documentPath);");
             sb.AppendLine("    }");
             sb.AppendLine();
         }
@@ -72,80 +66,23 @@ internal static class SyntaxTreeModelGenerator
         if (!node.IsRoot)
             return;
 
-        sb.AppendLine("    protected NodeId _nodeId;");
+        sb.AppendLine("    protected NodeId? _nodeId;");
         sb.AppendLine("    protected byte[] _hash = null!;");
         sb.AppendLine("    protected int _hashShort;");
         sb.AppendLine("    protected ImmutableArray<SyntaxTreeNode> _childNodes;");
         sb.AppendLine();
     }
-
-    private static void WriteHashBuilder(this StringBuilder sb, Node node)
-    {
-        if (node.IsRoot)
-        {
-            sb.AppendLine("    public byte[] GetFullHash()");
-            sb.AppendLine("    {");
-            sb.AppendLine("        return _hash;");
-            sb.AppendLine("    }");
-            sb.AppendLine();
-        }
-        
-        if (node.IsTopMost)
-        {
-            sb.AppendLine("    private void EnsureHashIsBuild()");
-            sb.AppendLine("    {");
-            sb.AppendLine("        using var b = new HashBuilder();");
-            sb.AppendLine("        b.Add(" + node.Index + ");");
-            sb.AppendLine("        b.Add(_nodeId);");
-            foreach (var property in node.AllProperties)
-            {
-                if (property.IsOptional)
-                {
-                    sb.AppendLine("        if (" + property.Name + " == null)");
-                    sb.AppendLine("            b.AddNull();");
-                    sb.AppendLine("        else");
-                    sb.AppendLine("        {");
-                    if (property.IsList)
-                    {
-                        sb.AppendLine("            b.BeginList();");
-                        sb.AppendLine("            foreach(var entry in " + property.Name + ")");
-                        sb.AppendLine("                b.Add(entry);");
-                    }
-                    else
-                        sb.AppendLine("            b.Add(" + property.Name + ");");
-                    sb.AppendLine("        }");
-                }
-                else
-                {
-                    if (property.IsList)
-                    {
-                        sb.AppendLine("        b.BeginList();");
-                        sb.AppendLine("        foreach(var entry in " + property.Name + ")");
-                        sb.AppendLine("            b.Add(entry);");
-                    }
-                    else
-                        sb.AppendLine("        b.Add(" + property.Name + ");");
-                }
-            }
-            sb.AppendLine("        _hash = b.Build();");
-            sb.AppendLine("        var hc = new HashCode();");
-            sb.AppendLine("        hc.AddBytes(_hash);");
-            sb.AppendLine("        _hashShort = hc.ToHashCode();");
-            sb.AppendLine("    }");
-            sb.AppendLine();
-        }
-    }
-
+    
     private static void WriteConstructor(this StringBuilder sb, Node node)
     {
         var allParameters = node.AllProperties
             .Select(x => $"{GetRealType(x)} {ToLower(x.Name)}")
-            .Prepend("INodeId<"+node.Name+">" + " nodeId").ToArray()
+            .Prepend("INodeId<" + node.Name + ">?" + " nodeId").ToArray()
             .ToArray();
 
         var baseParameters = node.BaseProperties
-        .Select(x => ToLower(x.Name))
-        .ToArray();
+            .Select(x => ToLower(x.Name))
+            .ToArray();
 
         if (!node.IsRoot)
             baseParameters = baseParameters.Prepend("nodeId").ToArray();
@@ -156,7 +93,7 @@ internal static class SyntaxTreeModelGenerator
         sb.AppendLine($"    public {node.Name}({paramStr}) : base(" + baseStr + ")");
         sb.AppendLine("    {");
         if (node.IsRoot)
-            sb.AppendLine("        _nodeId = (NodeId)nodeId;");
+            sb.AppendLine("        _nodeId = (NodeId?)nodeId;");
         foreach (var prop in node.Properties)
         {
             sb.AppendLine($"        {prop.Name} = {ToLower(prop.Name)};");
@@ -164,12 +101,37 @@ internal static class SyntaxTreeModelGenerator
 
         if (node.IsTopMost)
         {
-            sb.AppendLine("        EnsureHashIsBuild();");
             sb.AppendLine("        EnsureChildNodeListIsBuild();");
         }
-            
+
         sb.AppendLine("    }");
         sb.AppendLine();
+    }
+
+    private static void WriteCreateMethod(this StringBuilder sb, Node node)
+    {
+        if (!node.IsTopMost)
+            return;
+
+        var props = new List<string>();
+        var values = new List<string>();
+        foreach(var prop in node.AllProperties)
+        {
+            if (prop.Init == null)
+            {
+                props.Add($"{GetRealType(prop)} {ToLower(prop.Name)}");
+            }
+
+            values.Add(prop.Init == null ? ToLower(prop.Name) : prop.Init.Replace("TNodeType", node.Name));
+        }
+
+        var propsStr = string.Join(", ", props);
+        var valuesStr = string.Join(", ", values);
+
+        sb.AppendLine($"    public static {node.Name} Create({propsStr})");
+        sb.AppendLine("    {");
+        sb.AppendLine($"        return new {node.Name}(null, {valuesStr});");
+        sb.AppendLine("    }");
     }
 
     private static string ToLower(string value)
@@ -180,7 +142,7 @@ internal static class SyntaxTreeModelGenerator
     private static string GetRealType(NodeProperty property)
     {
         var name = property.Type;
-        
+
         if (property.IsList)
             name = "ImmutableArray<" + name + ">";
 
@@ -192,7 +154,7 @@ internal static class SyntaxTreeModelGenerator
 
     private static void WriteProperties(this StringBuilder sb, Node node)
     {
-        sb.AppendLine($"    public {(node.IsRoot ? "" : "new")} INodeId<{node.Name}> NodeId => (INodeId<{node.Name}>)_nodeId;");
+        sb.AppendLine($"    public {(node.IsRoot ? "" : "new")} INodeId<{node.Name}> NodeId => (INodeId<{node.Name}>)_nodeId!;");
         foreach (var prop in node.Properties)
         {
             sb.AppendLine($"    public {GetRealType(prop)} {prop.Name} {{ get; }}");
@@ -213,7 +175,7 @@ internal static class SyntaxTreeModelGenerator
             sb.AppendLine("    private void EnsureChildNodeListIsBuild()");
             sb.AppendLine("    {");
             sb.AppendLine("        var nodes = ImmutableArray.CreateBuilder<SyntaxTreeNode>();");
-            int count = 0;
+            
             foreach (var prop in node.Properties.Where(x => x.TypeIsNode))
             {
                 var padding = "        ";
@@ -231,7 +193,6 @@ internal static class SyntaxTreeModelGenerator
                 }
 
                 sb.AppendLine(padding + "nodes.Add(" + (prop.IsList ? "entry" : prop.Name) + ");");
-                count++;
             }
 
             sb.AppendLine("        _childNodes = nodes.ToImmutable();");

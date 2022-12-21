@@ -1,30 +1,28 @@
-﻿using System.Collections.Generic;
-using Lucy.Core.Model;
+﻿using Lucy.Core.Model;
 using System.Diagnostics.CodeAnalysis;
 using Lucy.Core.Parsing.Nodes.Trivia;
+using System.Collections.Immutable;
 
-namespace Lucy.Core.Parsing;
+namespace Lucy.Core.Parsing.Nodes.Token;
 
 public static class TokenNodeParser
 {
     private const string _identifierCacheKey = "Identifier" + nameof(TokenNodeParser);
 
-    public static TokenNodeBuilder Missing(string? errorMessage = null)
+    public static TokenNode Missing(string? errorMessage = null)
     {
-        var token = new TokenNodeBuilder("", null);
-        if (errorMessage != null)
-            token.SyntaxErrors = new List<string> { errorMessage };
-        return token;
+        return new TokenNode(null, "", null, errorMessage == null ? ImmutableArray<string>.Empty : ImmutableArray.Create(errorMessage));
     }
-    
+
+    // ReSharper disable once NotAccessedPositionalProperty.Local
     private record TryReadExactCacheKey(string Text);
-    public static bool TryReadExact(Reader reader, string text, [NotNullWhen(true)] out TokenNodeBuilder? result)
+    public static bool TryReadExact(Reader reader, string text, [NotNullWhen(true)] out TokenNode? result)
     {
         result = TryReadExact(reader, text);
         return result != null;
     }
 
-    public static TokenNodeBuilder? TryReadExact(Reader reader, string text)
+    public static TokenNode? TryReadExact(Reader reader, string text)
     {
         return reader.WithCache(new TryReadExactCacheKey(text), _ =>
         {
@@ -33,38 +31,39 @@ public static class TokenNodeParser
                     return null;
 
             reader.Seek(text.Length);
-            return new TokenNodeBuilder(text, TriviaParser.Read(reader));
+            return TokenNode.Create(text, TriviaParser.Read(reader));
         });
     }
 
-    public static bool TryReadIdentifier(Reader reader, [NotNullWhen(true)] out TokenNodeBuilder? result)
+    public static bool TryReadIdentifier(Reader reader, [NotNullWhen(true)] out TokenNode? result)
     {
         result = TryReadIdentifier(reader);
         return result != null;
     }
 
-    public static TokenNodeBuilder? TryReadIdentifier(Reader reader)
+    public static TokenNode? TryReadIdentifier(Reader reader)
     {
-        return reader.WithCache(_identifierCacheKey, static code =>
+        return reader.WithCache(_identifierCacheKey, static r =>
         {
             var length = 0;
-            while (IsIdentifierChar(code.Peek(length), length == 0))
+            while (IsIdentifierChar(r.Peek(length), length == 0))
                 length++;
 
-            return length == 0 
-                ? null 
-                : new TokenNodeBuilder(code.Read(length), TriviaParser.Read(code));
+            return length == 0
+                ? null
+                : TokenNode.Create(r.Read(length), TriviaParser.Read(r));
         });
     }
 
+    // ReSharper disable once NotAccessedPositionalProperty.Local
     private record TryReadKeywordCacheKey(string Keyword);
-    public static bool TryReadKeyword(Reader reader, string keyword, [NotNullWhen(true)] out TokenNodeBuilder? result)
+    public static bool TryReadKeyword(Reader reader, string keyword, [NotNullWhen(true)] out TokenNode? result)
     {
         result = TryReadKeyword(reader, keyword);
         return result != null;
     }
 
-    public static TokenNodeBuilder? TryReadKeyword(Reader reader, string keyword)
+    public static TokenNode? TryReadKeyword(Reader reader, string keyword)
     {
         return reader.WithCache(new TryReadKeywordCacheKey(keyword), code =>
         {
@@ -80,7 +79,7 @@ public static class TokenNodeParser
                 return null;
 
             code.Seek(keyword.Length);
-            return new TokenNodeBuilder(keyword, TriviaParser.Read(code));
+            return TokenNode.Create(keyword, TriviaParser.Read(code));
         });
     }
 

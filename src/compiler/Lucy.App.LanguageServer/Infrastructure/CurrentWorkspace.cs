@@ -35,7 +35,7 @@ public class CurrentWorkspace
         foreach(var file in files)
             ws.AddDocument(file.ToString()[rootPathLength..].Replace("\\", "/"), await _fileSystem.ReadAllText(file));
         
-        _semanticDatabase = new SemanticDatabase(ws);
+        _semanticDatabase = new SemanticDatabase(ws, "C:\\lucy-languageserver-output");
         _workspace = ws;
         _rootPath = path;
     }

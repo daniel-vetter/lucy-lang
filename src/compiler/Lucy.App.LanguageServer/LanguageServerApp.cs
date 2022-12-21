@@ -2,11 +2,9 @@
 using Lucy.Infrastructure.RpcServer;
 using Microsoft.Extensions.DependencyInjection;
 using System;
-using System.Threading;
 using System.Threading.Tasks;
 using Lucy.App.LanguageServer.Infrastructure;
 using Lucy.App.LanguageServer.Services;
-using Lucy.Common;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Console;
 

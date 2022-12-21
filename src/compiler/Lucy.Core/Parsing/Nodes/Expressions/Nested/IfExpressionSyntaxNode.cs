@@ -1,17 +1,19 @@
 ﻿using Lucy.Core.Model;
+using Lucy.Core.Parsing.Nodes.Token;
+using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Lucy.Core.Parsing.Nodes.Expressions.Nested;
 
 public static class IfExpressionSyntaxNodeParser
 {
-    public static bool TryReadOrInner(Reader reader, [NotNullWhen(true)] out ExpressionSyntaxNodeBuilder? result)
+    public static bool TryReadOrInner(Reader reader, [NotNullWhen(true)] out ExpressionSyntaxNode? result)
     {
         result = TryReadOrInner(reader);
         return result != null;
     }
 
-    public static ExpressionSyntaxNodeBuilder? TryReadOrInner(Reader reader)
+    public static ExpressionSyntaxNode? TryReadOrInner(Reader reader)
     {
         return reader.WithCache(nameof(IfExpressionSyntaxNodeParser), static code =>
         {
@@ -32,7 +34,13 @@ public static class IfExpressionSyntaxNodeParser
                 if (!AndExpressionSyntaxNodeParser.TryReadOrInner(code, out var elseExpression))
                     elseExpression = ExpressionSyntaxNodeParser.Missing("Expression expected after ':'");
 
-                result = new IfExpressionSyntaxNodeBuilder(result, ifToken, thenExpression, elseToken, elseExpression);
+                result = IfExpressionSyntaxNode.Create(
+                    condition: result,
+                    ifToken: ifToken,
+                    thenExpression: thenExpression,
+                    elseToken: elseToken,
+                    elseExpression: elseExpression
+                );
             }
         });
     }

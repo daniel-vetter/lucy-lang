@@ -1,44 +1,43 @@
 ﻿using Lucy.Core.Parsing.Nodes.Trivia;
 using System.Diagnostics.CodeAnalysis;
 using Lucy.Core.Model;
+using System.Collections.Immutable;
+using Lucy.Core.Parsing.Nodes.Token;
 
 namespace Lucy.Core.Parsing.Nodes.Expressions.Unary;
 
 public static class StringConstantExpressionSyntaxNodeParser
 {
-    public static bool TryRead(Reader reader, [NotNullWhen(true)] out StringConstantExpressionSyntaxNodeBuilder? result)
+    public static bool TryRead(Reader reader, [NotNullWhen(true)] out StringConstantExpressionSyntaxNode? result)
     {
         result = TryRead(reader);
         return result != null;
     }
 
-    public static StringConstantExpressionSyntaxNodeBuilder? TryRead(Reader reader)
+    public static StringConstantExpressionSyntaxNode? TryRead(Reader reader)
     {
-        return reader.WithCache(nameof(StringConstantExpressionSyntaxNodeParser), static code =>
+        return reader.WithCache(nameof(StringConstantExpressionSyntaxNodeParser), static r =>
         {
-            if (code.Peek() != '\"')
+            if (r.Peek() != '\"')
                 return null;
 
             var len = 1;
             while (true)
             {
-                if (code.Peek(len) == '\0')
+                if (r.Peek(len) == '\0')
                 {
-                    var str = code.Read(len);
-                    var trailingTrivia = TriviaParser.Read(code);
-                    var token = new TokenNodeBuilder(str, trailingTrivia)
-                    {
-                        SyntaxErrors = new() { "Unterminated string detected. Missing '\"'" }
-                    };
-                    return new StringConstantExpressionSyntaxNodeBuilder(str[1..], token);
+                    var str = r.Read(len);
+                    var trailingTrivia = TriviaParser.Read(r);
+                    var token = new TokenNode(null, str, trailingTrivia, ImmutableArray.Create("Unterminated string detected. Missing '\"'"));
+                    return StringConstantExpressionSyntaxNode.Create(str[1..], token);
                 }
 
-                if (code.Peek(len) == '"')
+                if (r.Peek(len) == '"')
                 {
-                    var str = code.Read(len + 1);
-                    var trailingTrivia = TriviaParser.Read(code);
-                    var token = new TokenNodeBuilder(str, trailingTrivia);
-                    return new StringConstantExpressionSyntaxNodeBuilder(str.Substring(1, str.Length - 2), token);
+                    var str = r.Read(len + 1);
+                    var trailingTrivia = TriviaParser.Read(r);
+                    var token = TokenNode.Create(str, trailingTrivia);
+                    return StringConstantExpressionSyntaxNode.Create(str.Substring(1, str.Length - 2), token);
                 }
 
                 len++;
@@ -46,9 +45,8 @@ public static class StringConstantExpressionSyntaxNodeParser
         });
     }
 
-    public static StringConstantExpressionSyntaxNodeBuilder Missing(string? errorMessage = null)
+    public static StringConstantExpressionSyntaxNode Missing(Reader reader, string? errorMessage = null)
     {
-        var node = new StringConstantExpressionSyntaxNodeBuilder("", TokenNodeParser.Missing(errorMessage));
-        return node;
+        return StringConstantExpressionSyntaxNode.Create("", TokenNodeParser.Missing(errorMessage));
     }
 }

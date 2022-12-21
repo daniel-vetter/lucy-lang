@@ -5,12 +5,12 @@ namespace Lucy.Core.Parsing.Nodes.Statements;
 
 public static class ExpressionStatementSyntaxNodeParser
 {
-    public static ExpressionStatementSyntaxNodeBuilder? Read(Reader reader)
+    public static ExpressionStatementSyntaxNode? Read(Reader reader)
     {
-        return reader.WithCache(nameof(ExpressionStatementSyntaxNodeParser), static code =>
+        return reader.WithCache(nameof(ExpressionStatementSyntaxNodeParser), static r =>
         {
-            if (ExpressionSyntaxNodeParser.TryRead(code, out var result))
-                return new ExpressionStatementSyntaxNodeBuilder(result);
+            if (ExpressionSyntaxNodeParser.TryRead(r, out var result))
+                return ExpressionStatementSyntaxNode.Create(result);
             return null;
         });
 

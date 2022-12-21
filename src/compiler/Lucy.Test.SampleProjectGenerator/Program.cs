@@ -7,21 +7,18 @@ namespace Lucy.Test.SampleProjectGenerator
         private readonly Random _r = new(0);
         private readonly NameProvider _np = new();
 
-        static void Main(string[] args)
+        static void Main()
         {
             new Program().Run();
         }
 
         private void Run()
         {
-            var np = new NameProvider();
-
             var p = new Project();
 
             for (int i = 0; i < 10; i++)
                 p.Files.Add(CreateFile(p, "", 0));
-
-
+            
             Write(p);
 
         }
@@ -43,7 +40,7 @@ namespace Lucy.Test.SampleProjectGenerator
             foreach (var projectFile in project.Files)
             {
                 var fullPath = Path.GetFullPath(Path.Combine(baseDir, projectFile.DocumentPath[1..]));
-                var dir = Path.GetDirectoryName(fullPath);
+                var dir = Path.GetDirectoryName(fullPath) ?? throw new Exception("Could not extract directory from: " + fullPath);
 
                 Directory.CreateDirectory(dir);
                 var sb = new StringBuilder();

@@ -1,5 +1,6 @@
 ﻿using Lucy.Core.Model;
-using System.Collections.Generic;
+using Lucy.Core.Parsing.Nodes.Token;
+using System.Collections.Immutable;
 
 namespace Lucy.Core.Parsing.Nodes.Expressions.Unary;
 
@@ -7,21 +8,21 @@ public static class FunctionCallArgumentSyntaxNodeParser
 {
     private const string _listCacheKey = "List" + nameof(FunctionCallArgumentSyntaxNodeParser);
 
-    public static List<FunctionCallArgumentSyntaxNodeBuilder> Read(Reader reader)
+    public static ImmutableArray<FunctionCallArgumentSyntaxNode> Read(Reader reader)
     {
         return reader.WithCache(_listCacheKey, static code =>
         {
-            var result = new List<FunctionCallArgumentSyntaxNodeBuilder>();
+            var result = ImmutableArray.CreateBuilder<FunctionCallArgumentSyntaxNode>();
             while (true)
             {
-                var next = code.WithCache(nameof(FunctionCallArgumentSyntaxNodeParser), static code =>
+                var next = code.WithCache(nameof(FunctionCallArgumentSyntaxNodeParser), static r =>
                 {
-                    if (!ExpressionSyntaxNodeParser.TryRead(code, out var expression))
+                    if (!ExpressionSyntaxNodeParser.TryRead(r, out var expression))
                         return null;
 
-                    var separator = TokenNodeParser.TryReadExact(code, ",");
+                    var separator = TokenNodeParser.TryReadExact(r, ",");
 
-                    return new FunctionCallArgumentSyntaxNodeBuilder(expression, separator);
+                    return FunctionCallArgumentSyntaxNode.Create(expression, separator);
                 });
 
                 if (next == null)
@@ -33,7 +34,7 @@ public static class FunctionCallArgumentSyntaxNodeParser
                     break;
             }
 
-            return result;
+            return result.ToImmutable();
         });
     }
 }

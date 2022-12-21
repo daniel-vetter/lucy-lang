@@ -1,32 +1,33 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using Lucy.Core.Model;
+using Lucy.Core.Parsing.Nodes.Token;
 
 namespace Lucy.Core.Parsing.Nodes.Expressions.Nested;
 
 public static class AdditionExpressionSyntaxNodeParser
 {
-    public static bool TryReadOrInner(Reader reader, [NotNullWhen(true)] out ExpressionSyntaxNodeBuilder? result)
+    public static bool TryReadOrInner(Reader reader, [NotNullWhen(true)] out ExpressionSyntaxNode? result)
     {
         result = TryReadOrInner(reader);
         return result != null;
     }
 
-    public static ExpressionSyntaxNodeBuilder? TryReadOrInner(Reader reader)
+    public static ExpressionSyntaxNode? TryReadOrInner(Reader reader)
     {
-        return reader.WithCache(nameof(AdditionExpressionSyntaxNodeParser), static code =>
+        return reader.WithCache(nameof(AdditionExpressionSyntaxNodeParser), static r =>
         {
-            if (!MemberAccessExpressionSyntaxNodeParser.TryReadOrInner(code, out var result))
+            if (!MemberAccessExpressionSyntaxNodeParser.TryReadOrInner(r, out var result))
                 return null;
 
             while (true)
             {
-                if (!TokenNodeParser.TryReadExact(code, "+", out var plusToken))
+                if (!TokenNodeParser.TryReadExact(r, "+", out var plusToken))
                     return result;
 
-                if (!MemberAccessExpressionSyntaxNodeParser.TryReadOrInner(code, out var right))
+                if (!MemberAccessExpressionSyntaxNodeParser.TryReadOrInner(r, out var right))
                     right = ExpressionSyntaxNodeParser.Missing("Missing expression after '+'.");
 
-                result = new AdditionExpressionSyntaxNodeBuilder(result, plusToken, right);
+                result = AdditionExpressionSyntaxNode.Create(result, plusToken, right);
             }
         });
     }

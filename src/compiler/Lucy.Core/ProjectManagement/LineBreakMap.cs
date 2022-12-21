@@ -108,13 +108,76 @@ public class LineBreakMap
     }
 }
 
-public record Position1D(int Position);
-public record Range1D(Position1D Start, Position1D End);
-public record Position2D(int Line, int Character)
+public readonly struct Position1D : IEquatable<Position1D>
 {
-    public override string ToString()
-    {
-        return $"[{Line + 1}, {Character + 1}]";
-    }
+    public Position1D(int position) => Position = position;
+
+    public int Position { get; }
+
+    public override bool Equals(object? obj) => obj is Position1D d && Equals(d);
+    public bool Equals(Position1D other) => Position == other.Position;
+    public override int GetHashCode() => HashCode.Combine(Position);
+    public static bool operator ==(Position1D left, Position1D right) => left.Equals(right);
+    public static bool operator !=(Position1D left, Position1D right) => !(left == right);
 }
-public record Range2D(Position2D Start, Position2D End);
+
+public readonly struct Range1D : IEquatable<Range1D>
+{
+    public Range1D(Position1D start, Position1D end)
+    {
+        Start = start;
+        End = end;
+    }
+
+    public Range1D(int start, int end)
+    {
+        Start = new Position1D(start);
+        End = new Position1D(end);
+    }
+
+    public Position1D Start { get; }
+    public Position1D End { get; }
+
+    public override bool Equals(object? obj) => obj is Range1D d && Equals(d);
+    public bool Equals(Range1D other) => Start.Equals(other.Start) && End.Equals(other.End);
+    public override int GetHashCode() => HashCode.Combine(Start, End);
+    public static bool operator ==(Range1D left, Range1D right) => left.Equals(right);
+    public static bool operator !=(Range1D left, Range1D right) => !(left == right);
+}
+
+public readonly struct Position2D : IEquatable<Position2D>
+{
+    public Position2D(int line, int character)
+    {
+        Line = line;
+        Character = character;
+    }
+
+    public int Line { get; }
+    public int Character { get; }
+
+    public override bool Equals(object? obj) => obj is Position2D d && Equals(d);
+    public bool Equals(Position2D other) => Line == other.Line && Character == other.Character;
+    public override int GetHashCode() => HashCode.Combine(Line, Character);
+    public override string ToString() => $"[{Line + 1}, {Character + 1}]";
+    public static bool operator ==(Position2D left, Position2D right) => left.Equals(right);
+    public static bool operator !=(Position2D left, Position2D right) => !(left == right);
+}
+
+public readonly struct Range2D : IEquatable<Range2D>
+{
+    public Range2D(Position2D start, Position2D end)
+    {
+        Start = start;
+        End = end;
+    }
+
+    public Position2D Start { get; }
+    public Position2D End { get; }
+
+    public override bool Equals(object? obj) => obj is Range2D d && Equals(d);
+    public bool Equals(Range2D other) => Start.Equals(other.Start) && End.Equals(other.End);
+    public override int GetHashCode() => HashCode.Combine(Start, End);
+    public static bool operator ==(Range2D left, Range2D right) => left.Equals(right);
+    public static bool operator !=(Range2D left, Range2D right) => !(left == right);
+}

@@ -18,9 +18,9 @@ public class EqualityTests
     private static List<Type> GetTypes()
     {
         var list = new List<Type>();
-        var allTypesInAssembly = typeof(SyntaxTreeNodeBuilder).Assembly.GetTypes();
+        var allTypesInAssembly = typeof(SyntaxTreeNode).Assembly.GetTypes();
         var allConsideredType = allTypesInAssembly
-            .Where(x => x.IsAssignableTo(typeof(SyntaxTreeNodeBuilder)))
+            .Where(x => x.IsAssignableTo(typeof(SyntaxTreeNode)))
             .Where(x => !x.IsAbstract);
 
         foreach (var type in allConsideredType)

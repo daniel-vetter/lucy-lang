@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Lucy.Common;
 using Lucy.Common.ServiceDiscovery;
 using Newtonsoft.Json.Linq;
 

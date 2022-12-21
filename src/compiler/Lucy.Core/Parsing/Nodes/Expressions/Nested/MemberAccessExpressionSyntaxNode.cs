@@ -1,33 +1,35 @@
 ﻿using Lucy.Core.Model;
 using Lucy.Core.Parsing.Nodes.Expressions.Unary;
+using Lucy.Core.Parsing.Nodes.Token;
+using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Lucy.Core.Parsing.Nodes.Expressions.Nested;
 
 public static class MemberAccessExpressionSyntaxNodeParser
 {
-    public static bool TryReadOrInner(Reader reader, [NotNullWhen(true)] out ExpressionSyntaxNodeBuilder? result)
+    public static bool TryReadOrInner(Reader reader, [NotNullWhen(true)] out ExpressionSyntaxNode? result)
     {
         result = TryReadOrInner(reader);
         return result != null;
     }
 
-    public static ExpressionSyntaxNodeBuilder? TryReadOrInner(Reader reader)
+    public static ExpressionSyntaxNode? TryReadOrInner(Reader reader)
     {
-        return reader.WithCache(nameof(MemberAccessExpressionSyntaxNodeParser), static code =>
+        return reader.WithCache(nameof(MemberAccessExpressionSyntaxNodeParser), static r =>
         {
-            if (!UnaryExpression.TryRead(code, out var result))
+            if (!UnaryExpression.TryRead(r, out var result))
                 return null;
 
             while (true)
             {
-                if (!TokenNodeParser.TryReadExact(code, ".", out var dotToken))
+                if (!TokenNodeParser.TryReadExact(r, ".", out var dotToken))
                     return result;
 
-                if (!TokenNodeParser.TryReadIdentifier(code, out var identifier))
-                    return new MemberAccessExpressionSyntaxNodeBuilder(result, dotToken, TokenNodeParser.Missing("Identifier expected after member access '.'"));
+                if (!TokenNodeParser.TryReadIdentifier(r, out var identifier))
+                    return MemberAccessExpressionSyntaxNode.Create(result, dotToken, TokenNodeParser.Missing("Identifier expected after member access '.'"));
 
-                result = new MemberAccessExpressionSyntaxNodeBuilder(result, dotToken, identifier);
+                result = MemberAccessExpressionSyntaxNode.Create(result, dotToken, identifier);
             }
         });
     }

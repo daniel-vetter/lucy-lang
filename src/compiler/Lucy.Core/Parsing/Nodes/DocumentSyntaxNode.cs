@@ -6,13 +6,14 @@ namespace Lucy.Core.Parsing.Nodes;
 
 public static class DocumentRootSyntaxNodeParser
 {
-    public static DocumentRootSyntaxNodeBuilder ReadDocumentSyntaxNode(Reader reader)
+    public static DocumentRootSyntaxNode ReadDocumentSyntaxNode(Reader reader)
     {
-        return reader.WithCache(nameof(DocumentRootSyntaxNodeParser), static code =>
+        return reader.WithCache(nameof(DocumentRootSyntaxNodeParser), static r =>
         {
-            var leadingTrivia = TriviaParser.Read(code);
-            var statementList = StatementListSyntaxNodeParser.ReadStatementsWithoutBlock(code);
-            return new DocumentRootSyntaxNodeBuilder(leadingTrivia, statementList);
+            var leadingTrivia = TriviaParser.Read(r);
+            var statementList = StatementListSyntaxNodeParser.ReadStatementsWithoutBlock(r);
+
+            return DocumentRootSyntaxNode.Create(leadingTrivia, statementList);
         });
     }
 }

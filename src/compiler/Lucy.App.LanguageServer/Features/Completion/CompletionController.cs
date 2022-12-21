@@ -1,7 +1,6 @@
 ﻿using Lucy.App.LanguageServer.Models;
 using Lucy.Infrastructure.RpcServer;
 using System.Collections.Immutable;
-using System.Linq;
 using Lucy.App.LanguageServer.Infrastructure;
 using Lucy.Common.ServiceDiscovery;
 using Lucy.Core.SemanticAnalysis.Handler;

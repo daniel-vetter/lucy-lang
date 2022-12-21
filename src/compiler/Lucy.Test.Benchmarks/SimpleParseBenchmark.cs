@@ -11,7 +11,12 @@ namespace Lucy.Test.Benchmarks
 {
     public static class Program
     {
-        public static void Main() => BenchmarkRunner.Run<SimpleBuildBenchmark>();
+
+
+        public static void Main()
+        {
+            BenchmarkRunner.Run<SimpleParseBenchmark>();
+        }
     }
 
     [MemoryDiagnoser]
@@ -30,7 +35,7 @@ namespace Lucy.Test.Benchmarks
             for (var i = 0; i < MethodCount; i++)
             {
                 sb.Append($$"""
-                fun method{{i+1}}(): void {
+                fun method{{i + 1}}(): void {
                     method{{i + 1}}()
                     var v = method{{i + 1}}()
                 }
@@ -42,9 +47,9 @@ namespace Lucy.Test.Benchmarks
         }
 
         [Benchmark]
-        public DocumentRootSyntaxNodeBuilder InitialParse()
+        public DocumentRootSyntaxNode InitialParse()
         {
-            return  Parser.Parse("/doc", _code);
+            return Parser.Parse("/doc", _code);
         }
     }
 
@@ -54,8 +59,8 @@ namespace Lucy.Test.Benchmarks
     {
         [Params(1, 10, 100, 1000, 10000)]
         public int MethodCount;
-        
-        private DocumentRootSyntaxNodeBuilder _tree = null!;
+
+        private DocumentRootSyntaxNode _tree = null!;
 
         [GlobalSetup]
         public void Setup()
@@ -78,7 +83,8 @@ namespace Lucy.Test.Benchmarks
         [Benchmark]
         public DocumentRootSyntaxNode SimpleParse()
         {
-            return _tree.Build();
+
+            return _tree;
         }
     }
 }

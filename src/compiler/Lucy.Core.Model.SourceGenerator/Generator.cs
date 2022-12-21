@@ -27,7 +27,7 @@ public class Generator
                 {
                     var config = ConfigLoader.GetConfig(configXml);
 
-                    SyntaxTreeModelBuilderGenerator.Generate(productionContext, config);
+                    //SyntaxTreeModelBuilderGenerator.Generate(productionContext, config);
                     SyntaxTreeModelGenerator.Generate(productionContext, config);
                 }
             });

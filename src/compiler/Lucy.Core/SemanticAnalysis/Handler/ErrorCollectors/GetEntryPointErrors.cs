@@ -30,7 +30,7 @@ public static class GetEntryPointErrorsHandler
 
             if (bestDocumentPath != null)
             {
-                result.Add(new ErrorWithRange(bestDocumentPath, new(new(0), new(0)), "No entry point found. Please ensure the solution has exactly one 'main' function."));
+                result.Add(new ErrorWithRange(bestDocumentPath, new(0, 0), "No entry point found. Please ensure the solution has exactly one 'main' function."));
             }
         }
 

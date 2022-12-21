@@ -42,7 +42,7 @@ namespace Lucy.Core.SemanticAnalysis.Handler
                     result.AddRange(list);
                 }
 
-                if (parent is INodeId<FunctionDeclarationStatementSyntaxNode> functionDeclarationStatementSyntaxNode)
+                if (parent is INodeId<FunctionDeclarationStatementSyntaxNode>)
                 {
                     //TODO: handle function parameters
                     break;

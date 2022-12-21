@@ -1,4 +1,4 @@
-﻿using System.Text;
+﻿using System.Runtime.CompilerServices;
 
 namespace Lucy.Core.Model;
 
@@ -6,92 +6,60 @@ namespace Lucy.Core.Model;
 public interface INodeId<out T> where T : SyntaxTreeNode
 {
     public string DocumentPath { get; }
-    public byte[] NodePath { get; }
 }
 
-// ReSharper disable once UnusedTypeParameter
-public interface IBuilderNodeId<out T>  where T : SyntaxTreeNodeBuilder
+public sealed class NodeId<TNode> : NodeId, INodeId<TNode> where TNode : SyntaxTreeNode
 {
-    public string DocumentPath { get; }
-    public byte[] NodePath { get; }
-}
-
-public sealed class NodeId<TNode, TBuilder> : NodeId, INodeId<TNode>, IBuilderNodeId<TBuilder> where TNode: SyntaxTreeNode where TBuilder : SyntaxTreeNodeBuilder
-{
-    public NodeId(string documentPath, byte[] nodePath) : base(documentPath, nodePath)
+    public NodeId(string documentPath) : base(documentPath)
     {
     }
 }
 
-public class NodeId : IHashable
+public static class NodeEx
 {
-    protected NodeId(string documentPath, byte[] nodePath)
+    public static bool IsMissing<T>(this INodeId<T>? nodeId) where T: SyntaxTreeNode
+    {
+        return nodeId == null;
+    }
+}
+
+public class NodeId
+{
+    private static int _lastId;
+    private static readonly ConditionalWeakTable<NodeId, IdSlot> _idStorage = new();
+    private class IdSlot { public int Value { get; set; } }
+
+    protected NodeId(string documentPath)
     {
         if (documentPath.Length == 0 || (documentPath[0] != '/' && documentPath[0] != '!'))
             throw new ArgumentException("Invalid document path");
 
         DocumentPath = documentPath;
-        NodePath = nodePath;
-        _hash = nodePath;
-
-        var hc = new HashCode();
-        hc.AddBytes(_hash);
-        _hashCode = hc.ToHashCode();
     }
-    
+
     public string DocumentPath { get; }
-    public byte[] NodePath { get; }
-    
-    private readonly int _hashCode;
-    private readonly byte[] _hash;
-
-    public byte[] GetFullHash() => _hash;
-
-    public override bool Equals(object? obj)
-    {
-        return obj is NodeId id && NodePath.SequenceEqual(id.NodePath);
-    }
-
-    public override int GetHashCode()
-    {
-        return _hashCode;
-    }
 
     public override string ToString()
     {
-        var parts = new List<string>();
-        var span = NodePath.AsSpan();
-        var index = span.IndexOf((byte) 0);
-        var block = index == -1 ? span[0..] : span[0..(index)];
-        parts.Add(Encoding.UTF8.GetString(block));
-        span = span[(index+1)..];
-        
-        while (true)
-        {
-            var num = BitConverter.ToInt32(span[..4]);
-            span= span[4..];
-            index = span.IndexOf((byte)0);
-            var name = Encoding.UTF8.GetString(index == -1 ? span : span[..index]);
-            parts.Add(name + "[" + num + "]");
-            if (index == -1)
-                break;
+        var slot = _idStorage.GetOrCreateValue(this);
+        slot.Value = Interlocked.Increment(ref _lastId);
+        return DocumentPath + "!" + slot.Value;
+    }
+}
 
-            span = span[(index+1)..];
-        }
-        
-        return string.Join(".", parts);
+public readonly struct NodeId2<T> where T : SyntaxTreeNode
+{
+    public int Value { get; }
+
+    public NodeId2(int value)
+    {
+        Value = value;
     }
 
-    public static bool operator ==(NodeId? id1, NodeId? id2)
-    {
-        if (ReferenceEquals(id1, id2)) return true;
-        if (ReferenceEquals(id1, null)) return false;
-        if (ReferenceEquals(id2, null)) return false;
-        return id1.Equals(id2);
-    }
 
-    public static bool operator !=(NodeId? id1, NodeId? id2)
+
+    public static implicit operator NodeId2<T>(T node)
     {
-        return !(id1 == id2);
+        return new NodeId2<T>(0);
     }
 }

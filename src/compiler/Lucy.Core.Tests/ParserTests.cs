@@ -1,6 +1,7 @@
 ﻿using System.Collections.Immutable;
 using Lucy.Core.Model;
 using Lucy.Core.Parsing;
+using Lucy.Core.ProjectManagement;
 using Shouldly;
 
 namespace Lucy.Core.Tests
@@ -18,12 +19,12 @@ namespace Lucy.Core.Tests
                 }
                 """;
 
-            var p = new ParserResult("/doc", code);
+            var p = ParserResult.CreateFrom("/doc", code);
             var v1 = p.RootNode;
 
 
             var pos = code.IndexOf("test2", StringComparison.Ordinal);
-            p.Update(pos, 5, "test3");
+            p.Update(new Range1D(new Position1D(pos), new Position1D(pos+5)), "test3");
 
             var v2 = p.RootNode;
             
@@ -32,10 +33,10 @@ namespace Lucy.Core.Tests
             recreatedNodes.Length.ShouldBe(4);
         }
 
-        ImmutableArray<SyntaxTreeNodeBuilder> Flatten(SyntaxTreeNodeBuilder node)
+        ImmutableArray<SyntaxTreeNode> Flatten(SyntaxTreeNode node)
         {
-            var r = ImmutableArray.CreateBuilder<SyntaxTreeNodeBuilder>();
-            void Traverse(SyntaxTreeNodeBuilder parent)
+            var r = ImmutableArray.CreateBuilder<SyntaxTreeNode>();
+            void Traverse(SyntaxTreeNode parent)
             {
                 r.Add(parent);
                 foreach (var child in parent.GetChildNodes()) 

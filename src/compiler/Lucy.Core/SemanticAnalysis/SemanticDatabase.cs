@@ -35,17 +35,17 @@ public class SemanticDatabase : IDb, IDisposable
             return;
 
         //var exporterDetailed = new DetailedGraphExport(graphOutputDir);
-        var exporterSummary = new SummaryGraphExport(graphOutputDir);
+        //var exporterSummary = new SummaryGraphExport(graphOutputDir);
 
         _db.OnQueryDone = () =>
         {
             var sw1 = Stopwatch.StartNew();
-            var log = _db.GetLastQueryExecutionLog();
+            //var log = _db.GetLastQueryExecutionLog();
             sw1.Stop();
 
             var sw2 = Stopwatch.StartNew();
-          //  exporterDetailed.Export(log);
-            exporterSummary.Export(log);
+           // exporterDetailed.Export(log);
+           // exporterSummary.Export(log);
             sw2.Stop();
         };
     }
@@ -55,7 +55,7 @@ public class SemanticDatabase : IDb, IDisposable
         _db.SetInput(new GetDocumentList(), new GetDocumentListResult(_workspace.Documents.Keys.ToComparableReadOnlyList()));
         foreach (var codeFile in workspace.Documents.Values.OfType<CodeWorkspaceDocument>())
         {
-            _db.SetInput(new GetSyntaxTree(codeFile.Path), new GetSyntaxTreeResult(codeFile.ParserResult.RootNode.Build()));
+            _db.SetInput(new GetSyntaxTree(codeFile.Path), new GetSyntaxTreeResult(codeFile.ParserResult.RootNode));
         }
     }
 
@@ -90,7 +90,7 @@ public class SemanticDatabase : IDb, IDisposable
             _db.SetInput(new GetDocumentList(), new GetDocumentListResult(_workspace.Documents.Keys.ToComparableReadOnlyList()));
             if (documentAdded.Document is CodeWorkspaceDocument codeFile)
             {
-                _db.SetInput(new GetSyntaxTree(codeFile.Path), new GetSyntaxTreeResult(codeFile.ParserResult.RootNode.Build()));
+                _db.SetInput(new GetSyntaxTree(codeFile.Path), new GetSyntaxTreeResult(codeFile.ParserResult.RootNode));
             }
 
             else
@@ -100,7 +100,7 @@ public class SemanticDatabase : IDb, IDisposable
         {
             if (documentChanged.NewDocument is CodeWorkspaceDocument codeFile)
             {
-                _db.SetInput(new GetSyntaxTree(codeFile.Path), new GetSyntaxTreeResult(codeFile.ParserResult.RootNode.Build()));
+                _db.SetInput(new GetSyntaxTree(codeFile.Path), new GetSyntaxTreeResult(codeFile.ParserResult.RootNode));
             }
         }
         if (@event is DocumentRemoved documentRemoved)

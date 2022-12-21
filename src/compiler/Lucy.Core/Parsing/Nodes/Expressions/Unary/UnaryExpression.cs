@@ -5,15 +5,15 @@ namespace Lucy.Core.Parsing.Nodes.Expressions.Unary;
 
 internal static class UnaryExpression
 {
-    public static bool TryRead(Reader reader, [NotNullWhen(true)] out ExpressionSyntaxNodeBuilder? result)
+    public static bool TryRead(Reader reader, [NotNullWhen(true)] out ExpressionSyntaxNode? result)
     {
         result = TryRead(reader);
         return result != null;
     }
 
-    public static ExpressionSyntaxNodeBuilder? TryRead(Reader reader)
+    public static ExpressionSyntaxNode? TryRead(Reader reader)
     {
-        return reader.WithCache<ExpressionSyntaxNodeBuilder?>(nameof(UnaryExpression), static code =>
+        return reader.WithCache<ExpressionSyntaxNode?>(nameof(UnaryExpression), static code =>
         {
             if (FunctionCallExpressionSyntaxNodeParser.TryRead(code, out var functionCallExpressionSyntaxNode))
                 return functionCallExpressionSyntaxNode;

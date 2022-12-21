@@ -1,32 +1,33 @@
 ﻿using Lucy.Core.Model;
+using Lucy.Core.Parsing.Nodes.Token;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Lucy.Core.Parsing.Nodes.Expressions.Unary;
 
 public static class FunctionCallExpressionSyntaxNodeParser
 {
-    public static bool TryRead(Reader reader, [NotNullWhen(true)] out FunctionCallExpressionSyntaxNodeBuilder? result)
+    public static bool TryRead(Reader reader, [NotNullWhen(true)] out FunctionCallExpressionSyntaxNode? result)
     {
         result = TryRead(reader);
         return result != null;
     }
 
-    public static FunctionCallExpressionSyntaxNodeBuilder? TryRead(Reader reader)
+    public static FunctionCallExpressionSyntaxNode? TryRead(Reader reader)
     {
-        return reader.WithCache(nameof(FunctionCallExpressionSyntaxNodeParser), static code =>
+        return reader.WithCache(nameof(FunctionCallExpressionSyntaxNodeParser), static r =>
         {
-            if (!TokenNodeParser.TryReadIdentifier(code, out var functionName))
+            if (!TokenNodeParser.TryReadIdentifier(r, out var functionName))
                 return null;
 
-            if (!TokenNodeParser.TryReadExact(code, "(", out var openBracket))
+            if (!TokenNodeParser.TryReadExact(r, "(", out var openBracket))
                 return null;
 
-            var argumentList = FunctionCallArgumentSyntaxNodeParser.Read(code);
+            var argumentList = FunctionCallArgumentSyntaxNodeParser.Read(r);
 
-            if (!TokenNodeParser.TryReadExact(code, ")", out var closeBracket))
+            if (!TokenNodeParser.TryReadExact(r, ")", out var closeBracket))
                 closeBracket = TokenNodeParser.Missing("Expected ')'.");
 
-            return new FunctionCallExpressionSyntaxNodeBuilder(functionName, openBracket, argumentList, closeBracket);
+            return FunctionCallExpressionSyntaxNode.Create(functionName, openBracket, argumentList, closeBracket);
         });
     }
 }

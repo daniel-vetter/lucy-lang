@@ -21,7 +21,7 @@ public static class RangeCalculation
     {
         var start = db.GetDistanceFromDocumentStart(node);
         var len = db.GetNodeRangeLength(node);
-        return new Range1D(new (start), new (start + len));
+        return new Range1D(start, start + len);
     }
 
     [GenerateDbExtension] ///<see cref="GetRangeFromNodeEx.GetRangeFromNodeId"/>

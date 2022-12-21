@@ -2,21 +2,21 @@
 using Lucy.Core.Model;
 using Lucy.Core.Parsing.Nodes;
 using Lucy.Core.ProjectManagement;
+using System.Collections.Immutable;
 
 namespace Lucy.Core.Parsing;
 
+//TODO: General refactoring of this file
+
 public static class Parser
 {
-    public static DocumentRootSyntaxNodeBuilder Parse(string documentPath, string code)
+    public static DocumentRootSyntaxNode Parse(string documentPath, string content)
     {
         Profiler.Start("Parsing " + documentPath);
-        var reader = new Reader(code);
+        var reader = new Reader(documentPath, content);
         var rootNode = DocumentRootSyntaxNodeParser.ReadDocumentSyntaxNode(reader);
         Profiler.End("Parsing " + documentPath);
 
-        Profiler.Start("IdAssign " + documentPath);
-        IdAssigner.Run(documentPath, rootNode);
-        Profiler.End("IdAssign " + documentPath);
         return rootNode;
     }
 }
@@ -24,19 +24,23 @@ public static class Parser
 public class ParserResult
 {
     private readonly Reader _reader;
+    
+    public string Code => _reader.Code;
+    public DocumentRootSyntaxNode RootNode { get; }
 
-    public static ParserResult CreateFrom(string content)
+    public static ParserResult CreateFrom(string documentPath, string content)
     {
-        return new ParserResult(content);
+        return new ParserResult(documentPath, content);
     }
 
-    private ParserResult(string content)
+    private ParserResult(string documentPath, string content)
     {
-        _reader = new Reader(content);
+        _reader = new Reader(documentPath, content);
         RootNode = DocumentRootSyntaxNodeParser.ReadDocumentSyntaxNode(_reader);
+        IdAssigner.AssignNewIds(documentPath, RootNode);
     }
 
-    private ParserResult(Reader reader, DocumentRootSyntaxNodeBuilder rootNode)
+    private ParserResult(Reader reader, DocumentRootSyntaxNode rootNode)
     {
         _reader = reader;
         RootNode = rootNode;
@@ -44,11 +48,15 @@ public class ParserResult
     
     public ParserResult Update(Range1D range, string newContent)
     {
-        var reader = _reader.Update(range, newContent);
-        var rootNode = DocumentRootSyntaxNodeParser.ReadDocumentSyntaxNode(_reader);
-        return new ParserResult(reader, rootNode);
-    }
+        var newReader = _reader.Update(range, newContent, out var removedCachedEntries);
+        var newRootNode = DocumentRootSyntaxNodeParser.ReadDocumentSyntaxNode(newReader);
 
-    public string Code => _reader.Code;
-    public DocumentRootSyntaxNodeBuilder RootNode { get; }
+        IdAssigner.ReassignIdsFromPreviousTreeOrCreateNewOnes(
+            oldTree: RootNode, 
+            newTree: newRootNode,
+            candidates: removedCachedEntries.OfType<SyntaxTreeNode>().ToImmutableArray()
+        );
+
+        return new ParserResult(newReader, newRootNode);
+    }
 }

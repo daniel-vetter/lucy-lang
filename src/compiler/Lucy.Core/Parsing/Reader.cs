@@ -1,13 +1,13 @@
-﻿using Lucy.Core.ProjectManagement;
+﻿using Lucy.Core.Model;
+using Lucy.Core.ProjectManagement;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
+using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Text;
 
 namespace Lucy.Core.Parsing;
 
-[EditorBrowsable(EditorBrowsableState.Never)]
 [DebuggerDisplay("{DebuggerDisplay,nq}")]
 public class Reader
 {
@@ -16,44 +16,66 @@ public class Reader
 
     private int _position;
     private int _maxPeek;
-    
-    public Reader(string code)
+
+    private readonly int _lastNodeId;
+    private readonly string _documentPath;
+
+    public Reader(string documentPath, string code)
     {
         _code = code;
+        _documentPath = documentPath;
     }
 
-    private Reader(string code, Dictionary<CacheKey, CacheEntry> cache)
+    private Reader(string documentPath, string code, Dictionary<CacheKey, CacheEntry> cache, int lastNodeId)
     {
         _code = code;
         _cache = cache;
+        _documentPath = documentPath;
+        _lastNodeId = lastNodeId;
     }
 
     public string Code => _code;
 
-    public Reader Update(Range1D range, string newContent)
+    public Reader Update(Range1D range, string newContent, out ImmutableArray<object> removedFromCache)
     {
         var start = range.Start.Position;
-        var length = range.End.Position - range.Start.Position;
+        var rangeLength = range.End.Position - range.Start.Position;
 
         var sb = new StringBuilder();
         sb.Append(_code[..start]);
         sb.Append(newContent);
-        sb.Append(_code[(start + length)..]);
+        sb.Append(_code[(start + rangeLength)..]);
         var code = sb.ToString();
 
+        // TODO: Fix the text was removed. Current this code only supports adding content.
+
         var cache = new Dictionary<CacheKey, CacheEntry>();
-        var diff = length - newContent.Length;
-        foreach (var (key, entry) in _cache)
+        var removed = ImmutableArray.CreateBuilder<object>();
+        if (newContent.Length > rangeLength)
         {
-            if (key.StartPosition < start + length && start < key.StartPosition + entry.PeekedLength)
-                continue;
-            
-            cache[key.StartPosition >= start 
-                ? key with { StartPosition = key.StartPosition + diff } 
-                : key] = entry;
+            var added = newContent.Length - rangeLength;
+            var overwritten = newContent.Length - added;
+            foreach (var (key, entry) in _cache)
+            {
+                if (key.StartPosition >= start + overwritten)
+                {
+                    cache[key with { StartPosition = key.StartPosition + added }] = entry with { EndPosition = entry.EndPosition + added, MaxPeek = entry.MaxPeek + added };
+                }
+                else if ((key.StartPosition >= start && key.StartPosition < start + overwritten) ||
+                         (entry.MaxPeek >= start && entry.MaxPeek < start + overwritten) ||
+                         (key.StartPosition <= start && entry.MaxPeek >= start + overwritten))
+                {
+                    if (entry.Result != null)
+                        removed.Add(entry.Result);
+                }
+                else
+                    cache[key] = entry;
+            }
         }
 
-        return new Reader(code, cache);
+        removedFromCache = removed.ToImmutable();
+
+        return new Reader(_documentPath, code, cache, _lastNodeId);
     }
 
     public string Read(int length)
@@ -70,6 +92,7 @@ public class Reader
         // if the cache contains a entry, seek to the recorded end and return the cached node
         if (_cache.TryGetValue(new CacheKey(cacheKey, _position), out var entry))
         {
+            _maxPeek = entry.MaxPeek;
             _position = entry.EndPosition;
             return (T)entry.Result!;
         }
@@ -83,7 +106,8 @@ public class Reader
         }
 
         // record a new cache entry
-        _cache[new CacheKey(cacheKey, start)] = new CacheEntry(_position, _maxPeek - start, result);
+        if (result != null)  //TODO: Should we only cache positive results? (if so, CacheEntry.Result can be made non nullable)
+            _cache[new CacheKey(cacheKey, start)] = new CacheEntry(_position, _maxPeek, result);
 
         return result;
     }
@@ -97,7 +121,7 @@ public class Reader
 
     private string DebuggerDisplay => _code[_position..];
 
-
+    // ReSharper disable once NotAccessedPositionalProperty.Local
     private record CacheKey(object Key, int StartPosition);
-    private record CacheEntry(int EndPosition, int PeekedLength, object? Result);
+    private record CacheEntry(int EndPosition, int MaxPeek, object? Result);
 }

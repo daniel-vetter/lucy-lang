@@ -1,15 +1,16 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections.Immutable;
 using Lucy.Core.Model;
+using Lucy.Core.Parsing.Nodes.Token;
 
 namespace Lucy.Core.Parsing.Nodes.Statements.FunctionDeclaration;
 
 internal static class FunctionDeclarationModifierList
 {
-    public static List<TokenNodeBuilder> Read(Reader reader)
+    public static ImmutableArray<TokenNode> Read(Reader reader)
     {
         return reader.WithCache(nameof(FunctionDeclarationModifierList), static code =>
         {
-            var l = new List<TokenNodeBuilder>();
+            var l = ImmutableArray.CreateBuilder<TokenNode>();
 
             while (true)
             {
@@ -34,7 +35,7 @@ internal static class FunctionDeclarationModifierList
                 break;
             }
 
-            return l;
+            return l.ToImmutable();
         });
     }
 }

@@ -52,7 +52,7 @@ internal class TestCaseReader
             if (_workspace.ContainsFile(file.Path))
                 _workspace.UpdateFile(file.Path, file.Content);
             else
-                _workspace.AddFile(file.Path, file.Content);
+                _workspace.AddDocument(file.Path, file.Content);
         }
         return true;
     }
