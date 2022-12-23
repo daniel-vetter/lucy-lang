@@ -1,12 +1,12 @@
-﻿using Lucy.Common.ServiceDiscovery;
+﻿using Lucy.App.LanguageServer.Infrastructure;
+using Lucy.App.LanguageServer.Services;
+using Lucy.Common.ServiceDiscovery;
 using Lucy.Infrastructure.RpcServer;
 using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Threading.Tasks;
-using Lucy.App.LanguageServer.Infrastructure;
-using Lucy.App.LanguageServer.Services;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Console;
+using System;
+using System.Threading.Tasks;
 
 namespace Lucy.App.LanguageServer;
 

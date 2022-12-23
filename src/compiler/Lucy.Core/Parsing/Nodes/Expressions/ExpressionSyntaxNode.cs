@@ -9,6 +9,7 @@ public abstract class ExpressionSyntaxNodeParser
 {
     public static ExpressionSyntaxNode Missing(string? errorMessage = null)
     {
+        // TODO: Must also be cached so the id stays stable
         return new MissingExpressionSyntaxNode(
             nodeId: null,
             syntaxErrors: errorMessage == null ? ImmutableArray<string>.Empty : ImmutableArray.Create(errorMessage)

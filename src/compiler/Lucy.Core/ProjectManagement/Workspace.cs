@@ -44,7 +44,7 @@ public class Workspace
             Path = path,
             Content = content,
             LineBreakMap = LineBreakMap.CreateFrom(content),
-            ParserResult = ParserResult.CreateFrom(path, content)
+            ParserResult = Parser.Parse(path, content)
         };
 
         _documents = _documents.Add(path, document);
@@ -63,7 +63,7 @@ public class Workspace
                 Path = path,
                 Content = content,
                 LineBreakMap = LineBreakMap.CreateFrom(content),
-                ParserResult = ParserResult.CreateFrom(path, content)
+                ParserResult = Parser.Parse(path, content)
             };
 
             _documents = _documents.SetItem(path, newDocument);
@@ -87,13 +87,13 @@ public class Workspace
         if (oldDocument is not CodeWorkspaceDocument codeDoc)
             throw new Exception($"Incremental update of '{path}' is not supported.");
 
-        var updatedParseResult = codeDoc.ParserResult.Update(range, content);
-        var updatesLineBreakMap = LineBreakMap.CreateFrom(updatedParseResult.Code);
+        var updatedParseResult = Parser.Update(codeDoc.ParserResult, range, content);
+        var updatesLineBreakMap = LineBreakMap.CreateFrom(updatedParseResult.Reader.Code);
 
         var newDocument = new CodeWorkspaceDocument
         {
             Path = path,
-            Content = updatedParseResult.Code,
+            Content = updatedParseResult.Reader.Code,
             ParserResult = updatedParseResult,
             LineBreakMap = updatesLineBreakMap
         };

@@ -3,36 +3,11 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Text.Json;
-using System.Threading;
 
 namespace Lucy.Common;
 
 public static class Profiler
 {
-    public static void Attach()
-    {
-        var cmd = $"""
-            dotnet trace collect -p {Process.GetCurrentProcess().Id} --output trace.netstat
-            dotnet trace convert --output trace.json --format Speedscope trace.netstat
-            speedscope trace.speedscope.json
-            """;
-
-        var dir = Path.Combine(Path.GetTempPath(), "lucy-trace" + Environment.TickCount);
-        var file = Path.Combine(dir, "run.cmd");
-        if (!Directory.Exists(dir))
-            Directory.CreateDirectory(dir);
-
-        File.WriteAllText(file, cmd);
-        
-        Process.Start(new ProcessStartInfo(file)
-        {
-            WorkingDirectory= dir,
-            UseShellExecute = true
-        });
-
-        Thread.Sleep(5000);
-    }
-
     private static readonly List<RecordedEvent> _events = new();
     private static readonly  Stopwatch _sw = Stopwatch.StartNew();
 
@@ -64,11 +39,13 @@ public static class Profiler
         {
             Name = "trace.speedscope",
             Exporter = "lucy trace profiler",
-            Shared = new SpeedscopeShared()
+            Shared = new SpeedscopeShared(),
+            ActiveProfilerIndex = 0
         };
 
         var profile = new SpeedscopeProfile
         {
+            // ReSharper disable once StringLiteralTypo
             Type = "evented",
             Name = "default",
             Unit = "milliseconds",
@@ -117,12 +94,13 @@ public static class Profiler
 
     private class RecordedEvent
     {
-        public required string Name { get; set; }
-        public required bool IsStart { get; set; }
-        public required double Timestamp { get; set; }
+        public required string Name { get; init; }
+        public required bool IsStart { get; init; }
+        public required double Timestamp { get; init; }
     }
 }
 
+[Serializable]
 public class SpeedscopeFile
 {
     public required string Exporter { get; set; }
@@ -132,6 +110,7 @@ public class SpeedscopeFile
     public List<SpeedscopeProfile> Profiles { get; } = new();
 }
 
+[Serializable]
 public class SpeedscopeProfile
 {
     public required string Type { get; set; }
@@ -142,6 +121,7 @@ public class SpeedscopeProfile
     public List<SpeedscopeEvent> Events { get; } = new();
 }
 
+[Serializable]
 public class SpeedscopeEvent
 {
     public required string Type { get; set; }
@@ -149,11 +129,13 @@ public class SpeedscopeEvent
     public required double At { get; set; }
 }
 
+[Serializable]
 public class SpeedscopeShared
 {
     public List<SpeedscopeFrame> Frames { get; set; } = new();
 }
 
+[Serializable]
 public class SpeedscopeFrame
 {
     public required string Name { get; set; }

@@ -47,7 +47,9 @@ internal static class SyntaxTreeModelGenerator
             sb.AppendLine();
             sb.AppendLine("    public void AssignExistingNodeId(INodeId<SyntaxTreeNode> id)");
             sb.AppendLine("    {");
-            sb.AppendLine($"        _nodeId = (NodeId)id;");
+            sb.AppendLine("        if (_nodeId != null)");
+            sb.AppendLine("            throw new Exception(\"Node already has a id\");");
+            sb.AppendLine("        _nodeId = (NodeId)id;");
             sb.AppendLine("    }");
             sb.AppendLine();
         }
@@ -55,6 +57,8 @@ internal static class SyntaxTreeModelGenerator
         {
             sb.AppendLine("    public override void AssignNewNodeId(string documentPath)");
             sb.AppendLine("    {");
+            sb.AppendLine("        if (_nodeId != null)");
+            sb.AppendLine("            throw new Exception(\"Node already has a id\");");
             sb.AppendLine($"        _nodeId = new NodeId<{node.Name}>(documentPath);");
             sb.AppendLine("    }");
             sb.AppendLine();

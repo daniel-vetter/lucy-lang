@@ -7,7 +7,7 @@ extern cdecl "kernel32.dll" "allocConsole" fun allocConsole(): void
 
 extern cdecl "kernel32.dll" "GetStdHandle" fun GetStdHandle(nStdHandle: int): int
 extern cdecl "kernel32.dll" "WriteConsoleA" fun WriteConsoleA(hConsoleOutput: int, buffer: string, nNumberOfCharsToWrite: int, lpNumberOfCharsWritten: int, lpReserved: int): int
-
+                   
 fun main(num: int): int {
 
 
@@ -18,7 +18,21 @@ fun main(num: int): int {
        
     fun testInInnerScope(): int { }
     fun tes345t(): void { }
-         
+             
+             void dawd    
+             void awdddd
+
+             fun test(): void
+             {
+
+             }
+
+             void main void 
+
+             fuz
+
+             fz
+
     
                          
     test()
@@ -4731,9 +4745,30 @@ fun test2Blub(): void {
 }
 
 fun method(): void {
-    
+           fzu  fun main(): void {
+                   test ddddddddd    ddw fun test(): void {
+                    
+                   }
+
+                   fun test(): void {
+                           fun test(): void {
+        
+                           }
+                   }        
+
+                   fun main():void {
+                    
+                   }  
+           }
+}
+
+fun main() : void {
+
 }
 
+fun main(): void {
+    
+}
 
 fun main(num: int): int {
 
@@ -4760,6 +4795,10 @@ fun test2Blub(): void {
 }
 
 fun method(): void {
+    dadawd f
+}
+
+fun main(): void {
     
 }
 
@@ -4963,10 +5002,15 @@ fun test2Blub(): void {
 }
 
 fun method(): void {
-    
-}
+           void          
+
+           fun test() {
+                        
+           } 
+} 
 
 
+
 fun main(num: int): int {
 
 
@@ -4993,6 +5037,10 @@ fun test2Blub(): void {
 
 fun method(): void {
     
+}
+
+fun main(): void {
+
 }
 
 

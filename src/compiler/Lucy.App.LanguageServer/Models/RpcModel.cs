@@ -421,7 +421,7 @@ public class RpcServerInfo
     /// <summary>
     /// The name of the server as defined by the server.
     /// </summary>
-    public string Name { get; set; } = "";
+    public string Name { get; init; } = "";
 
     /// <summary>
     /// The server's version as defined by the server.
@@ -456,7 +456,7 @@ public class RpcInitializeParams
     /// <summary>
     /// The capabilities provided by the client (editor or tool)
     /// </summary>
-    public RpcClientCapabilities Capabilities { get; set; } = new RpcClientCapabilities();
+    public RpcClientCapabilities Capabilities { get; } = new();
 
     /// <summary>
     /// The initial trace setting. If omitted trace is disabled ('off').
@@ -920,12 +920,12 @@ public class RpcMarkupContent
     /// <summary>
     /// The type of the Markup
     /// </summary>
-    public RpcMarkupKind Kind { get; set; } = RpcMarkupKind.Plaintext;
+    public RpcMarkupKind Kind { get; init; } = RpcMarkupKind.Plaintext;
 
     /// <summary>
     /// The content itself
     /// </summary>
-    public string Value { get; set; } = "";
+    public string Value { get; init; } = "";
 }
 
 [JsonConverter(typeof(StringEnumConverter))]
@@ -997,7 +997,7 @@ public class RpcDiagnostic
     /// <summary>
     /// The range at which the message applies.
     /// </summary>
-    public RpcRange Range { get; set; } = null!;
+    public RpcRange Range { get; init; } = null!;
 
     /// <summary>
     /// The diagnostic's severity. Can be omitted. If omitted it is up to the
@@ -1024,7 +1024,7 @@ public class RpcDiagnostic
     /// <summary>
     /// The diagnostic's message.
     /// </summary>
-    public string Message { get; set; } = "";
+    public string Message { get; init; } = "";
 
     /// <summary>
     /// Additional metadata about the diagnostic.
@@ -1116,12 +1116,12 @@ public class RpcHoverParams
     /// <summary>
     /// The text document.
     /// </summary>
-    public RpcTextDocumentIdentifier TextDocument { get; set; } = new RpcTextDocumentIdentifier();
+    public RpcTextDocumentIdentifier TextDocument { get; set; } = new();
 
     /// <summary>
     /// The position inside the text document.
     /// </summary>
-    public RpcPosition Position { get; set; } = new RpcPosition();
+    public RpcPosition Position { get; set; } = new();
 }
 
 public class RpcHover
@@ -1129,7 +1129,7 @@ public class RpcHover
     /// <summary>
     /// The hover's content
     /// </summary>
-    public RpcMarkupContent Contents { get; set; } = new RpcMarkupContent();
+    public RpcMarkupContent Contents { get; init; } = new();
 
     /// <summary>
     /// An optional range is a range inside a text document that is used to visualize a hover, e.g.by changing the background color.
@@ -1142,7 +1142,7 @@ public class RpcPublishDiagnosticsParams
     /// <summary>
     /// The URI for which diagnostic information is reported.
     /// </summary>
-    public SystemPath Uri { get; set; } = null!;
+    public SystemPath Uri { get; init; } = null!;
 
     /// <summary>
     /// Optional the version number of the document the diagnostics are published for.
@@ -1152,7 +1152,7 @@ public class RpcPublishDiagnosticsParams
     /// <summary>
     /// An array of diagnostic information items.
     /// </summary>
-    public RpcDiagnostic[] Diagnostics { get; set; } = Array.Empty<RpcDiagnostic>();
+    public RpcDiagnostic[] Diagnostics { get; init; } = Array.Empty<RpcDiagnostic>();
 }
 
 public class RpcLocation
@@ -1481,4 +1481,48 @@ public enum RpcCompletionItemKind
     Event = 23,
     Operator = 24,
     TypeParameter = 25
+}
+
+public class RpcDefinitionParams
+{
+    /// <summary>
+    /// The text document
+    /// </summary>
+    public required RpcTextDocumentIdentifier TextDocument { get; set; }
+
+    /// <summary>
+    /// The position inside the text document.
+    /// </summary>
+    public required RpcPosition Position { get; set; }
+}
+
+public class RpcLocationLink
+{
+    /// <summary>
+    /// Span of the origin of this link.
+    ///
+    /// Used as the underlined span for mouse interaction. Defaults to the word
+    /// range at the mouse position.
+    /// </summary>
+    public RpcRange? OriginSelectionRange { get; set; }
+
+    /// <summary>
+    /// The target resource identifier of this link.
+    /// </summary>
+    public required SystemPath TargetUri { get; set; }
+
+    /// <summary>
+    /// The full target range of this link. If the target for example is a symbol
+    /// then target range is the range enclosing this symbol not including
+    /// leading/trailing whitespace but everything else like comments. This
+    /// information is typically used to highlight the range in the editor.
+    /// </summary>
+    public required RpcRange TargetRange { get; set; }
+
+    /// <summary>
+    /// The range that should be selected and revealed when this link is being#
+    /// followed, e.g the name of a function. Must be contained by the
+    /// `targetRange`. See also `DocumentSymbol#range`
+    /// </summary>
+    public required RpcRange TargetSelectionRange { get; set; }
 }

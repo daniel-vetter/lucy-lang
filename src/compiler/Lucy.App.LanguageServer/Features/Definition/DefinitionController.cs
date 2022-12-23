@@ -58,48 +58,4 @@ namespace Lucy.App.LanguageServer.Features.Definition
             return ImmutableArray<RpcLocationLink>.Empty;
         }
     }
-
-    public class RpcDefinitionParams
-    {
-        /// <summary>
-        /// The text document
-        /// </summary>
-        public required RpcTextDocumentIdentifier TextDocument { get; set; }
-
-        /// <summary>
-        /// The position inside the text document.
-        /// </summary>
-        public required RpcPosition Position { get; set; }
-    }
-
-    public class RpcLocationLink
-    {
-        /// <summary>
-        /// Span of the origin of this link.
-        ///
-        /// Used as the underlined span for mouse interaction. Defaults to the word
-        /// range at the mouse position.
-        /// </summary>
-        public RpcRange? OriginSelectionRange { get; set; }
-
-        /// <summary>
-        /// The target resource identifier of this link.
-        /// </summary>
-        public required SystemPath TargetUri { get; set; }
-
-        /// <summary>
-        /// The full target range of this link. If the target for example is a symbol
-        /// then target range is the range enclosing this symbol not including
-        /// leading/trailing whitespace but everything else like comments. This
-        /// information is typically used to highlight the range in the editor.
-        /// </summary>
-        public required RpcRange TargetRange { get; set; }
-
-        /// <summary>
-        /// The range that should be selected and revealed when this link is being#
-        /// followed, e.g the name of a function. Must be contained by the
-        /// `targetRange`. See also `DocumentSymbol#range`
-        /// </summary>
-        public required RpcRange TargetSelectionRange { get; set; }
-    }
 }

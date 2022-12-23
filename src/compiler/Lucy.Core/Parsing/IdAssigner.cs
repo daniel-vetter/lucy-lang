@@ -11,7 +11,8 @@ internal static class IdAssigner
     /// </summary>
     internal static void AssignNewIds(string documentPath, SyntaxTreeNode node)
     {
-        node.AssignNewNodeId(documentPath);
+        if (node.NodeId.IsMissing())
+            node.AssignNewNodeId(documentPath);
         foreach (var child in node.GetChildNodes())
             AssignNewIds(documentPath, child);
     }
@@ -24,7 +25,7 @@ internal static class IdAssigner
     {
         // Assumption: The oldTree is a full processed tree. So all nodes have a node id
         // Assumption: The newTree is new tree where some ids are missing. We only traverse down nodes that have a missing id
-        //             If a node already has an id, it was reused from the parser cache and therefore all its child nodes will have ids
+        //             If a node already has an id, it was reused from the parser cache and therefore all its child nodes will also have ids
 
         // Since there can only be one root node, we can just move to id to the new tree. 
         if (newTree.NodeId.IsMissing())
@@ -32,8 +33,7 @@ internal static class IdAssigner
 
         var documentPath = oldTree.NodeId.DocumentPath;
 
-        // To prevent assigning a id more than once, we keep track of all node ids
-        // where we know they are not part of the new tree.
+        // To prevent id duplicates in the tree, we keep track of all ids where we know they are not part of the new tree.
         var remainingCandidates = candidates.ToHashSet();
         
         Traverse(oldTree, newTree);

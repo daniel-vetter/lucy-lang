@@ -8,6 +8,8 @@ using System.Threading.Tasks;
 
 namespace Lucy.App.LanguageServer.Infrastructure;
 
+// TODO: Should this class be removed?
+
 public interface IFileSystem
 {
     Task<byte[]> ReadAllBytes(SystemPath path);

@@ -8,18 +8,18 @@ public interface INodeId<out T> where T : SyntaxTreeNode
     public string DocumentPath { get; }
 }
 
+public static class NodeEx
+{
+    public static bool IsMissing<T>(this INodeId<T>? nodeId) where T : SyntaxTreeNode
+    {
+        return nodeId == null;
+    }
+}
+
 public sealed class NodeId<TNode> : NodeId, INodeId<TNode> where TNode : SyntaxTreeNode
 {
     public NodeId(string documentPath) : base(documentPath)
     {
-    }
-}
-
-public static class NodeEx
-{
-    public static bool IsMissing<T>(this INodeId<T>? nodeId) where T: SyntaxTreeNode
-    {
-        return nodeId == null;
     }
 }
 
@@ -42,24 +42,8 @@ public class NodeId
     public override string ToString()
     {
         var slot = _idStorage.GetOrCreateValue(this);
-        slot.Value = Interlocked.Increment(ref _lastId);
+        if (slot.Value == 0)
+            slot.Value = Interlocked.Increment(ref _lastId);
         return DocumentPath + "!" + slot.Value;
-    }
-}
-
-public readonly struct NodeId2<T> where T : SyntaxTreeNode
-{
-    public int Value { get; }
-
-    public NodeId2(int value)
-    {
-        Value = value;
-    }
-
-
-
-    public static implicit operator NodeId2<T>(T node)
-    {
-        return new NodeId2<T>(0);
     }
 }

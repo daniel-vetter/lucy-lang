@@ -1,9 +1,9 @@
-﻿using Lucy.Infrastructure.RpcServer;
-using Lucy.Common.ServiceDiscovery;
-using Lucy.App.LanguageServer.Infrastructure;
+﻿using Lucy.App.LanguageServer.Infrastructure;
 using Lucy.App.LanguageServer.Models;
+using Lucy.Common.ServiceDiscovery;
 using Lucy.Core.Model;
 using Lucy.Core.SemanticAnalysis.Handler;
+using Lucy.Infrastructure.RpcServer;
 
 namespace Lucy.App.LanguageServer.Features.Hover;
 

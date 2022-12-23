@@ -1,11 +1,11 @@
-﻿using System;
-using System.Linq;
-using System.Threading.Tasks;
-using Lucy.App.LanguageServer.Features.Diagnostics;
+﻿using Lucy.App.LanguageServer.Features.Diagnostics;
 using Lucy.App.LanguageServer.Infrastructure;
 using Lucy.App.LanguageServer.Models;
 using Lucy.Common.ServiceDiscovery;
 using Lucy.Infrastructure.RpcServer;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Lucy.App.LanguageServer.Features;
 
@@ -50,6 +50,7 @@ public class ServerLifecycleRpcController
             OpenClose = true
         };
 
+        // Initializing these properties with empty object is enough to tell the client that these features are supported
         result.Capabilities.DocumentLinkProvider = new RpcDocumentLinkOptions();
         result.Capabilities.CompletionProvider = new RpcCompletionOptions();
         result.Capabilities.DefinitionProvider = true;
@@ -77,6 +78,9 @@ public class ServerLifecycleRpcController
     [JsonRpcFunction("shutdown")]
     public void Shutdown()
     {
+        // Awaiting the returned task would lead to a a deadlock.
+        // When stop is called, the JsonRpcServer will wait for all running handlers to complete,
+        // but the current handler would never complete because it is waiting for the JsonRpcServer to shut down.
         _ = _jsonRpcServer.Stop();
     }
 }

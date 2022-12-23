@@ -25,6 +25,6 @@ public static class TypeReferenceSyntaxNodeParser
 
     public static TypeReferenceSyntaxNode Missing(string? errorMessage = null)
     {
-        return new TypeReferenceSyntaxNode(null!, TokenNodeParser.Missing(errorMessage), default);
+        return new TypeReferenceSyntaxNode(null, TokenNodeParser.Missing(errorMessage), default);
     }
 }

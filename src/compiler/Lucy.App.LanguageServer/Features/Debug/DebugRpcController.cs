@@ -1,10 +1,10 @@
-﻿using Lucy.App.LanguageServer.Infrastructure;
+﻿using System.Diagnostics;
+using System.Threading.Tasks;
+using Lucy.App.LanguageServer.Infrastructure;
 using Lucy.Common;
 using Lucy.Common.ServiceDiscovery;
 using Lucy.Core.SemanticAnalysis.Inputs;
 using Lucy.Infrastructure.RpcServer;
-using System.Diagnostics;
-using System.Threading.Tasks;
 
 namespace Lucy.App.LanguageServer.Features.Debug;
 
@@ -38,7 +38,7 @@ public class DebugRpcController
     [JsonRpcFunction("debug/attachProfiler")]
     public Task AttachProfiler()
     {
-        Profiler.Attach();
+        ExternalProfiler.Attach();
         return Task.CompletedTask;
     }
 

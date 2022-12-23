@@ -5,7 +5,7 @@ namespace Lucy.Common;
 
 public class Subscriptions<T>
 {
-    readonly List<Action<T>> _handler = new List<Action<T>>();
+    private readonly List<Action<T>> _handler = new();
 
     public IDisposable AddHandler(Action<T> handler)
     {
