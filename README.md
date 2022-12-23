@@ -11,7 +11,7 @@ This is not a ready-to-use language implementation. Everything is under heavy de
 - This is mainly a learning exercise. The current main goal is to be able to compile a lucy project to a windows executable that prints out "Hello World". 
 - As few dependencies as possible. The full stack should be implemented in this project. After reading the code, everyone should be able to tell how source is transformed into machine code. This means: no LLVM or parser generator.
 - A good developer experience: Nobody wants to code in a plain text editor, so IDE support should be provided via a language server. Nowadays expected features like "Go to definition", Refactoring support or autocomplete should be available.
-- Acceptable performance:
+- Acceptable performance: Especially for the language server. It should be possible to open a project containing thousands of files and still be able to refactor some code or get autocomplete without any noticeable delay.
 
 ### Current implementation status
 
