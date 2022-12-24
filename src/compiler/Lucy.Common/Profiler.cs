@@ -11,7 +11,7 @@ public static class Profiler
     private static readonly List<RecordedEvent> _events = new();
     private static readonly  Stopwatch _sw = Stopwatch.StartNew();
 
-    [Conditional("CUSTOM_TRACE")]
+    [Conditional("DEBUG")]
     public static void Start(string name)
     {
         _events.Add(new RecordedEvent
@@ -22,7 +22,7 @@ public static class Profiler
         });
     }
 
-    [Conditional("CUSTOM_TRACE")]
+    [Conditional("DEBUG")]
     public static void End(string name)
     {
         _events.Add(new RecordedEvent

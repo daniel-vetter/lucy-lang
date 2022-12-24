@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Reflection.PortableExecutable;
 using Lucy.Common;
 using Lucy.Core.Model;
 using Lucy.Core.Parsing.Nodes;
 using Lucy.Core.ProjectManagement;
-using System.Collections.Immutable;
-using System.Diagnostics;
-using System.Linq;
 
 namespace Lucy.Core.Parsing;
 
@@ -51,7 +50,7 @@ public static class Parser
         }
 
         Traverse(null, rootNode);
-
+        
         var result = new ParserResult(
             Reader: reader,
             RootNode: rootNode,
@@ -59,8 +58,11 @@ public static class Parser
             ParentNodeIdsByNodeId: parentNodeIdsByNodeId.ToImmutable(),
             NodeIdsByType: nodeIdsByType.ToImmutableDictionary(x => x.Key, x => x.Value.ToImmutable())
         );
-
+        
         Profiler.End("Building id maps");
+
+        ParserResultValidator.Validate(content, result);
+
         Profiler.End("Parsing " + documentPath);
         return result;
     }
@@ -136,8 +138,7 @@ public static class Parser
         }
 
         Profiler.End("Updating id maps");
-        Profiler.End("Reparsing " + lastResult.RootNode.NodeId.DocumentPath);
-
+        
         var result = new ParserResult(
             Reader: newReader,
             RootNode: newRootNode,
@@ -146,57 +147,13 @@ public static class Parser
             NodeIdsByType: nodeIdsByType
         );
 
-        //ValidateParserResult(result);
+        ParserResultValidator.Validate(newReader.Code, result);
 
+        Profiler.End("Reparsing " + lastResult.RootNode.NodeId.DocumentPath);
         return result;
     }
-
-    [Conditional("DEBUG")]
-    private static void ValidateParserResult(ParserResult result)
-    {
-        Profiler.Start("Validating result");
-        try
-        {
-            List<(SyntaxTreeNode? Parent, SyntaxTreeNode Node)> allNodes = new();
-
-            void Traverse(SyntaxTreeNode? parent, SyntaxTreeNode node)
-            {
-                allNodes.Add((parent, node));
-                foreach (var child in node.GetChildNodes())
-                    Traverse(node, child);
-            }
-            Traverse(null, result.RootNode);
-
-            if (allNodes.Any(x => x.Node.NodeId.IsMissing()))
-                throw new Exception("Syntax tree has missing nodes");
-
-            if (allNodes.GroupBy(x => x.Node.NodeId).Any(x => x.Count() > 1))
-                throw new Exception("Syntax tree contains Id duplicates");
-
-            if (allNodes.Select(x => x.Node.NodeId).Except(result.NodesById.Keys).Any())
-                throw new Exception("NodeByIdMap is missing node ids");
-
-            var nodeIdToNodeMismatches = allNodes.Where(x => !ReferenceEquals(x.Node, result.NodesById[x.Node.NodeId])).ToArray();
-            if (nodeIdToNodeMismatches.Length > 0)
-                throw new Exception($"NodeByIdMap: {nodeIdToNodeMismatches.Length} Nodes do not match to node id");
-
-            if (result.NodesById.Keys.Except(allNodes.Select(x => x.Node.NodeId)).Any())
-                throw new Exception("NodeByIdMap has node ids which are not part of the tree");
-
-            if (result.ParentNodeIdsByNodeId.Keys.Any(x => !result.NodesById.ContainsKey(x)))
-                throw new Exception("ParentNodeIdByNodeIdMap contains node ids as key that are not part of the syntax tree.");
-
-            if (result.NodesById.Keys.Any(x => !result.ParentNodeIdsByNodeId.ContainsKey(x)))
-                throw new Exception("ParentNodeIdByNodeIdMap is missing entries for specific nodes.");
-
-            if (allNodes.Any(x => !ReferenceEquals(result.ParentNodeIdsByNodeId[x.Node.NodeId], x.Parent?.NodeId)))
-                throw new Exception("ParentNodeIdByNodeIdMap contains wrong parent ids");
-        }
-        finally
-        {
-            Profiler.End("Validating result");
-        }
-    }
+    
+    
 }
 
 public record ParserResult(

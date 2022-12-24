@@ -15,23 +15,21 @@ public static class TreeDiffer
             var leftChildren = left.GetChildNodes().ToDictionary(x => x.NodeId, x => x);
             var rightChildren = right.GetChildNodes().ToDictionary(x => x.NodeId, x => x);
 
-            var newIds = rightChildren.Keys.Where(x => !leftChildren.ContainsKey(x)).ToArray();
-            var removedIds = leftChildren.Keys.Where(x => !rightChildren.ContainsKey(x)).ToArray();
-            
-            foreach (var removedId in removedIds)
+            foreach (var removedId in leftChildren.Keys.Where(x => !rightChildren.ContainsKey(x)))
                 result.Add(new NodeDetached(right, leftChildren[removedId]));
-
-            foreach (var newId in newIds)
-                result.Add(new NodeAttached(right, rightChildren[newId]));
 
             foreach (var rightNode in rightChildren.Values)
             {
                 if (!leftChildren.TryGetValue(rightNode.NodeId, out var leftNode))
+                {
+                    result.Add(new NodeAttached(right, rightChildren[rightNode.NodeId]));
+                    continue;
+                }
+
+                if (ReferenceEquals(leftNode, rightNode))
                     continue;
 
-                if (!ReferenceEquals(leftNode, rightNode))
-                    result.Add(new NodeReplaced(right, leftNode, rightNode));
-
+                result.Add(new NodeReplaced(right, leftNode, rightNode));
                 Traverse(leftNode, rightNode);
             }
         }
@@ -41,9 +39,9 @@ public static class TreeDiffer
             result.Add(new NodeDetached(null, leftTree));
             result.Add(new NodeAttached(null, rightTree));
         }
-        else if(!ReferenceEquals(leftTree, rightTree))
+        else if (!ReferenceEquals(leftTree, rightTree))
             result.Add(new NodeReplaced(null, leftTree, rightTree));
-        
+
         Traverse(leftTree, rightTree);
 
         return result.ToImmutable();
