@@ -14,7 +14,7 @@ public static class StatementListSyntaxNodeParser
         return reader.WithCache(_statementListWithoutBlockCacheKey, static r =>
         {
             var result = ImmutableArray.CreateBuilder<StatementSyntaxNode>();
-            while (StatementSyntaxNodeParser.TryRead(r, out var statement)) 
+            while (StatementSyntaxNodeParser.TryRead(r, out var statement))
                 result.Add(statement);
             return StatementListSyntaxNode.Create(null, result.ToImmutable(), null);
         });
@@ -28,12 +28,26 @@ public static class StatementListSyntaxNodeParser
                 return null;
 
             var list = ImmutableArray.CreateBuilder<StatementSyntaxNode>();
-            while (StatementSyntaxNodeParser.TryRead(r, out var statement))
-                list.Add(statement);
+            
+            TokenNode? blockEnd;
+            while (true)
+            {
+                while (StatementSyntaxNodeParser.TryRead(r, out var statement))
+                    list.Add(statement);
 
-            if (!TokenNodeParser.TryReadExact(r, "}", out var blockEnd))
+                if (TokenNodeParser.TryReadExact(r, "}", out blockEnd))
+                    break;
+                
+                if (UnknownTokenStatementSyntaxNodeParser.TryRead(r, out var something))
+                {
+                    list.Add(something);
+                    continue;
+                }
+
                 blockEnd = TokenNodeParser.Missing("'}' expected");
-
+                break;
+            }
+            
             return StatementListSyntaxNode.Create(blockStart, list.ToImmutable(), blockEnd);
         });
     }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 
 namespace Lucy.Core.ProjectManagement;
 
@@ -19,16 +20,15 @@ public class LineBreakMap
         var starts = new List<int>();
         var count = 0;
         var start = 0;
-        for (int i = 0; i < content.Length; i++)
+        for (var i = 0; i < content.Length; i++)
         {
             count++;
-            if (content[i] == '\n')
-            {
-                lengths.Add(count);
-                starts.Add(start);
-                count = 0;
-                start = i + 1;
-            }
+            if (content[i] != '\n') 
+                continue;
+            lengths.Add(count);
+            starts.Add(start);
+            count = 0;
+            start = i + 1;
         }
         if (count != 0)
         {
@@ -113,6 +113,10 @@ public readonly struct Position1D : IEquatable<Position1D>
     public Position1D(int position) => Position = position;
 
     public int Position { get; }
+    public override string ToString()
+    {
+        return Position.ToString(CultureInfo.InvariantCulture);
+    }
 
     public override bool Equals(object? obj) => obj is Position1D d && Equals(d);
     public bool Equals(Position1D other) => Position == other.Position;
@@ -135,8 +139,19 @@ public readonly struct Range1D : IEquatable<Range1D>
         End = new Position1D(end);
     }
 
+    public bool IntersectsWith(Range1D range)
+    {
+        return range.Start.Position < End.Position && Start.Position < range.End.Position;
+    }
+
+    public override string ToString()
+    {
+        return $"{Start}-{End}";
+    }
+
     public Position1D Start { get; }
     public Position1D End { get; }
+    public int Length => End.Position - Start.Position;
 
     public override bool Equals(object? obj) => obj is Range1D d && Equals(d);
     public bool Equals(Range1D other) => Start.Equals(other.Start) && End.Equals(other.End);

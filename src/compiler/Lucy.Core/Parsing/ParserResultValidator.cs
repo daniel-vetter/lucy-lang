@@ -36,7 +36,8 @@ public static class ParserResultValidator
             }
             Traverse(null, result.RootNode);
 
-            if (sb.ToString() != code)
+            var codeFromNodes = sb.ToString();
+            if (codeFromNodes != code)
                 throw new Exception("SyntaxTree did not match the parsed code");
 
             if (allNodes.Any(x => x.Node.NodeId.IsMissing()))
@@ -65,7 +66,8 @@ public static class ParserResultValidator
                 throw new Exception("ParentNodeIdByNodeIdMap contains wrong parent ids");
 
             var allNodesByType = allNodes.GroupBy(x => x.Node.GetType()).ToDictionary(x => x.Key, x => x.Select(y => y.Node.NodeId).ToHashSet());
-            if (result.NodeIdsByType.Keys.Any(x => !allNodesByType.ContainsKey(x)))
+            var tooManyTypes = result.NodeIdsByType.Keys.Where(x => !allNodesByType.ContainsKey(x));
+            if (tooManyTypes.Any())
                 throw new Exception("NodeIdsByType map contains to many types");
 
             if (allNodesByType.Keys.Any(x => !result.NodeIdsByType.ContainsKey(x)))

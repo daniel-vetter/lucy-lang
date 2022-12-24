@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Reflection.PortableExecutable;
 using Lucy.Common;
 using Lucy.Core.Model;
 using Lucy.Core.Parsing.Nodes;
@@ -17,7 +16,7 @@ public static class Parser
     {
         Profiler.Start("Parsing " + documentPath);
         Profiler.Start("Creating syntax tree");
-        var reader = new Reader(documentPath, content);
+        var reader = new Reader(content);
         var rootNode = DocumentRootSyntaxNodeParser.ReadDocumentSyntaxNode(reader);
         Profiler.End("Creating syntax tree");
 
@@ -103,7 +102,10 @@ public static class Parser
                     throw new Exception("Could not find node id list for type: " + node.GetType());
 
                 list = list.Remove(node.NodeId);
-                nodeIdsByType = nodeIdsByType.SetItem(node.GetType(), list);
+                nodeIdsByType = list.Count == 0 
+                    ? nodeIdsByType.Remove(node.GetType()) 
+                    : nodeIdsByType.SetItem(node.GetType(), list);
+
 
                 foreach (var child in node.GetChildNodes())
                     stack.Push(child);

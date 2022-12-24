@@ -5022,7 +5022,7 @@ fun main(num: int): int {
     fun testInInnerScope(): int { }
     fun tes345t(): void { }
          
-    
+
                          
     test()
     printf("dwad", 12)

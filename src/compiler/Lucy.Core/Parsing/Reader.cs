@@ -1,10 +1,12 @@
-﻿using Lucy.Core.Model;
-using Lucy.Core.ProjectManagement;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
+using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
+using Lucy.Core.Model;
+using Lucy.Core.ProjectManagement;
 
 namespace Lucy.Core.Parsing;
 
@@ -17,69 +19,91 @@ public class Reader
     private int _position;
     private int _maxPeek;
 
-    private readonly int _lastNodeId;
-    private readonly string _documentPath;
-
-    public Reader(string documentPath, string code)
+    public Reader(string code)
     {
         _code = code;
-        _documentPath = documentPath;
     }
 
-    private Reader(string documentPath, string code, Dictionary<CacheKey, CacheEntry> cache, int lastNodeId)
+    private Reader(string code, Dictionary<CacheKey, CacheEntry> cache)
     {
         _code = code;
         _cache = cache;
-        _documentPath = documentPath;
-        _lastNodeId = lastNodeId;
     }
 
     public string Code => _code;
 
     public Reader Update(Range1D range, string newContent, out ImmutableArray<object> removedFromCache)
     {
-        var start = range.Start.Position;
-        var rangeLength = range.End.Position - range.Start.Position;
-
+        // Update the actual code
         var sb = new StringBuilder();
-        sb.Append(_code[..start]);
+        sb.Append(_code[..range.Start.Position]);
         sb.Append(newContent);
-        sb.Append(_code[(start + rangeLength)..]);
+        sb.Append(_code[(range.End.Position)..]);
         var code = sb.ToString();
-
-        // TODO: Fix the text was removed. Current this code only supports adding content.
-
-        var cache = new Dictionary<CacheKey, CacheEntry>();
+        
+        // Update the cache
+        var newCache = new Dictionary<CacheKey, CacheEntry>();
         var removed = ImmutableArray.CreateBuilder<object>();
-        if (newContent.Length > rangeLength)
+
+        // How much the range will grow/shrink with the new content
+        var lengthDifference = newContent.Length - range.Length;
+
+        foreach (var (key, entry) in _cache)
         {
-            var added = newContent.Length - rangeLength;
-            var overwritten = newContent.Length - added;
-            foreach (var (key, entry) in _cache)
+            if (key.StartPosition >= range.End.Position)
             {
-                if (key.StartPosition >= start + overwritten)
+                // If the cache entry is after the change, we push it further back
+                var movedKey = key with
                 {
-                    cache[key with { StartPosition = key.StartPosition + added }] = entry with { EndPosition = entry.EndPosition + added, MaxPeek = entry.MaxPeek + added };
-                }
-                else if ((key.StartPosition >= start && key.StartPosition < start + overwritten) ||
-                         (entry.MaxPeek >= start && entry.MaxPeek < start + overwritten) ||
-                         (key.StartPosition <= start && entry.MaxPeek >= start + overwritten))
+                    StartPosition = key.StartPosition + lengthDifference
+                };
+
+                var movedEntry = entry with
                 {
-                    if (entry.Result != null)
-                        removed.Add(entry.Result);
-                }
-                else
-                    cache[key] = entry;
+                    EndPosition = entry.EndPosition + lengthDifference,
+                    MaxPeek = entry.MaxPeek + lengthDifference
+                };
+
+                newCache[movedKey] = movedEntry;
+            }
+            else if (new Range1D(key.StartPosition, entry.MaxPeek).IntersectsWith(range))
+            {
+                // If the cache entry intersects with the change, we throw it away.
+                // This is the range where the parser needs to reparse the code.
+                // This method returns a list of all removed cache entries, so we still need to keep track of it.
+                removed.Add(entry.Result);
+            }
+            else
+            {
+                // In this case, the cache entry is before the changed range, so we just copy it to the new dictionary.
+                newCache[key] = entry;
             }
         }
 
         removedFromCache = removed.ToImmutable();
 
-        return new Reader(_documentPath, code, cache, _lastNodeId);
+        return new Reader(code, newCache);
+    }
+
+    private string VisCache(Dictionary<CacheKey, CacheEntry> cache)
+    {
+        var sb = new StringBuilder();
+        foreach (var cacheKey in cache.Keys.OrderBy(x => x.StartPosition).ThenBy(x => cache[x].MaxPeek))
+        {
+            var v = cache[cacheKey];
+            var text = v.Result switch
+            {
+                TokenNode t => "\"" + t.Text + t.TrailingTrivia + "\"",
+                _ => v.Result.ToString()
+            };
+            sb.AppendLine($"{cacheKey.StartPosition}-{v.EndPosition}/{v.MaxPeek}: {cacheKey.Key} {text}");
+        }
+        return sb.ToString();
     }
 
     public string Read(int length)
     {
+        _maxPeek = Math.Max(_maxPeek, _position + length + 1);
         var result = _code.Substring(_position, length);
         _position += length;
         return result;
@@ -94,7 +118,7 @@ public class Reader
         {
             _maxPeek = entry.MaxPeek;
             _position = entry.EndPosition;
-            return (T)entry.Result!;
+            return (T)entry.Result;
         }
 
         // otherwise, the handler needs to parse a fresh node
@@ -106,16 +130,21 @@ public class Reader
         }
 
         // record a new cache entry
-        if (result != null)  //TODO: Should we only cache positive results? (if so, CacheEntry.Result can be made non nullable)
+        if (result != null)
             _cache[new CacheKey(cacheKey, start)] = new CacheEntry(_position, _maxPeek, result);
 
         return result;
     }
 
-    public void Seek(int offset) => _position += offset;
+    public void Seek(int offset)
+    {
+        _maxPeek = Math.Max(_maxPeek, _position + offset + 1);
+        _position += offset;
+    }
+
     public char Peek(int offset = 0)
     {
-        _maxPeek = Math.Max(_maxPeek, _position + offset);
+        _maxPeek = Math.Max(_maxPeek, _position + offset + 1);
         return _position + offset < _code.Length ? _code[_position + offset] : '\0';
     }
 
@@ -123,5 +152,5 @@ public class Reader
 
     // ReSharper disable once NotAccessedPositionalProperty.Local
     private record CacheKey(object Key, int StartPosition);
-    private record CacheEntry(int EndPosition, int MaxPeek, object? Result);
+    private record CacheEntry(int EndPosition, int MaxPeek, object Result);
 }

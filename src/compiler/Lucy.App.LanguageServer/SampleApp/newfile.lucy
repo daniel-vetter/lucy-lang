@@ -3,4 +3,6 @@ import "main"
 
 fun thisIsAFunction(): string {
     test()
+
 }
+
