@@ -56,6 +56,9 @@ public class SemanticDatabase : IDb, IDisposable
         foreach (var codeFile in workspace.Documents.Values.OfType<CodeWorkspaceDocument>())
         {
             _db.SetInput(new GetSyntaxTree(codeFile.Path), new GetSyntaxTreeResult(codeFile.ParserResult.RootNode));
+            _db.SetInput(new GetNodesByNodeIdMap(codeFile.Path), new GetNodesByNodeIdMapResult(codeFile.ParserResult.NodesById));
+            _db.SetInput(new GetNodeIdsByTypeMap(codeFile.Path), new GetNodeIdsByTypeMapResult(codeFile.ParserResult.NodeIdsByType));
+            _db.SetInput(new GetParentNodeIdByNodeIdMap(codeFile.Path), new GetParentNodeIdByNodeIdMapResult(codeFile.ParserResult.ParentNodeIdsByNodeId));
         }
     }
 
@@ -91,6 +94,9 @@ public class SemanticDatabase : IDb, IDisposable
             if (documentAdded.Document is CodeWorkspaceDocument codeFile)
             {
                 _db.SetInput(new GetSyntaxTree(codeFile.Path), new GetSyntaxTreeResult(codeFile.ParserResult.RootNode));
+                _db.SetInput(new GetNodesByNodeIdMap(codeFile.Path), new GetNodesByNodeIdMapResult(codeFile.ParserResult.NodesById));
+                _db.SetInput(new GetNodeIdsByTypeMap(codeFile.Path), new GetNodeIdsByTypeMapResult(codeFile.ParserResult.NodeIdsByType));
+                _db.SetInput(new GetParentNodeIdByNodeIdMap(codeFile.Path), new GetParentNodeIdByNodeIdMapResult(codeFile.ParserResult.ParentNodeIdsByNodeId));
             }
 
             else
@@ -101,12 +107,18 @@ public class SemanticDatabase : IDb, IDisposable
             if (documentChanged.NewDocument is CodeWorkspaceDocument codeFile)
             {
                 _db.SetInput(new GetSyntaxTree(codeFile.Path), new GetSyntaxTreeResult(codeFile.ParserResult.RootNode));
+                _db.SetInput(new GetNodesByNodeIdMap(codeFile.Path), new GetNodesByNodeIdMapResult(codeFile.ParserResult.NodesById));
+                _db.SetInput(new GetNodeIdsByTypeMap(codeFile.Path), new GetNodeIdsByTypeMapResult(codeFile.ParserResult.NodeIdsByType));
+                _db.SetInput(new GetParentNodeIdByNodeIdMap(codeFile.Path), new GetParentNodeIdByNodeIdMapResult(codeFile.ParserResult.ParentNodeIdsByNodeId));
             }
         }
         if (@event is DocumentRemoved documentRemoved)
         {
             _db.SetInput(new GetDocumentList(), new GetDocumentListResult(_workspace.Documents.Keys.ToComparableReadOnlyList()));
             _db.RemoveInput(new GetSyntaxTree(documentRemoved.Document.Path));
+            _db.RemoveInput(new GetNodesByNodeIdMap(documentRemoved.Document.Path));
+            _db.RemoveInput(new GetNodeIdsByTypeMap(documentRemoved.Document.Path));
+            _db.RemoveInput(new GetParentNodeIdByNodeIdMap(documentRemoved.Document.Path));
         }
     }
 }

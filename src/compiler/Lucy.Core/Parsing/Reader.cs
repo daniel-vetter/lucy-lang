@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Linq;
-using System.Security.Cryptography;
 using System.Text;
 using Lucy.Core.Model;
 using Lucy.Core.ProjectManagement;
@@ -48,6 +47,7 @@ public class Reader
         // How much the range will grow/shrink with the new content
         var lengthDifference = newContent.Length - range.Length;
 
+        // Rearrange the cache. This is a linear operation, should probably find some better algorithm for this.
         foreach (var (key, entry) in _cache)
         {
             if (key.StartPosition >= range.End.Position)
@@ -109,7 +109,12 @@ public class Reader
         return result;
     }
 
-    public T WithCache<T>(object cacheKey, Func<Reader, T> handler)
+    public TResult WithCache<TResult>(object cacheKey, Func<Reader, TResult> handler)
+    {
+        return WithCache(cacheKey, (r, _) => handler(r));
+    }
+
+    public TResult WithCache<TResult, TCacheKey>(TCacheKey cacheKey, Func<Reader, TCacheKey, TResult> handler) where TCacheKey : class
     {
         var start = _position;
 
@@ -118,11 +123,11 @@ public class Reader
         {
             _maxPeek = entry.MaxPeek;
             _position = entry.EndPosition;
-            return (T)entry.Result;
+            return (TResult)entry.Result;
         }
 
         // otherwise, the handler needs to parse a fresh node
-        var result = handler(this);
+        var result = handler(this, cacheKey);
         if (result == null)
         {
             // if this fails, recover the old state so some other parse method can have its try

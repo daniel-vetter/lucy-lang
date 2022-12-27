@@ -13,18 +13,18 @@ internal static class UnaryExpression
 
     public static ExpressionSyntaxNode? TryRead(Reader reader)
     {
-        return reader.WithCache<ExpressionSyntaxNode?>(nameof(UnaryExpression), static code =>
+        return reader.WithCache<ExpressionSyntaxNode?>(nameof(UnaryExpression), static r =>
         {
-            if (FunctionCallExpressionSyntaxNodeParser.TryRead(code, out var functionCallExpressionSyntaxNode))
+            if (FunctionCallExpressionSyntaxNodeParser.TryRead(r, out var functionCallExpressionSyntaxNode))
                 return functionCallExpressionSyntaxNode;
 
-            if (StringConstantExpressionSyntaxNodeParser.TryRead(code, out var stringConstantExpressionSyntaxNode))
+            if (StringConstantExpressionSyntaxNodeParser.TryRead(r, out var stringConstantExpressionSyntaxNode))
                 return stringConstantExpressionSyntaxNode;
 
-            if (NumberConstantExpressionSyntaxNodeParser.TryRead(code, out var numberConstantExpressionSyntaxNode))
+            if (NumberConstantExpressionSyntaxNodeParser.TryRead(r, out var numberConstantExpressionSyntaxNode))
                 return numberConstantExpressionSyntaxNode;
 
-            if (VariableReferenceExpressionSyntaxNodeParser.TryRead(code, out var variableReferenceExpressionSyntaxNode))
+            if (VariableReferenceExpressionSyntaxNodeParser.TryRead(r, out var variableReferenceExpressionSyntaxNode))
                 return variableReferenceExpressionSyntaxNode;
 
             return null;

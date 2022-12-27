@@ -24,14 +24,14 @@ public static class TokenNodeParser
 
     public static TokenNode? TryReadExact(Reader reader, string text)
     {
-        return reader.WithCache(new TryReadExactCacheKey(text), _ =>
+        return reader.WithCache(new TryReadExactCacheKey(text), static (r, ck) =>
         {
-            for (var i = 0; i < text.Length; i++)
-                if (reader.Peek(i) != text[i])
+            for (var i = 0; i < ck.Text.Length; i++)
+                if (r.Peek(i) != ck.Text[i])
                     return null;
 
-            reader.Seek(text.Length);
-            return TokenNode.Create(text, TriviaParser.Read(reader));
+            r.Seek(ck.Text.Length);
+            return TokenNode.Create(ck.Text, TriviaParser.Read(r));
         });
     }
 
@@ -43,7 +43,7 @@ public static class TokenNodeParser
 
     public static TokenNode? TryReadIdentifier(Reader reader)
     {
-        return reader.WithCache(_identifierCacheKey, static r =>
+        return reader.WithCache(_identifierCacheKey, static (r, _) =>
         {
             var length = 0;
             while (IsIdentifierChar(r.Peek(length), length == 0))
@@ -65,21 +65,21 @@ public static class TokenNodeParser
 
     public static TokenNode? TryReadKeyword(Reader reader, string keyword)
     {
-        return reader.WithCache(new TryReadKeywordCacheKey(keyword), code =>
+        return reader.WithCache(new TryReadKeywordCacheKey(keyword), static (r, ck) =>
         {
-            for (var i = 0; i < keyword.Length; i++)
+            for (var i = 0; i < ck.Keyword.Length; i++)
             {
-                if (code.Peek(i) == keyword[i])
+                if (r.Peek(i) == ck.Keyword[i])
                     continue;
                 return null;
             }
 
-            var nextChar = code.Peek(keyword.Length);
+            var nextChar = r.Peek(ck.Keyword.Length);
             if (IsIdentifierChar(nextChar, false))
                 return null;
 
-            code.Seek(keyword.Length);
-            return TokenNode.Create(keyword, TriviaParser.Read(code));
+            r.Seek(ck.Keyword.Length);
+            return TokenNode.Create(ck.Keyword, TriviaParser.Read(r));
         });
     }
 

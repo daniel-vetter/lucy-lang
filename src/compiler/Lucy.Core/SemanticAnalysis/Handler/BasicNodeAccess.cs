@@ -10,29 +10,15 @@ namespace Lucy.Core.SemanticAnalysis.Handler;
 
 public static class BasicNodeAccess
 {
-    [GenerateDbExtension] ///<see cref="GetNodeByIdMapEx.GetNodeByIdMap"/>
-    public static ComparableReadOnlyDictionary<INodeId<SyntaxTreeNode>, SyntaxTreeNode> GetNodeByIdMap(IDb db, string documentPath)
-    {
-        return db.GetNodeList(db.GetSyntaxTree(documentPath)).ToComparableReadOnlyDictionary(x => x.NodeId, x => x);
-    }
-
     [GenerateDbExtension] ///<see cref="GetNodeByIdEx.GetNodeById"/>
     public static SyntaxTreeNode GetNodeById(IDb db, INodeId<SyntaxTreeNode> nodeId)
     {
-        return db.GetNodeByIdMap(nodeId.DocumentPath)[nodeId];
+        return db.GetNodesByNodeIdMap(nodeId.DocumentPath)[nodeId];
     }
 
     public static T GetNodeById<T>(this IDb db, INodeId<T> nodeId) where T : SyntaxTreeNode
     {
         return (T)GetNodeByIdEx.GetNodeById(db, nodeId);
-    }
-    
-    [GenerateDbExtension] ///<see cref="GetNodeIdsByTypeMapEx.GetNodeIdsByTypeMap"/>
-    public static ComparableReadOnlyDictionary<Type, ComparableReadOnlyList<INodeId<SyntaxTreeNode>>> GetNodeIdsByTypeMap(IDb db, string documentPath)
-    {
-        return db.GetNodeList(db.GetSyntaxTree(documentPath))
-            .GroupBy(x => x.GetType())
-            .ToComparableReadOnlyDictionary(x => x.Key, x => x.Select(y => y.NodeId).ToComparableReadOnlyList());
     }
 
     [GenerateDbExtension] ///<see cref="GetNodeIdsByTypeEx.GetNodeIdsByType"/>
@@ -73,43 +59,14 @@ public static class BasicNodeAccess
         Traverse(db, node, list);
         return list.Build();
     }
-
-    [GenerateDbExtension]
-    public static ComparableReadOnlyDictionary<INodeId<SyntaxTreeNode>, INodeId<SyntaxTreeNode>?> GetParentMap(IDb db, string documentPath)
-    {
-        var dict = new ComparableReadOnlyDictionary<INodeId<SyntaxTreeNode>, INodeId<SyntaxTreeNode>?>.Builder();
-
-        void Traverse(SyntaxTreeNode parent)
-        {
-            foreach (var child in parent.GetChildNodes())
-            {
-                dict.Add(child.NodeId, parent.NodeId);
-                Traverse(child);
-            }
-        }
-
-        var root = db.GetSyntaxTree(documentPath);
-        Traverse(root);
-        dict.Add(root.NodeId, null);
-
-        return dict.Build();
-    }
-
+    
     [GenerateDbExtension] ///<see cref="GetParentNodeEx.GetParentNode" />
     public static SyntaxTreeNode? GetParentNode(IDb db, INodeId<SyntaxTreeNode> nodeId)
     {
-        var map = db.GetParentMap(nodeId.DocumentPath);
+        var map = db.GetParentNodeIdByNodeIdMap(nodeId.DocumentPath);
         if (map.TryGetValue(nodeId, out var parentId) && parentId != null)
             return db.GetNodeById(parentId);
         return null;
-     /*   
-        var lastIndex = nodeId.NodePath.LastIndexOf('.');
-        if (lastIndex == -1)
-            return null;
-        var parentNodeId = new NodeId<SyntaxTreeNode, SyntaxTreeNodeBuilder>(nodeId.DocumentPath, nodeId.NodePath[..lastIndex]);
-
-        return db.GetNodeById(parentNodeId);
-       */ 
     }
 
     [GenerateDbExtension] ///<see cref="GetParentNodeIdOfTypeEx.GetParentNodeIdOfType"/>
