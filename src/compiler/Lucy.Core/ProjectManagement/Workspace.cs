@@ -1,10 +1,10 @@
-﻿using Lucy.Common;
-using Lucy.Core.Parsing;
-using System;
+﻿using System;
 using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Lucy.Common;
+using Lucy.Core.Parsing;
 
 namespace Lucy.Core.ProjectManagement;
 
@@ -19,35 +19,26 @@ public class Workspace
     public static async Task<Workspace> CreateFromPath(string path)
     {
         var files = Directory.GetFiles(path, "*.lucy", SearchOption.AllDirectories);
-        var data = await Task.WhenAll(files.Select(async x => new
+        var documents = await Task.WhenAll(files.Select(async x =>
         {
-            Path = x,
-            Content = await File.ReadAllTextAsync(x)
+            var documentPath = x.ToString()[path.Length..].Replace("\\", "/");
+            var content = await File.ReadAllTextAsync(x);
+
+            return WorkspaceDocument.Create(documentPath, content);
         }));
         
         var ws = new Workspace();
-        foreach (var document in data)
-            ws.AddDocument(document.Path, document.Content);
+        foreach (var document in documents)
+            ws.AddDocument(document);
         return ws;
     }
 
-    public void AddDocument(string path, string content)
+    public void AddDocument(WorkspaceDocument document)
     {
-        if (_documents.ContainsKey(path))
-            throw new Exception($"A file named '{path}' already exists.");
+        if (_documents.ContainsKey(document.Path))
+            throw new Exception($"A file named '{document.Path}' already exists.");
 
-        if (!path.EndsWith(".lucy"))
-            throw new Exception($"Invalid document path: '{path}'");
-
-        var document = new CodeWorkspaceDocument
-        {
-            Path = path,
-            Content = content,
-            LineBreakMap = LineBreakMap.CreateFrom(content),
-            ParserResult = Parser.Parse(path, content)
-        };
-
-        _documents = _documents.Add(path, document);
+        _documents = _documents.Add(document.Path, document);
         _eventSubscriptions.Publish(new DocumentAdded(document));
     }
 
@@ -56,19 +47,10 @@ public class Workspace
         if (!_documents.TryGetValue(path, out var oldDocument))
             throw new Exception($"A file named '{path}' does not exist.");
 
-        if (oldDocument is CodeWorkspaceDocument)
-        {
-            var newDocument = new CodeWorkspaceDocument
-            {
-                Path = path,
-                Content = content,
-                LineBreakMap = LineBreakMap.CreateFrom(content),
-                ParserResult = Parser.Parse(path, content)
-            };
+        var newDocument = WorkspaceDocument.Create(path, content);
 
-            _documents = _documents.SetItem(path, newDocument);
-            _eventSubscriptions.Publish(new DocumentChanged(oldDocument, newDocument));
-        }
+        _documents = _documents.SetItem(path, newDocument);
+        _eventSubscriptions.Publish(new DocumentChanged(oldDocument, newDocument));
     }
 
     public void UpdateFile(string path, Range2D range, string content)
@@ -119,18 +101,6 @@ public class Workspace
 
         return document;
     }
-}
-
-public class WorkspaceDocument
-{
-    public required string Path { get; init; }
-    public required string Content { get; init; }
-    public required LineBreakMap LineBreakMap { get; init; }
-}
-
-public class CodeWorkspaceDocument : WorkspaceDocument
-{
-    public required ParserResult ParserResult { get; init; }
 }
 
 public interface IWorkspaceEvent { }

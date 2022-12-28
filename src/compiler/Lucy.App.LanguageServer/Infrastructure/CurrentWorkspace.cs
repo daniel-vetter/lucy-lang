@@ -10,17 +10,10 @@ namespace Lucy.App.LanguageServer.Infrastructure;
 [Service(Lifetime.Singleton)]
 public class CurrentWorkspace
 {
-    private readonly IFileSystem _fileSystem;
-
     private Workspace? _workspace;
     private SemanticDatabase? _semanticDatabase;
     private SystemPath? _rootPath;
-
-    public CurrentWorkspace(IFileSystem fileSystem)
-    {
-        _fileSystem = fileSystem;
-    }
-
+    
     public IDb Analysis => _semanticDatabase ?? throw new Exception("No workspace was loaded");
 
     public async Task Load(SystemPath path)
@@ -28,12 +21,7 @@ public class CurrentWorkspace
         if (_workspace != null)
             throw new InvalidOperationException("A workspace is already loaded");
 
-        var ws = new Workspace();
-        var rootPathLength = path.ToString().Length;
-        var files = await _fileSystem.GetFilesInDirectory(path);
-            
-        foreach(var file in files)
-            ws.AddDocument(file.ToString()[rootPathLength..].Replace("\\", "/"), await _fileSystem.ReadAllText(file));
+        var ws = await Workspace.CreateFromPath(path.ToString());
         
         _semanticDatabase = new SemanticDatabase(ws, "C:\\lucy-languageserver-output");
         _workspace = ws;
@@ -50,7 +38,7 @@ public class CurrentWorkspace
         if (_workspace.ContainsFile(workspacePath))
             _workspace.UpdateFile(workspacePath, content);
         else
-            _workspace.AddDocument(ToWorkspacePath(path), content);
+            _workspace.AddDocument(WorkspaceDocument.Create(ToWorkspacePath(path), content));
     }
 
     public Position1D ToPosition1D(SystemPath systemPath, Position2D position2D) => ToPosition1D(ToWorkspacePath(systemPath), position2D);
