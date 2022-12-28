@@ -55,19 +55,34 @@ public static class RangeCalculation
     [GenerateDbExtension] ///<see cref="GetDistanceFromDocumentStartEx.GetDistanceFromDocumentStart"/>
     public static int GetDistanceFromDocumentStart(IDb db, SyntaxTreeNode node)
     {
+        var distance = 0;
+        SyntaxTreeNode? current = node;
+
+        while (current != null)
+        {
+            distance += db.GetDistanceFromParent(current);
+            current = db.GetParentNode(current.NodeId);
+        }
+
+        return distance;
+    }
+
+    [GenerateDbExtension] ///<see cref="GetDistanceFromDocumentStartEx.GetDistanceFromParent"/>
+    public static int GetDistanceFromParent(IDb db, SyntaxTreeNode node)
+    {
         var parentNode = db.GetParentNode(node.NodeId);
         if (parentNode == null)
             return 0;
 
         var distance = 0;
-        foreach(var child in parentNode.GetChildNodes())
+        foreach (var child in parentNode.GetChildNodes())
         {
             if (child.NodeId.Equals(node.NodeId))
                 break;
             distance += db.GetNodeRangeLength(child);
         }
 
-        return distance + db.GetDistanceFromDocumentStart(parentNode);
+        return distance;
     }
 
     [GenerateDbExtension] ///<see cref="GetNodeRangeLengthEx.GetNodeRangeLength"/>
