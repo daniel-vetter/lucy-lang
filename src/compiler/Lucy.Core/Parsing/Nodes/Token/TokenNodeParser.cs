@@ -31,7 +31,7 @@ public static class TokenNodeParser
                     return null;
 
             r.Seek(ck.Text.Length);
-            return TokenNode.Create(ck.Text, TriviaParser.Read(r));
+            return TokenNode.Create(r.Internalize(ck.Text), TriviaParser.Read(r));
         });
     }
 
@@ -51,7 +51,7 @@ public static class TokenNodeParser
 
             return length == 0
                 ? null
-                : TokenNode.Create(r.Read(length), TriviaParser.Read(r));
+                : TokenNode.Create(r.Internalize(r.Read(length)), TriviaParser.Read(r));
         });
     }
 
@@ -79,7 +79,7 @@ public static class TokenNodeParser
                 return null;
 
             r.Seek(ck.Keyword.Length);
-            return TokenNode.Create(ck.Keyword, TriviaParser.Read(r));
+            return TokenNode.Create(r.Internalize(ck.Keyword), TriviaParser.Read(r));
         });
     }
 

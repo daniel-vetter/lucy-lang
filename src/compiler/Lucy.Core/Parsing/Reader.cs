@@ -2,9 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
-using System.Linq;
 using System.Text;
-using Lucy.Core.Model;
 using Lucy.Core.ProjectManagement;
 
 namespace Lucy.Core.Parsing;
@@ -14,6 +12,7 @@ public class Reader
 {
     private readonly string _code;
     private readonly Dictionary<CacheKey, CacheEntry> _cache = new();
+    private readonly HashSet<string> _internalizedStrings = new();
 
     private int _position;
     private int _maxPeek;
@@ -27,6 +26,20 @@ public class Reader
     {
         _code = code;
         _cache = cache;
+    }
+
+    public string Internalize(string str)
+    {
+        if (_internalizedStrings.TryGetValue(str, out var existing))
+            return existing;
+
+        _internalizedStrings.Add(str);
+        return str;
+    }
+
+    public void Trim()
+    {
+        _cache.TrimExcess();
     }
 
     public string Code => _code;
@@ -84,23 +97,7 @@ public class Reader
 
         return new Reader(code, newCache);
     }
-
-    private string VisCache(Dictionary<CacheKey, CacheEntry> cache)
-    {
-        var sb = new StringBuilder();
-        foreach (var cacheKey in cache.Keys.OrderBy(x => x.StartPosition).ThenBy(x => cache[x].MaxPeek))
-        {
-            var v = cache[cacheKey];
-            var text = v.Result switch
-            {
-                TokenNode t => "\"" + t.Text + t.TrailingTrivia + "\"",
-                _ => v.Result.ToString()
-            };
-            sb.AppendLine($"{cacheKey.StartPosition}-{v.EndPosition}/{v.MaxPeek}: {cacheKey.Key} {text}");
-        }
-        return sb.ToString();
-    }
-
+    
     public string Read(int length)
     {
         _maxPeek = Math.Max(_maxPeek, _position + length + 1);

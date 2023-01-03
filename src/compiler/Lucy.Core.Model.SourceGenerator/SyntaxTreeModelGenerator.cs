@@ -71,7 +71,6 @@ internal static class SyntaxTreeModelGenerator
             return;
 
         sb.AppendLine("    protected NodeId? _nodeId;");
-        sb.AppendLine("    protected ImmutableArray<SyntaxTreeNode> _childNodes;");
         sb.AppendLine();
     }
     
@@ -99,11 +98,6 @@ internal static class SyntaxTreeModelGenerator
         foreach (var prop in node.Properties)
         {
             sb.AppendLine($"        {prop.Name} = {ToLower(prop.Name)};");
-        }
-
-        if (node.IsTopMost)
-        {
-            sb.AppendLine("        EnsureChildNodeListIsBuild();");
         }
 
         sb.AppendLine("    }");
@@ -169,14 +163,13 @@ internal static class SyntaxTreeModelGenerator
     {
         if (node.IsRoot)
         {
-            sb.AppendLine("    public ImmutableArray<SyntaxTreeNode> GetChildNodes() => _childNodes;");
+            sb.AppendLine("    public abstract IEnumerable<SyntaxTreeNode> GetChildNodes();");
         }
 
         if (node.IsTopMost)
         {
-            sb.AppendLine("    private void EnsureChildNodeListIsBuild()");
+            sb.AppendLine("    public override IEnumerable<SyntaxTreeNode> GetChildNodes()");
             sb.AppendLine("    {");
-            sb.AppendLine("        var nodes = ImmutableArray.CreateBuilder<SyntaxTreeNode>();");
             
             foreach (var prop in node.Properties.Where(x => x.TypeIsNode))
             {
@@ -194,10 +187,12 @@ internal static class SyntaxTreeModelGenerator
 
                 }
 
-                sb.AppendLine(padding + "nodes.Add(" + (prop.IsList ? "entry" : prop.Name) + ");");
+                sb.AppendLine(padding + "yield return " + (prop.IsList ? "entry" : prop.Name) + ";");
             }
 
-            sb.AppendLine("        _childNodes = nodes.ToImmutable();");
+            if (!node.Properties.Any(x => x.TypeIsNode))
+                sb.AppendLine("        yield break;");
+            
             sb.AppendLine("    }");
         }
         sb.AppendLine();

@@ -8,13 +8,17 @@ public static class DocumentRootSyntaxNodeParser
 {
     public static DocumentRootSyntaxNode ReadDocumentSyntaxNode(Reader reader)
     {
-        return reader.WithCache(nameof(DocumentRootSyntaxNodeParser), static r =>
+        var result =  reader.WithCache(nameof(DocumentRootSyntaxNodeParser), static r =>
         {
             var startToken = ReadDocumentStartToken(r);
             var statementList = StatementListSyntaxNodeParser.ReadStatementsWithoutBlock(r);
 
             return DocumentRootSyntaxNode.Create(startToken, statementList);
         });
+
+        reader.Trim();
+
+        return result;
     }
 
     private static TokenNode ReadDocumentStartToken(Reader reader)

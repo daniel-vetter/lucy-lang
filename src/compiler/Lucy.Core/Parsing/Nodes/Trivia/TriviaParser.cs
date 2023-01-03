@@ -69,6 +69,6 @@ public abstract class TriviaParser
     public static string? Read(Reader reader)
     {
         var len = ReadLength(reader);
-        return len == 0 ? null : reader.Read(len);
+        return len == 0 ? null : reader.Internalize(reader.Read(len));
     }
 }
