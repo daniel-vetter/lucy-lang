@@ -3,7 +3,6 @@ using Lucy.Core.ProjectManagement;
 using Lucy.Core.SemanticAnalysis.Infrastructure;
 using Lucy.Core.SemanticAnalysis.Inputs;
 using System;
-using System.Diagnostics;
 using System.Linq;
 
 namespace Lucy.Core.SemanticAnalysis;
@@ -14,51 +13,24 @@ public class SemanticDatabase : IDb, IDisposable
     private readonly IDisposable _workspaceEventSubscription;
     private readonly Db _db = new();
 
-    public SemanticDatabase(Workspace workspace, string? traceOutputDir = null)
+    public SemanticDatabase(Workspace workspace)
     {
         _workspaceEventSubscription = workspace.AddEventHandler(OnWorkspaceEvent);
         _workspace = workspace;
 
         RegisterHandler();
         AddWorkspaceAsInputs(workspace);
-        RegisterTraceListener(traceOutputDir);
     }
-
-    public QueryExectionLog GetLastQueryExecutionLog()
-    {
-        return _db.GetLastQueryExecutionLog();
-    }
-
-    private void RegisterTraceListener(string? graphOutputDir)
-    {
-        if (graphOutputDir == null)
-            return;
-
-        //var exporterDetailed = new DetailedGraphExport(graphOutputDir);
-        //var exporterSummary = new SummaryGraphExport(graphOutputDir);
-
-        _db.OnQueryDone = () =>
-        {
-            var sw1 = Stopwatch.StartNew();
-            //var log = _db.GetLastQueryExecutionLog();
-            sw1.Stop();
-
-            var sw2 = Stopwatch.StartNew();
-           // exporterDetailed.Export(log);
-           // exporterSummary.Export(log);
-            sw2.Stop();
-        };
-    }
-
+    
     private void AddWorkspaceAsInputs(Workspace workspace)
     {
-        _db.SetInput(new GetDocumentList(), new GetDocumentListResult(_workspace.Documents.Keys.ToComparableReadOnlyList()));
+        _db.SetInput(new GetDocumentList(), _workspace.Documents.Keys.ToComparableReadOnlyList());
         foreach (var codeFile in workspace.Documents.Values.OfType<CodeWorkspaceDocument>())
         {
-            _db.SetInput(new GetSyntaxTree(codeFile.Path), new GetSyntaxTreeResult(codeFile.ParserResult.RootNode));
-            _db.SetInput(new GetNodesByNodeIdMap(codeFile.Path), new GetNodesByNodeIdMapResult(codeFile.ParserResult.NodesById));
-            _db.SetInput(new GetNodeIdsByTypeMap(codeFile.Path), new GetNodeIdsByTypeMapResult(codeFile.ParserResult.NodeIdsByType));
-            _db.SetInput(new GetParentNodeIdByNodeIdMap(codeFile.Path), new GetParentNodeIdByNodeIdMapResult(codeFile.ParserResult.ParentNodeIdsByNodeId));
+            _db.SetInput(new GetSyntaxTree(codeFile.Path), codeFile.ParserResult.RootNode);
+            _db.SetInput(new GetNodesByNodeIdMap(codeFile.Path), codeFile.ParserResult.NodesById);
+            _db.SetInput(new GetNodeIdsByTypeMap(codeFile.Path), codeFile.ParserResult.NodeIdsByType);
+            _db.SetInput(new GetParentNodeIdByNodeIdMap(codeFile.Path), codeFile.ParserResult.ParentNodeIdsByNodeId);
         }
     }
 
@@ -81,7 +53,7 @@ public class SemanticDatabase : IDb, IDisposable
         _workspaceEventSubscription.Dispose();
     }
 
-    public TQueryResult Query<TQueryResult>(IQuery<TQueryResult> query) where TQueryResult : notnull
+    public object Query(object query)
     {
         return _db.Query(query);
     }
@@ -90,15 +62,14 @@ public class SemanticDatabase : IDb, IDisposable
     {
         if (@event is DocumentAdded documentAdded)
         {
-            _db.SetInput(new GetDocumentList(), new GetDocumentListResult(_workspace.Documents.Keys.ToComparableReadOnlyList()));
+            _db.SetInput(new GetDocumentList(), _workspace.Documents.Keys.ToComparableReadOnlyList());
             if (documentAdded.Document is CodeWorkspaceDocument codeFile)
             {
-                _db.SetInput(new GetSyntaxTree(codeFile.Path), new GetSyntaxTreeResult(codeFile.ParserResult.RootNode));
-                _db.SetInput(new GetNodesByNodeIdMap(codeFile.Path), new GetNodesByNodeIdMapResult(codeFile.ParserResult.NodesById));
-                _db.SetInput(new GetNodeIdsByTypeMap(codeFile.Path), new GetNodeIdsByTypeMapResult(codeFile.ParserResult.NodeIdsByType));
-                _db.SetInput(new GetParentNodeIdByNodeIdMap(codeFile.Path), new GetParentNodeIdByNodeIdMapResult(codeFile.ParserResult.ParentNodeIdsByNodeId));
+                _db.SetInput(new GetSyntaxTree(codeFile.Path), codeFile.ParserResult.RootNode);
+                _db.SetInput(new GetNodesByNodeIdMap(codeFile.Path), codeFile.ParserResult.NodesById);
+                _db.SetInput(new GetNodeIdsByTypeMap(codeFile.Path), codeFile.ParserResult.NodeIdsByType);
+                _db.SetInput(new GetParentNodeIdByNodeIdMap(codeFile.Path), codeFile.ParserResult.ParentNodeIdsByNodeId);
             }
-
             else
                 throw new NotSupportedException("Unsupported workspace document: " + documentAdded.Document.GetType().Name);
         }
@@ -106,15 +77,15 @@ public class SemanticDatabase : IDb, IDisposable
         {
             if (documentChanged.NewDocument is CodeWorkspaceDocument codeFile)
             {
-                _db.SetInput(new GetSyntaxTree(codeFile.Path), new GetSyntaxTreeResult(codeFile.ParserResult.RootNode));
-                _db.SetInput(new GetNodesByNodeIdMap(codeFile.Path), new GetNodesByNodeIdMapResult(codeFile.ParserResult.NodesById));
-                _db.SetInput(new GetNodeIdsByTypeMap(codeFile.Path), new GetNodeIdsByTypeMapResult(codeFile.ParserResult.NodeIdsByType));
-                _db.SetInput(new GetParentNodeIdByNodeIdMap(codeFile.Path), new GetParentNodeIdByNodeIdMapResult(codeFile.ParserResult.ParentNodeIdsByNodeId));
+                _db.SetInput(new GetSyntaxTree(codeFile.Path), codeFile.ParserResult.RootNode);
+                _db.SetInput(new GetNodesByNodeIdMap(codeFile.Path), codeFile.ParserResult.NodesById);
+                _db.SetInput(new GetNodeIdsByTypeMap(codeFile.Path), codeFile.ParserResult.NodeIdsByType);
+                _db.SetInput(new GetParentNodeIdByNodeIdMap(codeFile.Path), codeFile.ParserResult.ParentNodeIdsByNodeId);
             }
         }
         if (@event is DocumentRemoved documentRemoved)
         {
-            _db.SetInput(new GetDocumentList(), new GetDocumentListResult(_workspace.Documents.Keys.ToComparableReadOnlyList()));
+            _db.SetInput(new GetDocumentList(), _workspace.Documents.Keys.ToComparableReadOnlyList());
             _db.RemoveInput(new GetSyntaxTree(documentRemoved.Document.Path));
             _db.RemoveInput(new GetNodesByNodeIdMap(documentRemoved.Document.Path));
             _db.RemoveInput(new GetNodeIdsByTypeMap(documentRemoved.Document.Path));

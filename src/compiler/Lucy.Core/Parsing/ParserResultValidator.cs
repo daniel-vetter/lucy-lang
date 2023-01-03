@@ -10,7 +10,7 @@ namespace Lucy.Core.Parsing;
 
 public static class ParserResultValidator
 {
-    [Conditional("DEBUG")]
+    [Conditional("CUSTOM_DEBUG")]
     public static void Validate(string code, ParserResult result)
     {
         Profiler.Start("Validating result");
@@ -22,10 +22,6 @@ public static class ParserResultValidator
             void Traverse(SyntaxTreeNode? parent, SyntaxTreeNode node)
             {
                 allNodes.Add((parent, node));
-                if (node is DocumentRootSyntaxNode r)
-                {
-                    sb.Append(r.LeadingTrivia);
-                }
                 if (node is TokenNode t)
                 {
                     sb.Append(t.Text);

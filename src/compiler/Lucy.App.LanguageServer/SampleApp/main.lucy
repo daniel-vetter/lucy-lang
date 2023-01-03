@@ -47,7 +47,7 @@ fun test2Blub(): void {
 }
 
 fun method(): void {
-    
+    test2Blub()
 }
 
 

@@ -50,9 +50,9 @@ internal class TestCaseReader
         {
             Console.WriteLine("Applying " + file.Path + " v" + _currentVersion);
             if (_workspace.ContainsFile(file.Path))
-                _workspace.UpdateFile(file.Path, file.Content);
+                _workspace.UpdateFile(WorkspaceDocument.Create(file.Path, file.Content));
             else
-                _workspace.AddDocument(file.Path, file.Content);
+                _workspace.AddDocument(WorkspaceDocument.Create(file.Path, file.Content));
         }
         return true;
     }

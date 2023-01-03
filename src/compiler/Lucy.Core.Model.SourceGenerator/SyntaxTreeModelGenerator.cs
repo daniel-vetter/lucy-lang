@@ -71,8 +71,6 @@ internal static class SyntaxTreeModelGenerator
             return;
 
         sb.AppendLine("    protected NodeId? _nodeId;");
-        sb.AppendLine("    protected byte[] _hash = null!;");
-        sb.AppendLine("    protected int _hashShort;");
         sb.AppendLine("    protected ImmutableArray<SyntaxTreeNode> _childNodes;");
         sb.AppendLine();
     }

@@ -33,7 +33,7 @@ public class QueryExectionLog
 
 public class RecordedEntry
 {
-    public RecordedEntry(IQuery query, object? result, bool isInput, ImmutableArray<RecordedEntry> dependencies, RecordedCalculation? calculation)
+    public RecordedEntry(object query, object? result, bool isInput, ImmutableArray<RecordedEntry> dependencies, RecordedCalculation? calculation)
     {
         Query = query;
         Result = result;
@@ -42,7 +42,7 @@ public class RecordedEntry
         Calculation = calculation;
     }
 
-    public IQuery Query { get; }
+    public object Query { get; }
     public object? Result { get; }
     public bool IsInput { get; }
     public ImmutableArray<RecordedEntry> Dependencies { get; }

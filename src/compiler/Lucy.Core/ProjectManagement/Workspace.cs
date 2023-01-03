@@ -42,15 +42,13 @@ public class Workspace
         _eventSubscriptions.Publish(new DocumentAdded(document));
     }
 
-    public void UpdateFile(string path, string content)
+    public void UpdateFile(WorkspaceDocument document)
     {
-        if (!_documents.TryGetValue(path, out var oldDocument))
-            throw new Exception($"A file named '{path}' does not exist.");
-
-        var newDocument = WorkspaceDocument.Create(path, content);
-
-        _documents = _documents.SetItem(path, newDocument);
-        _eventSubscriptions.Publish(new DocumentChanged(oldDocument, newDocument));
+        if (!_documents.TryGetValue(document.Path, out var oldDocument))
+            throw new Exception($"A file named '{document.Path}' does not exist.");
+        
+        _documents = _documents.SetItem(document.Path, document);
+        _eventSubscriptions.Publish(new DocumentChanged(oldDocument, document));
     }
 
     public void UpdateFile(string path, Range2D range, string content)

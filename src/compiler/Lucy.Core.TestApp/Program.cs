@@ -26,7 +26,7 @@ Console.WriteLine("GetAllErrors found " + errors.Count + " in " + sw.Elapsed.Tot
 Console.WriteLine("TOTAL TIME: " + total.Elapsed.TotalMilliseconds);
 Console.WriteLine("TOTAL MEMORY: " + GC.GetTotalMemory(true) / 1024.0 / 1024.0);
 
-
+/*
 var data = sa.GetLastQueryExecutionLog().Calculations
     .GroupBy(x => x.Query.GetType())
     .Select(x => new
@@ -44,7 +44,7 @@ foreach (var calcs in data.OrderByDescending(x => x.Time))
 {
     Console.WriteLine(calcs.QueryName + " - " + calcs.Count + " - " + calcs.Time);
 }
-
+*/
 
 Console.WriteLine(GC.GetTotalMemory(true) / 1024.0 / 1024.0);
 Console.ReadLine();

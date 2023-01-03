@@ -10,10 +10,15 @@ public static class DocumentRootSyntaxNodeParser
     {
         return reader.WithCache(nameof(DocumentRootSyntaxNodeParser), static r =>
         {
-            var leadingTrivia = TriviaParser.Read(r);
+            var startToken = ReadDocumentStartToken(r);
             var statementList = StatementListSyntaxNodeParser.ReadStatementsWithoutBlock(r);
 
-            return DocumentRootSyntaxNode.Create(leadingTrivia, statementList);
+            return DocumentRootSyntaxNode.Create(startToken, statementList);
         });
+    }
+
+    private static TokenNode ReadDocumentStartToken(Reader reader)
+    {
+        return reader.WithCache(nameof(ReadDocumentStartToken), static r => TokenNode.Create("", TriviaParser.Read(r)));
     }
 }

@@ -5,26 +5,23 @@ using Lucy.Core.SemanticAnalysis.Infrastructure;
 
 namespace Lucy.Core.SemanticAnalysis.Inputs;
 
-public record GetNodesByNodeIdMap(string DocumentPath) : IQuery<GetNodesByNodeIdMapResult>;
-public record GetNodesByNodeIdMapResult(ImmutableDictionary<INodeId<SyntaxTreeNode>, SyntaxTreeNode> Map);
+public record GetNodesByNodeIdMap(string DocumentPath);
 
 public static class GetNodesByNodeIdMapEx
 {
-    public static ImmutableDictionary<INodeId<SyntaxTreeNode>, SyntaxTreeNode> GetNodesByNodeIdMap(this IDb db, string documentPath) => db.Query(new GetNodesByNodeIdMap(documentPath)).Map;
+    public static ImmutableDictionary<INodeId<SyntaxTreeNode>, SyntaxTreeNode> GetNodesByNodeIdMap(this IDb db, string documentPath) => (ImmutableDictionary<INodeId<SyntaxTreeNode>, SyntaxTreeNode>)db.Query(new GetNodesByNodeIdMap(documentPath));
 }
 
-public record GetNodeIdsByTypeMap(string DocumentPath) : IQuery<GetNodeIdsByTypeMapResult>;
-public record GetNodeIdsByTypeMapResult(ImmutableDictionary<Type, ImmutableHashSet<INodeId<SyntaxTreeNode>>> Map);
+public record GetNodeIdsByTypeMap(string DocumentPath);
 
 public static class GetNodeIdsByTypeMapEx
 {
-    public static ImmutableDictionary<Type, ImmutableHashSet<INodeId<SyntaxTreeNode>>> GetNodeIdsByTypeMap(this IDb db, string documentPath) => db.Query(new GetNodeIdsByTypeMap(documentPath)).Map;
+    public static ImmutableDictionary<Type, ImmutableHashSet<INodeId<SyntaxTreeNode>>> GetNodeIdsByTypeMap(this IDb db, string documentPath) => (ImmutableDictionary<Type, ImmutableHashSet<INodeId<SyntaxTreeNode>>>)db.Query(new GetNodeIdsByTypeMap(documentPath));
 }
 
-public record GetParentNodeIdByNodeIdMap(string DocumentPath) : IQuery<GetParentNodeIdByNodeIdMapResult>;
-public record GetParentNodeIdByNodeIdMapResult(ImmutableDictionary<INodeId<SyntaxTreeNode>, INodeId<SyntaxTreeNode>?> Map);
+public record GetParentNodeIdByNodeIdMap(string DocumentPath);
 
 public static class GetParentNodeIdByNodeIdMapEx
 {
-    public static ImmutableDictionary<INodeId<SyntaxTreeNode>, INodeId<SyntaxTreeNode>?> GetParentNodeIdByNodeIdMap(this IDb db, string documentPath) => db.Query(new GetParentNodeIdByNodeIdMap(documentPath)).Map;
+    public static ImmutableDictionary<INodeId<SyntaxTreeNode>, INodeId<SyntaxTreeNode>?> GetParentNodeIdByNodeIdMap(this IDb db, string documentPath) => (ImmutableDictionary<INodeId<SyntaxTreeNode>, INodeId<SyntaxTreeNode>?>)db.Query(new GetParentNodeIdByNodeIdMap(documentPath));
 }

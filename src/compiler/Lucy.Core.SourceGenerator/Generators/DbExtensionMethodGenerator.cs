@@ -154,7 +154,7 @@ public static class DbExtensionMethodGenerator
                     myArguments.Add(methodParameter.Identifier.Text);
                     myMethodParameter.Add(fullTypeName + " " + methodParameter.Identifier.Text);
                     myRecordParameter.Add(fullTypeName + " " + methodParameter.Identifier.Text);
-                    handlerArguments.Add("query." + methodParameter.Identifier.Text);
+                    handlerArguments.Add("q." + methodParameter.Identifier.Text);
                 }
 
                 if (failed)
@@ -167,9 +167,8 @@ public static class DbExtensionMethodGenerator
                 sp.AppendLine($$"""
                     namespace {{methodInfo.ContainingNamespace}}
                     {
-                        public record {{method.Identifier.Text}}Input({{string.Join(", ", myRecordParameter)}}) : {{_ns}}.IQuery<{{method.Identifier.Text}}Output>;
-                        public record {{method.Identifier.Text}}Output({{fullReturnType}} Result);
-
+                        public record {{method.Identifier.Text}}Input({{string.Join(", ", myRecordParameter)}});
+                        
                         public static class {{method.Identifier.Text}}Ex
                         {
                             ///<summary>
@@ -177,15 +176,18 @@ public static class DbExtensionMethodGenerator
                             ///</summary>
                             public static {{fullReturnType}} {{method.Identifier.Text}}({{string.Join(", ", myMethodParameter)}})
                             {
-                                return db.Query(new {{method.Identifier.Text}}Input({{string.Join(",", myArguments)}})).Result;
+                                return ({{fullReturnType}})db.Query(new {{method.Identifier.Text}}Input({{string.Join(",", myArguments)}}));
                             }
                         }
 
-                        public class {{method.Identifier.Text}}GeneratedHandler : {{_ns}}.QueryHandler<{{method.Identifier.Text}}Input, {{method.Identifier.Text}}Output>
+                        public class {{method.Identifier.Text}}GeneratedHandler : {{_ns}}.QueryHandler
                         {
-                            public override {{method.Identifier.Text}}Output Handle({{_ns}}.IDb db, {{method.Identifier.Text}}Input query)
+                            public override System.Type HandledType => typeof({{method.Identifier.Text}}Input);
+
+                            public override object Handle({{_ns}}.IDb db, object query)
                             {
-                                return new {{method.Identifier.Text}}Output({{@class.Identifier.Text}}.{{method.Identifier.Text}}({{string.Join(", ", handlerArguments)}}));
+                                var q =  ({{method.Identifier.Text}}Input)query;
+                                return {{@class.Identifier.Text}}.{{method.Identifier.Text}}({{string.Join(", ", handlerArguments)}});
                             }
                         }
                     }

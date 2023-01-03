@@ -3,13 +3,12 @@ using Lucy.Core.SemanticAnalysis.Infrastructure;
 
 namespace Lucy.Core.SemanticAnalysis.Inputs;
 
-public record GetSyntaxTree(string DocumentPath) : IQuery<GetSyntaxTreeResult>;
-public record GetSyntaxTreeResult(DocumentRootSyntaxNode RootNode);
+public record GetSyntaxTree(string DocumentPath);
 
 public static class GetSyntaxTreeEx
 {
     public static DocumentRootSyntaxNode GetSyntaxTree(this IDb db, string documentPath)
     {
-        return db.Query(new GetSyntaxTree(documentPath)).RootNode;
+        return (DocumentRootSyntaxNode)db.Query(new GetSyntaxTree(documentPath));
     }
 }

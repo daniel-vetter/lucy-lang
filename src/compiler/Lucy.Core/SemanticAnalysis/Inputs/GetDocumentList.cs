@@ -3,10 +3,9 @@ using Lucy.Core.SemanticAnalysis.Infrastructure;
 
 namespace Lucy.Core.SemanticAnalysis.Inputs;
 
-public record GetDocumentList : IQuery<GetDocumentListResult>;
-public record GetDocumentListResult(ComparableReadOnlyList<string> Paths);
+public record GetDocumentList;
 
 public static class GetDocumentListEx
 {
-    public static ComparableReadOnlyList<string> GetDocumentList(this IDb db) => db.Query(new GetDocumentList()).Paths;
+    public static ComparableReadOnlyList<string> GetDocumentList(this IDb db) => (ComparableReadOnlyList<string>)db.Query(new GetDocumentList());
 }

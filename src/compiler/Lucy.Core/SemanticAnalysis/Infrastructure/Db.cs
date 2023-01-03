@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Diagnostics;
-using System.Linq;
 using System.Text.Json;
 using Lucy.Common;
 
@@ -10,44 +8,39 @@ namespace Lucy.Core.SemanticAnalysis.Infrastructure;
 
 public class Db
 {
-    private readonly Dictionary<IQuery, Entry> _entries = new();
+    private readonly Dictionary<object, Entry> _entries = new();
+    private readonly Dictionary<object, Entry> _inputEntries = new();
     private readonly Dictionary<Type, QueryHandler> _handlers = new();
     private int _currentRevision;
-
-    private readonly Dictionary<Entry, RecordedCalculation> _lastQueryCalculations = new();
-    private TimeSpan _lastQueryDuration = TimeSpan.Zero;
-    private IQuery? _lastQuery;
-
+    
     //TODO: Garbage collection
     //TODO: Better monitoring system so if no monitoring is requested, no performance impact is noticable
-
-    public Action? OnQueryDone { get; set; }
-
+    
     public void RegisterHandler(QueryHandler handler)
     {
-        _handlers.Add(handler.GetType().BaseType!.GetGenericArguments()[0], handler);
+        _handlers.Add(handler.HandledType, handler);
     }
 
-    public void SetInput<TQueryResult>(IQuery<TQueryResult> query, TQueryResult result) where TQueryResult : notnull
+    public void SetInput(object query, object result)
     {
-        _currentRevision++;
-        if (_entries.TryGetValue(query, out var existingEntry))
-        {
-            if (!existingEntry.IsInput)
-                throw new Exception("The result of this query was already set by an query handle. It can not be changed to an input.");
+        if (_entries.ContainsKey(query))
+            throw new Exception("The result of this query was already set by an query handle. It can not be changed to an input.");
 
+        _currentRevision++;
+        if (_inputEntries.TryGetValue(query, out var existingEntry))
+        {
             existingEntry.LastChanged = _currentRevision;
             existingEntry.Result = result;
         }
         else
         {
-            _entries.Add(query, new Entry(query, result, _currentRevision, _currentRevision, true));
+            _inputEntries.Add(query, new Entry(query, result, _currentRevision, _currentRevision));
         }
     }
 
-    public void RemoveInput<TQueryResult>(IQuery<TQueryResult> query) where TQueryResult : notnull
+    public void RemoveInput(object query)
     {
-        if (!_entries.Remove(query, out var entry))
+        if (!_inputEntries.Remove(query, out var entry))
             throw new Exception("The input could not be removed because it did not exist.");
 
         _currentRevision++;
@@ -89,25 +82,17 @@ public class Db
         return false;
     }
 
-    public TQueryResult Query<TQueryResult>(IQuery<TQueryResult> query) where TQueryResult : notnull
+    public object? Query(object query)
     {
-        
-        _lastQueryCalculations.Clear();
-        _lastQuery = query;
-        //var sw = Stopwatch.StartNew();
-        var result = (TQueryResult)(Query((IQuery) query).Result ?? throw new Exception("Query was not executed."));
-        _lastQueryDuration = TimeSpan.Zero; //sw.Elapsed;
-        OnQueryDone?.Invoke();
-        
-        return result;
+        return GetUpToDateEntry(query).Result;
     }
 
-    private Entry Query(IQuery query)
+    private Entry GetUpToDateEntry(object query)
     {
         Profiler.Start("Query " + query.GetType().Name);
-        if (!_entries.TryGetValue(query, out var entry))
+        if (!_entries.TryGetValue(query, out var entry) && !_inputEntries.TryGetValue(query, out entry))
         {
-            entry = new Entry(query, null, 0, 0, false, new List<Entry>());
+            entry = new Entry(query, null, 0, 0, Array.Empty<Entry>());
             _entries[query] = entry;
             Recalculate(entry);
         }
@@ -131,10 +116,7 @@ public class Db
         ResultType resultType;
        // var overheadStopwatch = Stopwatch.StartNew();
 
-        if (entry.IsInput)
-            throw new Exception("The result of this query was already set as an input. It can not be changed to an result of an query handler.");
-
-        if (!result.Equals(entry.Result))
+        if ((result == null && entry.Result != null) || (result != null && !result.Equals(entry.Result)))
         {
             resultType = ResultType.HasChanged;
             entry.LastChanged = _currentRevision;
@@ -144,66 +126,32 @@ public class Db
         {
             resultType = ResultType.WasTheSame;
         }
-        entry.Dependencies = callContext.Dependencies;
+        entry.Dependencies = callContext.Dependencies.ToArray();
         entry.LastChecked = _currentRevision;
 
         //overheadStopwatch.Stop();
 
-        _lastQueryCalculations.Add(entry, new RecordedCalculation(_lastQueryCalculations.Count, query: entry.Query, /*handlerStopwatch.Elapsed - callContext.TotalTimeInSubQueries*/ TimeSpan.Zero, TimeSpan.Zero, TimeSpan.Zero, /*handlerStopwatch.Elapsed, overheadStopwatch.Elapsed*/ resultType));
+        //_lastQueryCalculations.Add(entry, new RecordedCalculation(_lastQueryCalculations.Count, query: entry.Query, /*handlerStopwatch.Elapsed - callContext.TotalTimeInSubQueries*/ TimeSpan.Zero, TimeSpan.Zero, TimeSpan.Zero, /*handlerStopwatch.Elapsed, overheadStopwatch.Elapsed*/ resultType));
 
         Profiler.End("Calc " + entry.Query.GetType().Name);
         return resultType != ResultType.WasTheSame;
     }
-
-    public QueryExectionLog GetLastQueryExecutionLog()
-    {
-        if (_lastQuery == null)
-            throw new Exception("No query was executed");
-
-        if (!_entries.TryGetValue(_lastQuery, out var entry))
-            throw new Exception("Query not found");
-
-        var cache = new Dictionary<Entry, RecordedEntry>();
-
-        RecordedEntry Map(Entry entryToMap)
-        {
-            if (cache.TryGetValue(entryToMap, out var alreadyMapped))
-                return alreadyMapped;
-
-            _lastQueryCalculations.TryGetValue(entryToMap, out var calculation);
-
-            var mapped = new RecordedEntry(
-                query: entryToMap.Query,
-                result: entryToMap.Result,
-                isInput: entryToMap.IsInput,
-                dependencies: entryToMap.Dependencies.Select(Map).ToImmutableArray(),
-                calculation: calculation
-            );
-
-            cache.Add(entryToMap, mapped);
-            return mapped;
-        }
-
-        return new QueryExectionLog(_lastQueryDuration, Map(entry), _lastQueryCalculations.Values.ToImmutableArray());
-    }
-
+    
     private class Entry
     {
-        public Entry(IQuery query, object? result, int lastChanged, int lastChecked, bool isInput, List<Entry>? dependencies = null)
+        public Entry(object query, object? result, int lastChanged, int lastChecked, Entry[]? dependencies = null)
         {
             Query = query;
             Result = result;
             LastChanged = lastChanged;
             LastChecked = lastChecked;
-            IsInput = isInput;
-            Dependencies = dependencies ?? new List<Entry>();
+            Dependencies = dependencies ?? Array.Empty<Entry>();
         }
 
         public int LastChanged { get; set; }
         public int LastChecked { get; set; }
-        public bool IsInput { get; }
-        public List<Entry> Dependencies { get; set; }
-        public IQuery Query { get; }
+        public Entry[] Dependencies { get; set; }
+        public object Query { get; }
         public object? Result { get; set; }
     }
 
@@ -215,20 +163,20 @@ public class Db
         }
 
         public List<Entry> Dependencies { get; } = new();
-        public TimeSpan TotalTimeInSubQueries => _totalTimeInSubQueries;
 
         private readonly Db _db;
-        private TimeSpan _totalTimeInSubQueries = TimeSpan.Zero;
-
+        
         [DebuggerStepThrough]
-        public TQueryResult Query<TQueryResult>(IQuery<TQueryResult> query) where TQueryResult : notnull
+        public object? Query(object query)
         {
-            //var sw = Stopwatch.StartNew();
-            var resultEntry = _db.Query((IQuery) query);
+            return QueryInternal(query);
+        }
+
+        private object? QueryInternal(object query)
+        {
+            var resultEntry = _db.GetUpToDateEntry(query);
             Dependencies.Add(resultEntry);
-            //sw.Stop();
-            _totalTimeInSubQueries += TimeSpan.Zero; // sw.Elapsed;
-            return (TQueryResult)(resultEntry.Result ?? throw new Exception("Query was not executed."));
+            return resultEntry.Result;
         }
     }
 }

@@ -77,7 +77,7 @@ public static class RangeCalculation
         var distance = 0;
         foreach (var child in parentNode.GetChildNodes())
         {
-            if (child.NodeId.Equals(node.NodeId))
+            if (child.NodeId == node.NodeId)
                 break;
             distance += db.GetNodeRangeLength(child);
         }

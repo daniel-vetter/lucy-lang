@@ -123,7 +123,7 @@
 	</MemberAccessExpressionSyntaxNode>
 
 	<DocumentRootSyntaxNode basedOn="SyntaxTreeNode">
-		<LeadingTrivia type="string" optional="true" />
+		<DocumentStart type="TokenNode"></DocumentStart>
 		<StatementList type="StatementListSyntaxNode" />
 	</DocumentRootSyntaxNode>
 

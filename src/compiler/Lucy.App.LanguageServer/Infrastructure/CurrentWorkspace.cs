@@ -23,7 +23,7 @@ public class CurrentWorkspace
 
         var ws = await Workspace.CreateFromPath(path.ToString());
         
-        _semanticDatabase = new SemanticDatabase(ws, "C:\\lucy-languageserver-output");
+        _semanticDatabase = new SemanticDatabase(ws);
         _workspace = ws;
         _rootPath = path;
     }
@@ -36,7 +36,7 @@ public class CurrentWorkspace
         var workspacePath = ToWorkspacePath(path);
 
         if (_workspace.ContainsFile(workspacePath))
-            _workspace.UpdateFile(workspacePath, content);
+            _workspace.UpdateFile(WorkspaceDocument.Create(ToWorkspacePath(path), content));
         else
             _workspace.AddDocument(WorkspaceDocument.Create(ToWorkspacePath(path), content));
     }
