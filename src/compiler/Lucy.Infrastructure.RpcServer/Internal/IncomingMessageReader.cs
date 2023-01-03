@@ -102,7 +102,7 @@ public class IncomingMessageReader
         if (left.IsSingleSegment)
             return right.SequenceEqual(left.FirstSpan);
 
-        int offset = 0;
+        var offset = 0;
         foreach (var memory in left)
         {
             if (!memory.Span.SequenceEqual(right.Slice(offset, memory.Span.Length)))

@@ -4,9 +4,9 @@ using System.Threading.Tasks;
 
 namespace Lucy.Infrastructure.RpcServer.Internal.Infrastructure;
 
-class Worker
+internal class Worker
 {
-    private readonly object _syncObj = new object();
+    private readonly object _syncObj = new();
     private Task? _task;
     private CancellationTokenSource? _cts;
 

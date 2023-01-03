@@ -38,7 +38,7 @@ public class FunctionCaller
         if (function.SingleParameter)
         {
             if (function.Parameters.Length != 1)
-                throw new Exception("Single parameter deserialization was enabled but the method did not have excatly one parameter.");
+                throw new Exception("Single parameter deserialization was enabled but the method did not have exactly one parameter.");
 
             return ParseSingleParameter(json, function);
         }
@@ -62,9 +62,9 @@ public class FunctionCaller
         if (json is JArray arr)
         {
             if (function.Parameters.Length < arr.Count)
-                throw new Exception("Could parse function parameters because " + arr.Count + " parametere where provided, but the method only accepts " + function.Parameters.Length);
+                throw new Exception("Could parse function parameters because " + arr.Count + " parameters where provided, but the method only accepts " + function.Parameters.Length);
 
-            for (int i = 0; i < arr.Count; i++)
+            for (var i = 0; i < arr.Count; i++)
             {
                 result.Add(_serializer.TokenToObject(arr[i], function.Parameters[i].ParameterType));
             }

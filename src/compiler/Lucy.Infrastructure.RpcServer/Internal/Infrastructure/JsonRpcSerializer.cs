@@ -26,10 +26,7 @@ public class JsonRpcSerializer
 
     public JToken? ObjectToToken(object? obj)
     {
-        if (obj == null)
-            return null;
-
-        return JToken.FromObject(obj, _jsonSerializer);
+        return obj == null ? null : JToken.FromObject(obj, _jsonSerializer);
     }
 
     public string ObjectToString(object? obj)
@@ -50,8 +47,6 @@ public class JsonRpcSerializer
 
     public object? TokenToObject(JToken? token, System.Type type)
     {
-        if (token == null)
-            return null;
-        return token.ToObject(type, _jsonSerializer);
+        return token?.ToObject(type, _jsonSerializer);
     }
 }
