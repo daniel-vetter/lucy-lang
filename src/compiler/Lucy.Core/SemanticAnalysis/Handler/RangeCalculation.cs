@@ -21,7 +21,7 @@ public static class RangeCalculation
     {
         var start = db.GetDistanceFromDocumentStart(node);
         var len = db.GetNodeRangeLength(node);
-        return new Range1D(start, start + len);
+        return new Range1D(start, start + len.WithoutTrailingTrivia);
     }
 
     [GenerateDbExtension] ///<see cref="GetRangeFromNodeEx.GetRangeFromNodeId"/>
@@ -40,11 +40,11 @@ public static class RangeCalculation
         foreach (var child in startNode.GetChildNodes())
         {
             var nodeLength = db.GetNodeRangeLength(child);
-            if (position.Position >= offset && position.Position < + offset + nodeLength)
+            if (position.Position >= offset && position.Position < + offset + nodeLength.WithoutTrailingTrivia)
             {
                 return FindNodeFromPosition(db, position, child, offset);
             }
-            offset += nodeLength;
+            offset += nodeLength.WithTrailingTrivia;
         }
 
         return null;
@@ -56,7 +56,7 @@ public static class RangeCalculation
     public static int GetDistanceFromDocumentStart(IDb db, SyntaxTreeNode node)
     {
         var distance = 0;
-        SyntaxTreeNode? current = node;
+        var current = node;
 
         while (current != null)
         {
@@ -79,26 +79,35 @@ public static class RangeCalculation
         {
             if (child.NodeId == node.NodeId)
                 break;
-            distance += db.GetNodeRangeLength(child);
+            distance += db.GetNodeRangeLength(child).WithTrailingTrivia;
         }
 
         return distance;
     }
 
     [GenerateDbExtension] ///<see cref="GetNodeRangeLengthEx.GetNodeRangeLength"/>
-    public static int GetNodeRangeLength(IDb db, SyntaxTreeNode node)
+    public static RangeResult GetNodeRangeLength(IDb db, SyntaxTreeNode node)
     {
-        var len = 0;
-        foreach(var child in node.GetChildNodes())
-            len += db.GetNodeRangeLength(child);
+        var len = new RangeResult(0, 0);
+        foreach (var child in node.GetChildNodes())
+        {
+            var result = db.GetNodeRangeLength(child);
+            len = new RangeResult(
+                len.WithTrailingTrivia + result.WithTrailingTrivia,
+                len.WithTrailingTrivia + result.WithoutTrailingTrivia
+            );
+        }
 
         if (node is TokenNode token)
         {
-            len += token.Text.Length;
-            if (token.TrailingTrivia != null)
-                len += token.TrailingTrivia.Length;
+            len = new RangeResult(
+                len.WithTrailingTrivia + token.Text.Length + (token.TrailingTrivia?.Length ?? 0),
+                len.WithoutTrailingTrivia + token.Text.Length
+            );
         }
 
         return len;
     }
 }
+
+public record RangeResult(int WithTrailingTrivia, int WithoutTrailingTrivia);
