@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 using System.Threading.Channels;
 using System.Threading.Tasks;
 using Lucy.Common.ServiceDiscovery;
@@ -67,13 +68,16 @@ public class IncomingMessageHandler
         var sw = Stopwatch.StartNew();
         var result = await _functionCaller.Call(function, notificationMessage.Params);
 
-        if (result.Error != null)
+        switch (result)
         {
-            _logger.LogError(result.Error, "Handler failed while processing a incoming '{type}' notification. Processing took {duration}ms", notificationMessage.Method, sw.Elapsed.TotalMilliseconds);
-        }
-        else
-        {
-            _logger.LogInformation("Successfully handled incoming '{type}' notification. Processing took {duration}ms", notificationMessage.Method, sw.Elapsed.TotalMilliseconds);
+            case FunctionCallErrorResult errorResult:
+                _logger.LogError(errorResult.Error, "Handler failed while processing a incoming '{type}' notification. Processing took {duration}ms", notificationMessage.Method, sw.Elapsed.TotalMilliseconds);
+                break;
+            case FunctionCallSuccessResult:
+                _logger.LogInformation("Successfully handled incoming '{type}' notification. Processing took {duration}ms", notificationMessage.Method, sw.Elapsed.TotalMilliseconds);
+                break;
+            default:
+                throw new NotSupportedException("Unsupported result type: " + result.GetType().Name);
         }
 
     }
@@ -94,17 +98,19 @@ public class IncomingMessageHandler
 
         var sw = Stopwatch.StartNew();
         var result = await _functionCaller.Call(function, requestMessage.Params);
-        if (result.Error != null)
-        {
-            await _outgoingMessageWriter.Write(new ResponseErrorMessage(requestMessage.Id, new ErrorDescription(-1, result.Error.Message)));
-            _logger.LogError(result.Error, "Handler failed while processing a incoming '{type}' request. Processing took {duration}ms", requestMessage.Method, sw.Elapsed.TotalMilliseconds);
-            return;
-        }
-        else
-        {
-            _logger.LogInformation("Successfully handled incoming '{type}' request. Processing took {duration}ms", requestMessage.Method, sw.Elapsed.TotalMilliseconds);
-        }
 
-        await _outgoingMessageWriter.Write(new ResponseSuccessMessage(requestMessage.Id, _serializer.ObjectToToken(result.Result)));
+        switch (result)
+        {
+            case FunctionCallErrorResult errorResult:
+                await _outgoingMessageWriter.Write(new ResponseErrorMessage(requestMessage.Id, new ErrorDescription(-1, errorResult.Error.Message)));
+                _logger.LogError(errorResult.Error, "Handler failed while processing a incoming '{type}' request. Processing took {duration}ms", requestMessage.Method, sw.Elapsed.TotalMilliseconds);
+                break;
+            case FunctionCallSuccessResult successResult:
+                await _outgoingMessageWriter.Write(new ResponseSuccessMessage(requestMessage.Id, _serializer.ObjectToToken(successResult.Result)));
+                _logger.LogInformation("Successfully handled incoming '{type}' request. Processing took {duration}ms", requestMessage.Method, sw.Elapsed.TotalMilliseconds);
+                break;
+            default:
+                throw new NotSupportedException("Unsupported result type: " + result.GetType().Name);
+        }
     }
 }

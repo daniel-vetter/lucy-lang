@@ -26,7 +26,7 @@ public class JsonRpcSerializer
 
     public JToken? ObjectToToken(object? obj)
     {
-        return obj == null ? null : JToken.FromObject(obj, _jsonSerializer);
+        return obj == null ? JValue.CreateNull() : JToken.FromObject(obj, _jsonSerializer);
     }
 
     public string ObjectToString(object? obj)

@@ -22,11 +22,11 @@ public class FunctionCaller
         try
         {
             var result = await function.Invoke(parsedParameter);
-            return new FunctionCallResult(null, result);
+            return new FunctionCallSuccessResult(result);
         }
         catch (Exception e)
         {
-            return new FunctionCallResult(e, null);
+            return new FunctionCallErrorResult(e);
         }
     }
 
@@ -86,4 +86,6 @@ public class FunctionCaller
     }
 }
 
-public record FunctionCallResult(Exception? Error, object? Result);
+public abstract record FunctionCallResult;
+public record FunctionCallSuccessResult(object? Result) : FunctionCallResult;
+public record FunctionCallErrorResult(Exception Error) : FunctionCallResult;
