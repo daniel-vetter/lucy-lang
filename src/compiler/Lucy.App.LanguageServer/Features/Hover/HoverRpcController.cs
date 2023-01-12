@@ -22,35 +22,35 @@ internal class HoverRpcController
     {
         var documentPath = _currentWorkspace.ToWorkspacePath(input.TextDocument.Uri);
         var position = _currentWorkspace.ToPosition1D(documentPath, input.Position.ToPosition2D());
-        var node = _currentWorkspace.Analysis.GetNodeAtPosition(documentPath, position);
+        var nodeId = _currentWorkspace.Analysis.GetNodeAtPosition(documentPath, position);
 
-        if (node == null)
+        if (nodeId == null)
             return new RpcHover();
 
-        var tooltip = "NodeId: " + node.NodeId + "\\\n";
+        var tooltip = "NodeId: " + nodeId + "\\\n";
         tooltip += "Position: " + input.Position + ", " + position.Position + "\\\n";
 
         while (true)
         {
-            if (node == null)
+            if (nodeId == null)
                 break;
 
-            if (node is TypeReferenceSyntaxNode typeReferenceSyntaxNode)
+            if (nodeId is INodeId<TypeReferenceSyntaxNode> typeReferenceSyntaxNode)
             {
-                var typeInfo = _currentWorkspace.Analysis.GetTypeInfoFromTypeReferenceId(typeReferenceSyntaxNode.NodeId);
+                var typeInfo = _currentWorkspace.Analysis.GetTypeInfoFromTypeReferenceId(typeReferenceSyntaxNode);
                 tooltip += typeInfo == null
                     ? "Type: Unknown type\\\n"
                     : "Type: " + typeInfo.Name + "\\\n";
                 break;
             }
 
-            if (node is ExpressionSyntaxNode expressionSyntaxNode)
+            if (nodeId is INodeId<ExpressionSyntaxNode> expressionSyntaxNode)
             {
-                tooltip += "Type: " + (_currentWorkspace.Analysis.GetExpressionType(expressionSyntaxNode.NodeId)?.Name ?? "Unknown type") + "\\\n ";
+                tooltip += "Type: " + (_currentWorkspace.Analysis.GetExpressionType(expressionSyntaxNode)?.Name ?? "Unknown type") + "\\\n ";
                 break;
             }
             
-            node = _currentWorkspace.Analysis.GetParentNode(node.NodeId);
+            nodeId = _currentWorkspace.Analysis.GetParentNodeId(nodeId);
         }
 
         return new RpcHover

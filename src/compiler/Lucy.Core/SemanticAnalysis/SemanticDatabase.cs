@@ -12,6 +12,7 @@ public class SemanticDatabase : IDb, IDisposable
     private readonly Workspace _workspace;
     private readonly IDisposable _workspaceEventSubscription;
     private readonly Db _db = new();
+    private QueryMetricsExporter? _queryMetricsExporter;
 
     public SemanticDatabase(Workspace workspace)
     {
@@ -20,8 +21,19 @@ public class SemanticDatabase : IDb, IDisposable
 
         RegisterHandler();
         AddWorkspaceAsInputs(workspace);
+        RegisterDebugHelper();
     }
     
+    private void RegisterDebugHelper()
+    {
+        var path = Environment.GetEnvironmentVariable("LUCY_CORE_EXPORT_SEMANTIC_DB_LOG");
+        if (string.IsNullOrWhiteSpace(path))
+            return;
+
+        _db.TrackQueryMetrics = true;
+        _queryMetricsExporter = new QueryMetricsExporter(path);
+    }
+
     private void AddWorkspaceAsInputs(Workspace workspace)
     {
         _db.SetInput(new GetDocumentList(), _workspace.Documents.Keys.ToComparableReadOnlyList());
@@ -53,11 +65,13 @@ public class SemanticDatabase : IDb, IDisposable
         _workspaceEventSubscription.Dispose();
     }
 
-    public object Query(object query)
+    public object? Query(object query)
     {
-        return _db.Query(query);
+        var result = _db.Query(query);
+        _queryMetricsExporter?.Export(_db.GetLastQueryMetrics());
+        return result;
     }
-
+    
     private void OnWorkspaceEvent(IWorkspaceEvent @event)
     {
         if (@event is DocumentAdded documentAdded)
@@ -92,4 +106,13 @@ public class SemanticDatabase : IDb, IDisposable
             _db.RemoveInput(new GetParentNodeIdByNodeIdMap(documentRemoved.Document.Path));
         }
     }
+}
+
+[DbInputs]
+public interface IDbInputs
+{
+    int ValueA();
+    int ValueB();
+
+    int Dummy(int value);
 }

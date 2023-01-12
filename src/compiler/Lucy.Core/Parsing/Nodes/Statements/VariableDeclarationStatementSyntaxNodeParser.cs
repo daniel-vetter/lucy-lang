@@ -1,5 +1,6 @@
 ﻿using Lucy.Core.Model;
 using Lucy.Core.Parsing.Nodes.Expressions;
+using Lucy.Core.Parsing.Nodes.Stuff;
 using Lucy.Core.Parsing.Nodes.Token;
 
 namespace Lucy.Core.Parsing.Nodes.Statements
@@ -13,8 +14,8 @@ namespace Lucy.Core.Parsing.Nodes.Statements
                 if (!TokenNodeParser.TryReadKeyword(r, "var", out var varKeyword))
                     return null;
 
-                if (!TokenNodeParser.TryReadIdentifier(r, out var variableName))
-                    variableName = TokenNodeParser.Missing("Variable name expected");
+                if (!VariableDefinitionSyntaxNodeParser.TryReadVariableDefinitionSyntaxNode(r, out var variableDefinition))
+                    variableDefinition = VariableDefinitionSyntaxNodeParser.Missing("Variable definition expected");
 
                 if (!TokenNodeParser.TryReadExact(r, "=", out var equalSign))
                     equalSign = TokenNodeParser.Missing("'=' expected");
@@ -22,7 +23,7 @@ namespace Lucy.Core.Parsing.Nodes.Statements
                 if (!ExpressionSyntaxNodeParser.TryRead(r, out var expression))
                     expression = ExpressionSyntaxNodeParser.Missing("Expression expected");
 
-                return VariableDeclarationStatementSyntaxNode.Create(varKeyword, variableName, equalSign, expression);
+                return VariableDeclarationStatementSyntaxNode.Create(varKeyword, variableDefinition, equalSign, expression);
             });
         }
     }

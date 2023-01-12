@@ -4,7 +4,7 @@
 		<TargetFramework>net7.0</TargetFramework>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
-
+		<EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
 		<IsPackable>false</IsPackable>
 	</PropertyGroup>
 
@@ -20,6 +20,7 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\Lucy.Core\Lucy.Core.csproj" />
+		<ProjectReference Include="..\Lucy.Core.SourceGenerator\Lucy.Core.SourceGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
 	</ItemGroup>
 
 </Project>

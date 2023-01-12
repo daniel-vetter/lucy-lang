@@ -8,7 +8,7 @@ namespace Lucy.Core.SemanticAnalysis.Handler;
 
 public record FlatIdentifier(string Text, INodeId<TokenNode> NodeId);
 public record FlatFunctionDeclaration(INodeId<FunctionDeclarationStatementSyntaxNode> NodeId, FlatIdentifier Name, ComparableReadOnlyList<FlatFunctionDeclarationParameter> Parameters, INodeId<TypeReferenceSyntaxNode> ReturnType);
-public record FlatFunctionDeclarationParameter(INodeId<FunctionDeclarationParameterSyntaxNode> NodeId, FlatIdentifier Name, INodeId<TypeReferenceSyntaxNode> TypeReference);
+public record FlatFunctionDeclarationParameter(INodeId<FunctionDeclarationParameterSyntaxNode> NodeId, FlatIdentifier Name, INodeId<TypeReferenceSyntaxNode>? TypeReference);
 
 public record FlatFunctionCall(INodeId<FunctionCallExpressionSyntaxNode> NodeId, FlatIdentifier Name, ComparableReadOnlyList<INodeId<ExpressionSyntaxNode>> Arguments);
 public record FlatFunctionParameterDeclaration(INodeId<FunctionDeclarationParameterSyntaxNode> NodeId, INodeId<TypeReferenceSyntaxNode> TypeReferenceNodeId, FlatIdentifier Name);
@@ -17,7 +17,7 @@ public record TypeReferenceInfo(INodeId<TypeReferenceSyntaxNode> TypeReferenceNo
 
 public static class FunctionsHandler
 {
-    [GenerateDbExtension] ///<see cref="GetFlatFunctionCallEx.GetFlatFunctionCall("/>
+    [DbQuery] ///<see cref="GetFlatFunctionCallEx.GetFlatFunctionCall("/>
     public static FlatFunctionCall GetFlatFunctionCall(IDb db, INodeId<FunctionCallExpressionSyntaxNode> functionCallNodeId)
     {
         var node = db.GetNodeById(functionCallNodeId);
@@ -29,7 +29,7 @@ public static class FunctionsHandler
         );
     }
 
-    [GenerateDbExtension] ///<see cref="GetFunctionsInDocumentEx.GetFunctionsInDocument"/>
+    [DbQuery] ///<see cref="GetFunctionsInDocumentEx.GetFunctionsInDocument"/>
     public static ComparableReadOnlyList<FlatFunctionDeclaration> GetFunctionsInDocument(IDb db, string documentPath)
     {
         return db.GetNodeIdsByType<FunctionDeclarationStatementSyntaxNode>(documentPath)
@@ -37,7 +37,7 @@ public static class FunctionsHandler
             .ToComparableReadOnlyList();
     }
 
-    [GenerateDbExtension] ///<see cref="GetFlatFunctionDeclarationEx.GetFlatFunctionDeclaration"/>
+    [DbQuery] ///<see cref="GetFlatFunctionDeclarationEx.GetFlatFunctionDeclaration"/>
     public static FlatFunctionDeclaration GetFlatFunctionDeclaration(IDb db, INodeId<FunctionDeclarationStatementSyntaxNode> functionDeclarationNodeId)
     {
         var node = db.GetNodeById(functionDeclarationNodeId);
@@ -46,10 +46,10 @@ public static class FunctionsHandler
             .Select(x => new FlatFunctionDeclarationParameter(
                 x.NodeId, 
                 new FlatIdentifier(
-                    x.VariableName.Text,
-                    x.VariableName.NodeId
+                    x.VariableDefinition.VariableName.Text,
+                    x.VariableDefinition.VariableName.NodeId
                 ),
-                x.VariableType.TypeReference.NodeId
+                x.VariableDefinition.VariableType?.TypeReference.NodeId
             )).ToComparableReadOnlyList();
 
         return new FlatFunctionDeclaration(
@@ -63,8 +63,8 @@ public static class FunctionsHandler
         );
     }
 
-    [GenerateDbExtension] ///<see cref="GetFunctionsInStatementListEx.GetFunctionsInStatementList"/>
-    public static ComparableReadOnlyList<FlatFunctionDeclaration> GetFunctionsInStatementList(IDb db, INodeId<StatementListSyntaxNode> statementListNodeId)
+    [DbQuery] ///<see cref="GetDeclaredFunctionsInStatementListEx.GetDeclaredFunctionsInStatementList"/>
+    public static ComparableReadOnlyList<FlatFunctionDeclaration> GetDeclaredFunctionsInStatementList(IDb db, INodeId<StatementListSyntaxNode> statementListNodeId)
     {
         var result = new ComparableReadOnlyList<FlatFunctionDeclaration>.Builder();
         foreach (var statement in db.GetNodeById(statementListNodeId).Statements)
@@ -75,45 +75,56 @@ public static class FunctionsHandler
         return result.Build();
     }
 
-    [GenerateDbExtension] ///<see cref="GetAvailableFunctionsInScopeEx.GetAvailableFunctionsInScope" />
-    public static ComparableReadOnlyList<FlatFunctionDeclaration> GetAvailableFunctionsInScope(IDb db, INodeId<SyntaxTreeNode> scopeTarget)
+    [DbQuery] ///<see cref="GetReachableFunctionsInStatementListEx.GetReachableFunctionsInStatementList" />
+    public static ComparableReadOnlyList<FlatFunctionDeclaration> GetReachableFunctionsInStatementList(IDb db, INodeId<StatementListSyntaxNode> statementListNodeId)
     {
-        var currentNode = scopeTarget;
+        var currentNode = statementListNodeId;
         var result = new ComparableReadOnlyList<FlatFunctionDeclaration>.Builder();
         while (true)
         {
-            var parentId = db.GetParentNodeIdOfType<StatementListSyntaxNode>(currentNode);
-            if (parentId == null)
+            result.AddRange(db.GetDeclaredFunctionsInStatementList(currentNode));
+
+            currentNode = db.GetParentNodeIdOfType<StatementListSyntaxNode>(currentNode);
+            if (currentNode == null)
                 break;
-            
-            result.AddRange(db.GetFunctionsInStatementList(parentId));
-            currentNode = parentId;
         }
 
-        foreach (var import in db.GetImports(scopeTarget.DocumentPath).Valid)
+        foreach (var import in db.GetImports(statementListNodeId.DocumentPath).Valid)
         {
             result.AddRange(db.GetFunctionsInDocument(import.Path));
         }
         return result.Build();
     }
 
-    [GenerateDbExtension] ///<see cref="GetFunctionsWithNameInScopeEx.GetFunctionsWithNameInScope" />
+    [DbQuery] ///<see cref="GetReachableFunctionsInScopeEx.GetReachableFunctionsInScope" />
+    public static ComparableReadOnlyList<FlatFunctionDeclaration> GetReachableFunctionsInScope(IDb db, INodeId<SyntaxTreeNode> scopeTarget)
+    {
+        var sl = scopeTarget as INodeId<StatementListSyntaxNode>
+                 ?? db.GetParentNodeIdOfType<StatementListSyntaxNode>(scopeTarget);
+
+        if (sl is null)
+            throw new Exception("Invalid scopeTarget");
+
+        return db.GetReachableFunctionsInStatementList(sl);
+    }
+
+    [DbQuery] ///<see cref="GetFunctionsWithNameInScopeEx.GetFunctionsWithNameInScope" />
     public static ComparableReadOnlyList<FlatFunctionDeclaration> GetFunctionsWithNameInScope(IDb db, INodeId<SyntaxTreeNode> scopeTarget, string name)
     {
-        return db.GetAvailableFunctionsInScope(scopeTarget)
+        return db.GetReachableFunctionsInScope(scopeTarget)
             .Where(x => x.Name.Text == name)
             .ToComparableReadOnlyList();
     }
 
 
-    [GenerateDbExtension] ///<see cref="GetFunctionCandidatesFromFunctionCallEx.GetFunctionCandidatesFromFunctionCall"/>
+    [DbQuery] ///<see cref="GetFunctionCandidatesFromFunctionCallEx.GetFunctionCandidatesFromFunctionCall"/>
     public static ComparableReadOnlyList<FlatFunctionDeclaration> GetFunctionCandidatesFromFunctionCall(IDb db, INodeId<FunctionCallExpressionSyntaxNode> nodeId)
     {
         var functionCallInfo = db.GetFlatFunctionCall(nodeId);
         return db.GetFunctionsWithNameInScope(functionCallInfo.NodeId, functionCallInfo.Name.Text);
     }
 
-    [GenerateDbExtension] ///<see cref="GetAllMatchingFunctionsFromFunctionCallEx.GetAllMatchingFunctionsFromFunctionCall" />
+    [DbQuery] ///<see cref="GetAllMatchingFunctionsFromFunctionCallEx.GetAllMatchingFunctionsFromFunctionCall" />
     public static ComparableReadOnlyList<FlatFunctionDeclaration> GetAllMatchingFunctionsFromFunctionCall(IDb db, INodeId<FunctionCallExpressionSyntaxNode> functionCallExpressionNodeId)
     {
         var functionCandidates = db.GetFunctionCandidatesFromFunctionCall(functionCallExpressionNodeId);
@@ -151,14 +162,14 @@ public static class FunctionsHandler
         return result.Build();
     }
 
-    [GenerateDbExtension] ///<see cref="GetBestMatchingFunctionsFromFunctionCallEx.GetBestMatchingFunctionsFromFunctionCall" />
+    [DbQuery] ///<see cref="GetBestMatchingFunctionsFromFunctionCallEx.GetBestMatchingFunctionsFromFunctionCall" />
     public static FlatFunctionDeclaration? GetBestMatchingFunctionsFromFunctionCall(IDb db, INodeId<FunctionCallExpressionSyntaxNode> functionCallExpressionNodeId)
     {
         var all = db.GetAllMatchingFunctionsFromFunctionCall(functionCallExpressionNodeId);
         return all.Count != 1 ? null : all[0];
     }
 
-    [GenerateDbExtension] ///<see cref="GetFunctionParameterTypesEx.GetFunctionParameterTypes" />
+    [DbQuery] ///<see cref="GetFunctionParameterTypesEx.GetFunctionParameterTypes" />
     public static ComparableReadOnlyList<TypeInfo?> GetFunctionParameterTypes(IDb db, INodeId<FunctionDeclarationStatementSyntaxNode> nodeId)
     {
         var flat = db.GetFlatFunctionDeclaration(nodeId);
@@ -170,7 +181,7 @@ public static class FunctionsHandler
         return parameterTypes.Build();
     }
 
-    [GenerateDbExtension] ///<see cref="GetFunctionArgumentTypesEx.GetFunctionArgumentTypes" />
+    [DbQuery] ///<see cref="GetFunctionArgumentTypesEx.GetFunctionArgumentTypes" />
     public static ComparableReadOnlyList<TypeInfo?> GetFunctionArgumentTypes(IDb db, INodeId<FunctionCallExpressionSyntaxNode> nodeId)
     {
         var flatFunctionCall = db.GetFlatFunctionCall(nodeId);
@@ -184,7 +195,7 @@ public static class FunctionsHandler
         return list.Build();
     }
 
-    [GenerateDbExtension] ///<see cref="GetExpressionTypeEx.GetExpressionType" />
+    [DbQuery] ///<see cref="GetExpressionTypeEx.GetExpressionType" />
     public static TypeInfo? GetExpressionType(IDb db, INodeId<ExpressionSyntaxNode> nodeId)
     {
         var node = db.GetNodeById(nodeId);

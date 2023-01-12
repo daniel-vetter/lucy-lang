@@ -1,6 +1,8 @@
 ﻿using System.Collections.Immutable;
 using Lucy.Core.Model;
+using Lucy.Core.Parsing.Nodes.Stuff;
 using Lucy.Core.Parsing.Nodes.Token;
+using Lucy.Core.ProjectManagement;
 
 namespace Lucy.Core.Parsing.Nodes.Statements.FunctionDeclaration;
 
@@ -17,15 +19,13 @@ public static class FunctionDeclarationParameterSyntaxNodeParser
             {
                 var next = code.WithCache(nameof(FunctionDeclarationParameterSyntaxNodeParser), static r =>
                 {
-                    if (!TokenNodeParser.TryReadIdentifier(r, out var variableName))
+                    var def = VariableDefinitionSyntaxNodeParser.Read(r);
+                    if (def == null)
                         return null;
-
-                    if (!TypeAnnotationSyntaxNodeParser.TryRead(r, out var variableType))
-                        variableType = TypeAnnotationSyntaxNodeParser.Missing("Parameter type expected");
 
                     TokenNodeParser.TryReadExact(r, ",", out var separator);
 
-                    return FunctionDeclarationParameterSyntaxNode.Create(variableName, variableType, separator);
+                    return FunctionDeclarationParameterSyntaxNode.Create(def, separator);
                 });
 
                 if (next == null)

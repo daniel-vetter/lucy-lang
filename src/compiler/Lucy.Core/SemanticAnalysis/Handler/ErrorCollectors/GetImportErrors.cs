@@ -6,7 +6,7 @@ namespace Lucy.Core.SemanticAnalysis.Handler.ErrorCollectors;
 
 public static class GetImportErrorsHandler
 {
-    [GenerateDbExtension] ///<see cref="GetImportErrorsEx.GetImportErrors"/>
+    [DbQuery] ///<see cref="GetImportErrorsEx.GetImportErrors"/>
     public static ComparableReadOnlyList<Error> GetImportErrors(IDb db)
     {
         var result = new ComparableReadOnlyList<Error>.Builder();
@@ -15,7 +15,7 @@ public static class GetImportErrorsHandler
             var imports = db.GetImports(documentPath);
             foreach (var import in imports.Invalid)
             {
-                var range = db.GetRangeFromNode(db.GetNodeById(import.ImportPathTokenNodeId));
+                var range = db.GetRangeFromNodeId(import.ImportPathTokenNodeId);
                 result.Add(new ErrorWithRange(documentPath, range, $"Could not resolve import: '{import.Path}'."));
             }
         }

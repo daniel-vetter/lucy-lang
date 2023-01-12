@@ -1,0 +1,7 @@
+{
+  "profiles": {
+    "Lucy.Core.TestApp": {
+      "commandName": "Project"
+    }
+  }
+}

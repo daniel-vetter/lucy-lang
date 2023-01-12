@@ -1,26 +1,61 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Diagnostics;
+using System.Linq;
+using System.Reflection;
 using System.Text.Json;
 using Lucy.Common;
 
 namespace Lucy.Core.SemanticAnalysis.Infrastructure;
 
-public class Db
+public class Db : IDb
 {
     private readonly Dictionary<object, Entry> _entries = new();
     private readonly Dictionary<object, Entry> _inputEntries = new();
     private readonly Dictionary<Type, QueryHandler> _handlers = new();
     private int _currentRevision;
     
+    private object? _lastRootQuery;
+    private readonly List<RecordedQuery> _recordedCalculations = new();
+
     //TODO: Garbage collection
-    //TODO: Better monitoring system so if no monitoring is requested, no performance impact is noticable
-    
+
+    public Db(bool trackQueryMetrics = false)
+    {
+        TrackQueryMetrics = trackQueryMetrics;
+    }
+
+    public bool TrackQueryMetrics { get; set; }
+
     public void RegisterHandler(QueryHandler handler)
     {
         _handlers.Add(handler.HandledType, handler);
     }
 
+    public void RegisterHandlerFromCurrentAssembly()
+    {
+        foreach (var handler in Assembly.GetCallingAssembly().GetTypes().Where(x => x.BaseType == typeof(QueryHandler)))
+        {
+            var instance = Activator.CreateInstance(handler);
+            if (instance == null)
+                throw new Exception("Could not create instance of " + handler);
+
+            RegisterHandler((QueryHandler)instance);
+        }
+    }
+
+    public QueryMetrics GetLastQueryMetrics()
+    {
+        if (!TrackQueryMetrics)
+            throw new Exception("TrackQueryMetrics was not enabled.");
+
+        if (_lastRootQuery == null)
+            throw new Exception("No query was executed.");
+
+        return new QueryMetrics(_lastRootQuery, _recordedCalculations.ToImmutableArray());
+    }
+    
     public void SetInput(object query, object result)
     {
         if (_entries.ContainsKey(query))
@@ -47,136 +82,181 @@ public class Db
         entry.LastChanged = _currentRevision;
     }
 
-    private bool EnsureEntryIsUpToDate(Entry entry)
-    {
-        if (entry.LastChecked == _currentRevision)
-            return false;
-
-        // First check the dependencies of the current entry.
-        // If the current entry is out of date, we need to recalculate.
-        foreach (var dep in entry.Dependencies)
-        {
-            if (dep.LastChanged > entry.LastChanged)
-            {
-                // Since we recalculated, the current node and all its dependencies
-                // will be update to date, so we don't need to check further.
-                return Recalculate(entry);
-            }
-        }
-
-        // We now know that the current entry thinks it is up to date.
-        // But transitive dependencies can still be out of date.
-
-        foreach (var dep in entry.Dependencies)
-        {
-            // Recursively check for all dependencies, if there dependencies are up to date
-            if (EnsureEntryIsUpToDate(dep))
-            {
-                // If something has changed, out current entry will also
-                // no longer be up to date, so we need to recalculate.
-                return Recalculate(entry);
-            }
-        }
-
-        entry.LastChecked = _currentRevision;
-        return false;
-    }
-
     public object? Query(object query)
     {
-        return GetUpToDateEntry(query).Result;
+        _recordedCalculations.Clear();
+        _lastRootQuery = query;
+
+        var result = GetUpToDateEntry(query).Result;
+        return result;
     }
 
     private Entry GetUpToDateEntry(object query)
     {
         Profiler.Start("Query " + query.GetType().Name);
+        
         if (!_entries.TryGetValue(query, out var entry) && !_inputEntries.TryGetValue(query, out entry))
         {
             entry = new Entry(query, null, 0, 0, Array.Empty<Entry>());
             _entries[query] = entry;
             Recalculate(entry);
         }
-
-        EnsureEntryIsUpToDate(entry);
+        else
+        {
+            EnsureEntryIsUpToDate(entry);
+        }
+        
         Profiler.End("Query " + query.GetType().Name);
         return entry;
     }
+    
+    private void EnsureEntryIsUpToDate(Entry entry)
+    {
+        if (entry.LastChecked == _currentRevision)
+            return;
 
-    private bool Recalculate(Entry entry)
+        foreach (var dep in entry.Dependencies)
+        {
+            EnsureEntryIsUpToDate(dep);
+            if (dep.LastChanged > entry.LastChecked)
+            {
+                Recalculate(entry);
+                return;
+            }
+        }
+
+        entry.LastChecked = _currentRevision;
+    }
+
+    private void Recalculate(Entry entry)
     {
         Profiler.Start("Calc " + entry.Query.GetType().Name);
         if (!_handlers.TryGetValue(entry.Query.GetType(), out var handler))
             throw new Exception($"For a query of type '{entry.Query.GetType().Name}' with parameter '{JsonSerializer.Serialize(entry.Query)}' is no input provided and no query handler registered.");
 
-        var callContext = new QueryExecutionContext(this);
-        //var handlerStopwatch = Stopwatch.StartNew();
+        var stopwatch = TrackQueryMetrics ? Stopwatch.StartNew() : null;
+
+        var callContext = new QueryExecutionContext(this, TrackQueryMetrics);
         var result = handler.Handle(callContext, entry.Query);
-        //handlerStopwatch.Stop();
 
-        ResultType resultType;
-       // var overheadStopwatch = Stopwatch.StartNew();
+        var resultType = ResultType.WasTheSame;
 
-        if ((result == null && entry.Result != null) || (result != null && !result.Equals(entry.Result)))
+        if (entry.LastChanged == 0)
+        {
+            resultType = ResultType.InitialCalculation;
+            entry.LastChanged = _currentRevision;
+            entry.Result = result;
+        }
+
+        else if (!IsEqual(result, entry.Result))
         {
             resultType = ResultType.HasChanged;
             entry.LastChanged = _currentRevision;
             entry.Result = result;
         }
-        else
-        {
-            resultType = ResultType.WasTheSame;
-        }
         entry.Dependencies = callContext.Dependencies.ToArray();
         entry.LastChecked = _currentRevision;
 
-        //overheadStopwatch.Stop();
-
-        //_lastQueryCalculations.Add(entry, new RecordedCalculation(_lastQueryCalculations.Count, query: entry.Query, /*handlerStopwatch.Elapsed - callContext.TotalTimeInSubQueries*/ TimeSpan.Zero, TimeSpan.Zero, TimeSpan.Zero, /*handlerStopwatch.Elapsed, overheadStopwatch.Elapsed*/ resultType));
-
+        if (TrackQueryMetrics)
+        {
+            var executionTime = stopwatch?.Elapsed - callContext.TimeInOtherQueries;
+            if (executionTime == null)
+                throw new Exception("Execution time could not be calculated");
+            _recordedCalculations.Add(new RecordedQuery(entry.Query, entry.Result, executionTime.Value, resultType));
+        }
+        
         Profiler.End("Calc " + entry.Query.GetType().Name);
-        return resultType != ResultType.WasTheSame;
+    }
+
+    private bool IsEqual(object? result, object? entryResult)
+    {
+        if (result == null && entryResult != null) return false;
+        if (result != null && entryResult == null) return false;
+        if (result == null && entryResult == null) return true;
+        if (result != null && entryResult != null) return result.Equals(entryResult);
+        throw new NotSupportedException();
     }
     
-    private class Entry
-    {
-        public Entry(object query, object? result, int lastChanged, int lastChecked, Entry[]? dependencies = null)
-        {
-            Query = query;
-            Result = result;
-            LastChanged = lastChanged;
-            LastChecked = lastChecked;
-            Dependencies = dependencies ?? Array.Empty<Entry>();
-        }
-
-        public int LastChanged { get; set; }
-        public int LastChecked { get; set; }
-        public Entry[] Dependencies { get; set; }
-        public object Query { get; }
-        public object? Result { get; set; }
-    }
-
     private class QueryExecutionContext : IDb
     {
-        public QueryExecutionContext(Db db)
+        public QueryExecutionContext(Db db, bool measureTimeOnOtherQueries)
         {
             _db = db;
+            if (measureTimeOnOtherQueries)
+                _timeOnOtherQueries = new Stopwatch();
         }
 
         public List<Entry> Dependencies { get; } = new();
 
         private readonly Db _db;
-        
+        private readonly Stopwatch? _timeOnOtherQueries;
+
+        public TimeSpan? TimeInOtherQueries => _timeOnOtherQueries?.Elapsed;
+
         [DebuggerStepThrough]
         public object? Query(object query)
         {
-            return QueryInternal(query);
-        }
-
-        private object? QueryInternal(object query)
-        {
+            _timeOnOtherQueries?.Start();
             var resultEntry = _db.GetUpToDateEntry(query);
+            _timeOnOtherQueries?.Start();
+
             Dependencies.Add(resultEntry);
             return resultEntry.Result;
         }
     }
+}
+
+public class Entry
+{
+    public Entry(object query, object? result, int lastChanged, int lastChecked, Entry[]? dependencies = null)
+    {
+        Query = query;
+        Result = result;
+        LastChanged = lastChanged;
+        LastChecked = lastChecked;
+        Dependencies = dependencies ?? Array.Empty<Entry>();
+    }
+
+    public int LastChanged { get; set; }
+    public int LastChecked { get; set; }
+    public Entry[] Dependencies { get; set; }
+    public object Query { get; }
+    public object? Result { get; set; }
+}
+
+
+public class QueryMetrics
+{
+    public QueryMetrics(object rootQuery, ImmutableArray<RecordedQuery> calculations)
+    {
+        RootQuery = rootQuery;
+        Calculations = calculations;
+    }
+
+    public object RootQuery { get; }
+    public ImmutableArray<RecordedQuery> Calculations { get; }
+}
+
+
+public class RecordedQuery
+{
+    public object Query { get; }
+    public object? Result { get; }
+    public TimeSpan ExecutionTime { get; }
+    public ResultType ResultType { get; }
+
+    public RecordedQuery(object query, object? result, TimeSpan executionTime, ResultType resultType)
+    {
+        Query = query;
+        Result = result;
+        ExecutionTime = executionTime;
+        ResultType = resultType;
+    }
+}
+
+public enum ResultType
+{
+    InitialCalculation,
+    WasTheSame,
+    HasChanged
 }

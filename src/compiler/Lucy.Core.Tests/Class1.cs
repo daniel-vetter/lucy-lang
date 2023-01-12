@@ -13,7 +13,7 @@ namespace Lucy.Core.Tests
         public void Test()
         {
             var ws = new Workspace();
-            ws.AddDocument("/main.lucy", """
+            ws.AddDocument(WorkspaceDocument.Create("/main.lucy", """
                 fun main() {
 
                 }
@@ -25,13 +25,13 @@ namespace Lucy.Core.Tests
                 fun main3() {
                 
                 }
-                """);
+                """));
 
             var sb = new StringBuilder();
             void Traverse(SyntaxTreeNode node)
             {
                 if (node is DocumentRootSyntaxNode rootNode)
-                    sb.Append(rootNode.LeadingTrivia);
+                    sb.Append(rootNode);
                 if (node is TokenNode t)
                 {
                     sb.Append(t.Text);
@@ -52,7 +52,7 @@ namespace Lucy.Core.Tests
 
             var tokenNode = tokenNodes.Where(x => x.Text == "main").Single();
 
-            var range = sd.GetRangeFromNode(tokenNode);
+            var range = sd.GetRangeFromNodeId(tokenNode.NodeId);
 
             var errors1 = sd.GetAllErrors();
 

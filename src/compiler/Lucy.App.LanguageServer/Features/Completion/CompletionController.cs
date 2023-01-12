@@ -25,12 +25,12 @@ namespace Lucy.App.LanguageServer.Features.Completion
             var position = _currentWorkspace.ToPosition1D(workspacePath, input.Position.ToPosition2D());
 
             var node = _currentWorkspace.Analysis.GetNodeAtPosition(workspacePath, position);
-
+            
             if (node == null)
                 return new RpcCompletionList();
 
-            var functions = _currentWorkspace.Analysis.GetAvailableFunctionsInScope(node.NodeId);
-            var variables = _currentWorkspace.Analysis.GetAvailableVariablesInScope(node.NodeId);
+            var functions = _currentWorkspace.Analysis.GetReachableFunctionsInScope(node);
+            var variables = _currentWorkspace.Analysis.GetReachableVariablesInScope(node);
 
             var result = new List<RpcCompletionItem>();
             foreach (var function in functions)

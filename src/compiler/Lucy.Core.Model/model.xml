@@ -30,7 +30,7 @@
 
 	<VariableDeclarationStatementSyntaxNode basedOn="StatementSyntaxNode">
 		<VarKeyword type="TokenNode" />
-		<VariableName type="TokenNode" />
+		<VariableDefinition type="VariableDefinitionSyntaxNode" />
 		<EqualSign type="TokenNode" />
 		<Expression type="ExpressionSyntaxNode" />
 	</VariableDeclarationStatementSyntaxNode>
@@ -59,6 +59,11 @@
 		<TypeName type="TokenNode" />
 	</TypeReferenceSyntaxNode>
 
+	<VariableDefinitionSyntaxNode basedOn="SyntaxTreeNode">
+		<VariableName type="TokenNode" />
+		<VariableType type="TypeAnnotationSyntaxNode" optional="true" />
+	</VariableDefinitionSyntaxNode>
+
 	<FunctionDeclarationStatementSyntaxNode basedOn="StatementSyntaxNode">
 		<Modifiers type="TokenNode" list="true" />
 		<ExternLibraryName type="StringConstantExpressionSyntaxNode" optional="true" />
@@ -73,8 +78,7 @@
 	</FunctionDeclarationStatementSyntaxNode>
 
 	<FunctionDeclarationParameterSyntaxNode basedOn="SyntaxTreeNode">
-		<VariableName type="TokenNode" />
-		<VariableType type="TypeAnnotationSyntaxNode" />
+		<VariableDefinition type="VariableDefinitionSyntaxNode" />
 		<Seperator type="TokenNode" optional="true" />
 	</FunctionDeclarationParameterSyntaxNode>
 

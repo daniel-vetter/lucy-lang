@@ -12,7 +12,7 @@ public record Import(INodeId<SyntaxTreeNode> ImportStatementNodeId, INodeId<Toke
 
 public static class GetImportsHandler
 {
-    [GenerateDbExtension] ///<see cref="GetImportsEx.GetImports"/>
+    [DbQuery] ///<see cref="GetImportsEx.GetImports"/>
     public static DocumentImports GetImports(IDb db, string documentPath)
     {
         var importStatementsIds = db.GetNodeIdsByType<ImportStatementSyntaxNode>(documentPath);

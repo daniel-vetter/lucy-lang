@@ -14,7 +14,7 @@ namespace Lucy.Core.SemanticAnalysis.Handler
 
     public static class Types
     {
-        [GenerateDbExtension] ///<see cref="GetTypeInfoFromTypeReferenceIdEx.GetTypeInfoFromTypeReferenceId" />
+        [DbQuery] ///<see cref="GetTypeInfoFromTypeReferenceIdEx.GetTypeInfoFromTypeReferenceId" />
         public static TypeInfo? GetTypeInfoFromTypeReferenceId(IDb db, INodeId<TypeReferenceSyntaxNode> nodeId)
         {
             var node = db.GetNodeById(nodeId);
@@ -28,7 +28,7 @@ namespace Lucy.Core.SemanticAnalysis.Handler
             };
         }
 
-        [GenerateDbExtension] ///<see cref="GetTypeInfoFromVariableReferenceEx.GetTypeInfoFromVariableReference" />
+        [DbQuery] ///<see cref="GetTypeInfoFromVariableReferenceEx.GetTypeInfoFromVariableReference" />
         public static TypeInfo? GetTypeInfoFromVariableReference(IDb db, INodeId<VariableReferenceExpressionSyntaxNode> nodeId)
         {
             return null;

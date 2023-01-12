@@ -7,7 +7,7 @@ namespace Lucy.Core.SemanticAnalysis.Handler.ErrorCollectors;
 
 public static class GetEntryPointErrorsHandler
 {
-    [GenerateDbExtension] ///<see cref="GetEntryPointErrorsEx.GetEntryPointErrors"/>
+    [DbQuery] ///<see cref="GetEntryPointErrorsEx.GetEntryPointErrors"/>
     public static ComparableReadOnlyList<Error> GetEntryPointErrors(IDb db)
     {
         var entryPoints = db.GetEntryPoints();

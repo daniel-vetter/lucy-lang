@@ -1,16 +1,16 @@
-﻿using Lucy.Core.Model;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using Lucy.Core.Model;
 using Lucy.Core.Parsing.Nodes;
 using Lucy.Core.SemanticAnalysis.Infrastructure;
 using Lucy.Core.SemanticAnalysis.Inputs;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace Lucy.Core.SemanticAnalysis.Handler;
 
 public static class BasicNodeAccess
 {
-    [GenerateDbExtension] ///<see cref="GetNodeByIdEx.GetNodeById"/>
+    [DbQuery] ///<see cref="GetNodeByIdEx.GetNodeById"/>
     public static SyntaxTreeNode GetNodeById(IDb db, INodeId<SyntaxTreeNode> nodeId)
     {
         return db.GetNodesByNodeIdMap(nodeId.DocumentPath)[nodeId];
@@ -21,7 +21,7 @@ public static class BasicNodeAccess
         return (T)GetNodeByIdEx.GetNodeById(db, nodeId);
     }
 
-    [GenerateDbExtension] ///<see cref="GetNodeIdsByTypeEx.GetNodeIdsByType"/>
+    [DbQuery] ///<see cref="GetNodeIdsByTypeEx.GetNodeIdsByType"/>
     public static ComparableReadOnlyList<INodeId<SyntaxTreeNode>> GetNodeIdsByType(IDb db, string documentPath, Type type)
     {
         return db.GetNodeIdsByTypeMap(documentPath).TryGetValue(type, out var list) 
@@ -36,66 +36,42 @@ public static class BasicNodeAccess
             .ToComparableReadOnlyList();
     }
     
-    [GenerateDbExtension] ///<see cref="GetNodeListEx.GetNodeList"/>
-    public static ComparableReadOnlyList<SyntaxTreeNode> GetNodeList(IDb db, SyntaxTreeNode node)
-    {
-        static void Traverse(IDb db, SyntaxTreeNode node, ComparableReadOnlyList<SyntaxTreeNode>.Builder nodes)
-        {
-            nodes.Add(node);
-
-            if (node is StatementListSyntaxNode)
-            {
-                foreach (var child in node.GetChildNodes())
-                    nodes.AddRange(db.GetNodeList(child));
-            }
-            else
-            {
-                foreach (var child in node.GetChildNodes())
-                    Traverse(db, child, nodes);
-            }
-        }
-
-        var list = new ComparableReadOnlyList<SyntaxTreeNode>.Builder();
-        Traverse(db, node, list);
-        return list.Build();
-    }
-    
-    [GenerateDbExtension] ///<see cref="GetParentNodeEx.GetParentNode" />
-    public static SyntaxTreeNode? GetParentNode(IDb db, INodeId<SyntaxTreeNode> nodeId)
+    [DbQuery] ///<see cref="GetParentNodeIdEx.GetParentNodeId" />
+    public static INodeId<SyntaxTreeNode>? GetParentNodeId(IDb db, INodeId<SyntaxTreeNode> nodeId)
     {
         var map = db.GetParentNodeIdByNodeIdMap(nodeId.DocumentPath);
         if (map.TryGetValue(nodeId, out var parentId) && parentId != null)
-            return db.GetNodeById(parentId);
+            return parentId;
         return null;
     }
 
-    [GenerateDbExtension] ///<see cref="GetParentNodeIdOfTypeEx.GetParentNodeIdOfType"/>
-    public static INodeId<SyntaxTreeNode>? GetParentNodeIdOfType(IDb db, INodeId<SyntaxTreeNode> nodeId, Type nodeType)
+    [DbQuery] ///<see cref="GetParentNodeIdOfTypeEx.GetParentNodeIdOfType"/>
+    public static INodeId<SyntaxTreeNode>? GetParentNodeIdOfType(IDb db, INodeId<SyntaxTreeNode> nodeId, Type nodeIdType)
     {
-        var parentNode = db.GetParentNode(nodeId);
-        if (parentNode == null)
+        var parentNodeId = db.GetParentNodeId(nodeId);
+        if (parentNodeId == null)
             return null;
 
-        return parentNode.GetType() == nodeType 
-            ? parentNode.NodeId 
-            : db.GetParentNodeIdOfType(parentNode.NodeId, nodeType);
+        return parentNodeId.GetType() == nodeIdType
+            ? parentNodeId 
+            : db.GetParentNodeIdOfType(parentNodeId, nodeIdType);
     }
 
     public static INodeId<T>? GetParentNodeIdOfType<T>(this IDb db, INodeId<SyntaxTreeNode> nodeId) where T : SyntaxTreeNode
     {
-        return db.GetParentNodeIdOfType(nodeId, typeof(T)) as INodeId<T>;
+        return db.GetParentNodeIdOfType(nodeId, typeof(NodeId<T>)) as INodeId<T>;
     }
 
-    [GenerateDbExtension] ///<see cref="GetParentNodeIdOfTypesEx.GetParentNodeIdOfTypes"/>
+    [DbQuery] ///<see cref="GetParentNodeIdOfTypesEx.GetParentNodeIdOfTypes"/>
     public static INodeId<SyntaxTreeNode>? GetParentNodeIdOfTypes(IDb db, INodeId<SyntaxTreeNode> nodeId, ComparableReadOnlyList<Type> nodeTypes)
     {
-        var parentNode = db.GetParentNode(nodeId);
+        var parentNode = db.GetParentNodeId(nodeId);
         if (parentNode == null)
             return null;
         
         return nodeTypes.Contains(parentNode.GetType()) 
-            ? parentNode.NodeId 
-            : db.GetParentNodeIdOfTypes(parentNode.NodeId, nodeTypes);
+            ? parentNode
+            : db.GetParentNodeIdOfTypes(parentNode, nodeTypes);
     }
 
     public static INodeId<SyntaxTreeNode>? GetParentNodeIdOfTypes<T1, T2>(this IDb db, INodeId<SyntaxTreeNode> nodeId) 
@@ -113,7 +89,7 @@ public static class BasicNodeAccess
         return db.GetParentNodeIdOfTypes(nodeId, new ComparableReadOnlyList<Type>(new[] { typeof(T1), typeof(T2), typeof(T3) }));
     }
 
-    [GenerateDbExtension] ///<see cref="GetNodeIdsByTypeInStatementListMapEx.GetNodeIdsByTypeInStatementListMap" />
+    [DbQuery] ///<see cref="GetNodeIdsByTypeInStatementListMapEx.GetNodeIdsByTypeInStatementListMap" />
     public static ComparableReadOnlyDictionary<Type, ComparableReadOnlyList<INodeId<SyntaxTreeNode>>> GetNodeIdsByTypeInStatementListMap(IDb db, INodeId<StatementListSyntaxNode> nodeId)
     {
         var currentNode = db.GetNodeById(nodeId);
@@ -136,14 +112,14 @@ public static class BasicNodeAccess
             .ToComparableReadOnlyDictionary(x => x.Key, x => x.Select(y => y.NodeId).ToComparableReadOnlyList());
     }
 
-    [GenerateDbExtension] ///<see cref="GetNodeIdsByTypeInStatementListEx.GetNodeIdsByTypeInStatementList" />
+    [DbQuery(nameof(GetNodeIdsByTypeInStatementListEx.GetNodeIdsByTypeInStatementList))]
     public static ComparableReadOnlyList<INodeId<SyntaxTreeNode>> GetNodeIdsByTypeInStatementList(IDb db, INodeId<StatementListSyntaxNode> nodeId, Type type)
     {
         return db.GetNodeIdsByTypeInStatementListMap(nodeId).TryGetValue(type, out var list) 
             ? list 
             : new ComparableReadOnlyList<INodeId<SyntaxTreeNode>>();
     }
-
+    
     public static ComparableReadOnlyList<INodeId<T>> GetNodeIdsByTypeInStatementList<T>(this IDb db, INodeId<StatementListSyntaxNode> nodeId) where T: SyntaxTreeNode
     {
         return db.GetNodeIdsByTypeInStatementList(nodeId, typeof(T))

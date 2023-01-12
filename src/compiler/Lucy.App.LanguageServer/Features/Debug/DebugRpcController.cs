@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Lucy.App.LanguageServer.Infrastructure;
 using Lucy.Common;
 using Lucy.Common.ServiceDiscovery;
+using Lucy.Core.SemanticAnalysis.Handler;
 using Lucy.Core.SemanticAnalysis.Inputs;
 using Lucy.Infrastructure.RpcServer;
 
@@ -25,6 +26,14 @@ public class DebugRpcController
     {
         var path = _currentWorkspace.ToWorkspacePath(input.Uri);
         var tree = _currentWorkspace.Analysis.GetSyntaxTree(path);
+        return await _debugViewGenerator.Generate(tree);
+    }
+
+    [JsonRpcFunction("debug/getScopeTree")]
+    public async Task<string> GetScopeTree(RpcGetScopeTree input)
+    {
+        var path = _currentWorkspace.ToWorkspacePath(input.Uri);
+        var tree = _currentWorkspace.Analysis.CreateScopeTree(path);
         return await _debugViewGenerator.Generate(tree);
     }
 
@@ -62,6 +71,11 @@ public class DebugRpcController
 }
 
 public class RpcGetSyntaxTree
+{
+    public SystemPath Uri { get; set; } = null!;
+}
+
+public class RpcGetScopeTree
 {
     public SystemPath Uri { get; set; } = null!;
 }

@@ -7,7 +7,7 @@ namespace Lucy.Core.SemanticAnalysis.Handler.ErrorCollectors
 {
     public static class GetTypeErrors
     {
-        [GenerateDbExtension] ///<see cref="GetAllTypeErrorsEx.GetAllTypeErrors" />
+        [DbQuery] ///<see cref="GetAllTypeErrorsEx.GetAllTypeErrors" />
         public static ComparableReadOnlyList<Error> GetAllTypeErrors(IDb db)
         {
             var result = new ComparableReadOnlyList<Error>.Builder();
@@ -16,7 +16,7 @@ namespace Lucy.Core.SemanticAnalysis.Handler.ErrorCollectors
             return result.Build();
         }
 
-        [GenerateDbExtension] ///<see cref="GetAllTypeErrorsInDocumentEx.GetAllTypeErrorsInDocument" />
+        [DbQuery] ///<see cref="GetAllTypeErrorsInDocumentEx.GetAllTypeErrorsInDocument" />
         public static ComparableReadOnlyList<Error> GetAllTypeErrorsInDocument(IDb db, string documentPath)
         {
             var result = new ComparableReadOnlyList<Error>.Builder();

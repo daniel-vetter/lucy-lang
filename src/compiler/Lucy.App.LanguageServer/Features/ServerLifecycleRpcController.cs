@@ -6,6 +6,7 @@ using Lucy.Infrastructure.RpcServer;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Diagnostics.Tracing.Parsers.ClrPrivate;
 
 namespace Lucy.App.LanguageServer.Features;
 
@@ -54,7 +55,6 @@ public class ServerLifecycleRpcController
         result.Capabilities.DocumentLinkProvider = new RpcDocumentLinkOptions();
         result.Capabilities.CompletionProvider = new RpcCompletionOptions();
         result.Capabilities.DefinitionProvider = true;
-
         //Enable signature help
         result.Capabilities.SignatureHelpProvider = new RpcSignatureHelpOptions
         {

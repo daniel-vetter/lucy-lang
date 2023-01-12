@@ -6,7 +6,7 @@ namespace Lucy.Core.SemanticAnalysis.Handler;
 
 public static class GetEntryPointsHandler
 {
-    [GenerateDbExtension] ///<see cref="GetEntryPointsEx.GetEntryPoints"/>
+    [DbQuery] ///<see cref="GetEntryPointsEx.GetEntryPoints"/>
     public static ComparableReadOnlyList<FlatFunctionDeclaration> GetEntryPoints(IDb db)
     {
         var paths = db.GetDocumentList();
@@ -19,7 +19,7 @@ public static class GetEntryPointsHandler
         return result.Build();
     }
 
-    [GenerateDbExtension] ///<see cref="GetEntryPointsInDocumentEx.GetEntryPointsInDocument"/>
+    [DbQuery] ///<see cref="GetEntryPointsInDocumentEx.GetEntryPointsInDocument"/>
     public static ComparableReadOnlyList<FlatFunctionDeclaration> GetEntryPointsInDocument(IDb db, string documentPath)
     {
         var infos = db.GetFunctionsInDocument(documentPath);

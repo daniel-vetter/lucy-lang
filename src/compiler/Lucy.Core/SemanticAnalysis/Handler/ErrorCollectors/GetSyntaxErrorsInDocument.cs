@@ -8,7 +8,7 @@ namespace Lucy.Core.SemanticAnalysis.Handler.ErrorCollectors;
 
 public static class GetSyntaxErrors
 {
-    [GenerateDbExtension] ///<see cref="GetAllSyntaxErrorsEx.GetAllSyntaxErrors"/>
+    [DbQuery] ///<see cref="GetAllSyntaxErrorsEx.GetAllSyntaxErrors"/>
     public static ComparableReadOnlyList<Error> GetAllSyntaxErrors(IDb db)
     {
         var result = new ComparableReadOnlyList<Error>.Builder();
@@ -19,7 +19,7 @@ public static class GetSyntaxErrors
         return result.Build();
     }
 
-    [GenerateDbExtension] ///<see cref="GetSyntaxErrorsInDocumentEx.GetSyntaxErrorsInDocument"/>
+    [DbQuery] ///<see cref="GetSyntaxErrorsInDocumentEx.GetSyntaxErrorsInDocument"/>
     public static ComparableReadOnlyList<Error> GetSyntaxErrorsInDocument(IDb db, string documentPath)
     {
         var root = db.GetSyntaxTree(documentPath);
@@ -28,10 +28,11 @@ public static class GetSyntaxErrors
         return list.Build();
     }
 
-    [GenerateDbExtension] ///<see cref="GetSyntaxErrorsInStatementListEx.GetSyntaxErrorsInStatementList"/>
-    public static ComparableReadOnlyList<Error> GetSyntaxErrorsInStatementList(IDb db, StatementListSyntaxNode statementListSyntaxNode)
+    [DbQuery] ///<see cref="GetSyntaxErrorsInStatementListEx.GetSyntaxErrorsInStatementList"/>
+    public static ComparableReadOnlyList<Error> GetSyntaxErrorsInStatementList(IDb db, INodeId<StatementListSyntaxNode> statementListSyntaxNodeId)
     {
         var list = new ComparableReadOnlyList<Error>.Builder();
+        var statementListSyntaxNode = db.GetNodeById(statementListSyntaxNodeId);
         Traverse(db, statementListSyntaxNode, list);
         return list.Build();
     }
@@ -39,13 +40,13 @@ public static class GetSyntaxErrors
     private static void Traverse(IDb db, SyntaxTreeNode node, ComparableReadOnlyList<Error>.Builder list)
     {
         if (!node.SyntaxErrors.IsDefaultOrEmpty)
-            list.AddRange(node.SyntaxErrors.Select(x => new ErrorWithRange(node.NodeId.DocumentPath, db.GetRangeFromNode(node), x)));
+            list.AddRange(node.SyntaxErrors.Select(x => new ErrorWithRange(node.NodeId.DocumentPath, db.GetRangeFromNodeId(node.NodeId), x)));
 
         foreach(var child in node.GetChildNodes())
         {
             if (child is StatementListSyntaxNode statementList)
             {
-                list.AddRange(db.GetSyntaxErrorsInStatementList(statementList));
+                list.AddRange(db.GetSyntaxErrorsInStatementList(statementList.NodeId));
             }
             else
             {
