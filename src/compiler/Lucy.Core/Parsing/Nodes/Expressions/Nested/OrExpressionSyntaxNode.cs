@@ -1,6 +1,6 @@
 ﻿using Lucy.Core.Model;
-using Lucy.Core.Parsing.Nodes.Token;
 using System.Diagnostics.CodeAnalysis;
+using Lucy.Core.Parsing.Nodes.Stuff;
 
 namespace Lucy.Core.Parsing.Nodes.Expressions.Nested;
 
@@ -14,17 +14,17 @@ internal static class OrExpressionSyntaxNodeParser
 
     public static ExpressionSyntaxNode? TryReadOrInner(Reader reader)
     {
-        return reader.WithCache(nameof(OrExpressionSyntaxNodeParser), static code =>
+        return reader.WithCache(nameof(OrExpressionSyntaxNodeParser), static (r, _) =>
         {
-            if (!AdditionExpressionSyntaxNodeParser.TryReadOrInner(code, out var result))
+            if (!AdditionExpressionSyntaxNodeParser.TryReadOrInner(r, out var result))
                 return null;
 
             while (true)
             {
-                if (!TokenNodeParser.TryReadKeyword(code, "or", out var orToken))
+                if (!TokenNodeParser.TryReadKeyword(r, "or", out var orToken))
                     return result;
 
-                if (!AdditionExpressionSyntaxNodeParser.TryReadOrInner(code, out var right))
+                if (!AdditionExpressionSyntaxNodeParser.TryReadOrInner(r, out var right))
                     return OrExpressionSyntaxNode.Create(result, orToken, ExpressionSyntaxNodeParser.Missing("Expression expected"));
 
                 result = OrExpressionSyntaxNode.Create(result, orToken, right);

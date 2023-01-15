@@ -16,7 +16,7 @@ public static class UnknownTokenStatementSyntaxNodeParser
 
     public static UnknownTokenStatementSyntaxNode? Read(Reader reader)
     {
-        return reader.WithCache(nameof(UnknownTokenStatementSyntaxNodeParser), static r =>
+        return reader.WithCache(nameof(UnknownTokenStatementSyntaxNodeParser), static (r, _) =>
         {
             var sb = new StringBuilder();
             var lastCharType = -1;

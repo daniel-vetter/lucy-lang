@@ -7,7 +7,7 @@ public static class ExpressionStatementSyntaxNodeParser
 {
     public static ExpressionStatementSyntaxNode? Read(Reader reader)
     {
-        return reader.WithCache(nameof(ExpressionStatementSyntaxNodeParser), static r =>
+        return reader.WithCache(nameof(ExpressionStatementSyntaxNodeParser), static (r, _) =>
         {
             if (ExpressionSyntaxNodeParser.TryRead(r, out var result))
                 return ExpressionStatementSyntaxNode.Create(result);

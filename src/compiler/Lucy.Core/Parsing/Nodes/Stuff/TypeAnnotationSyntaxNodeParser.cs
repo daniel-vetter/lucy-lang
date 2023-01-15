@@ -2,7 +2,6 @@
 using System.Diagnostics.CodeAnalysis;
 using Lucy.Core.Model;
 using Lucy.Core.Parsing.Nodes.Statements.FunctionDeclaration;
-using Lucy.Core.Parsing.Nodes.Token;
 
 namespace Lucy.Core.Parsing.Nodes.Stuff;
 
@@ -16,7 +15,7 @@ public static class TypeAnnotationSyntaxNodeParser
 
     public static TypeAnnotationSyntaxNode? TryRead(Reader reader)
     {
-        return reader.WithCache(nameof(TypeAnnotationSyntaxNodeParser), static r =>
+        return reader.WithCache(nameof(TypeAnnotationSyntaxNodeParser), static (r, _) =>
         {
             if (!TokenNodeParser.TryReadExact(r, ":", out var separator))
                 return null;

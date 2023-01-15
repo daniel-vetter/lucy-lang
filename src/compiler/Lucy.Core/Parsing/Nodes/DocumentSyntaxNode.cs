@@ -8,7 +8,7 @@ public static class DocumentRootSyntaxNodeParser
 {
     public static DocumentRootSyntaxNode ReadDocumentSyntaxNode(Reader reader)
     {
-        var result =  reader.WithCache(nameof(DocumentRootSyntaxNodeParser), static r =>
+        var result =  reader.WithCache(nameof(DocumentRootSyntaxNodeParser), static (r, _) =>
         {
             var startToken = ReadDocumentStartToken(r);
             var statementList = StatementListSyntaxNodeParser.ReadStatementsWithoutBlock(r);
@@ -23,6 +23,6 @@ public static class DocumentRootSyntaxNodeParser
 
     private static TokenNode ReadDocumentStartToken(Reader reader)
     {
-        return reader.WithCache(nameof(ReadDocumentStartToken), static r => TokenNode.Create("", TriviaParser.Read(r)));
+        return reader.WithCache(nameof(ReadDocumentStartToken), static (r, _) => TokenNode.Create("", TriviaParser.Read(r)));
     }
 }

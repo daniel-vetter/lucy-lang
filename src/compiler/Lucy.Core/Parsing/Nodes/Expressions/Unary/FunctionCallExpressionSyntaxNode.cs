@@ -1,6 +1,6 @@
 ﻿using Lucy.Core.Model;
-using Lucy.Core.Parsing.Nodes.Token;
 using System.Diagnostics.CodeAnalysis;
+using Lucy.Core.Parsing.Nodes.Stuff;
 
 namespace Lucy.Core.Parsing.Nodes.Expressions.Unary;
 
@@ -14,7 +14,7 @@ public static class FunctionCallExpressionSyntaxNodeParser
 
     public static FunctionCallExpressionSyntaxNode? TryRead(Reader reader)
     {
-        return reader.WithCache(nameof(FunctionCallExpressionSyntaxNodeParser), static r =>
+        return reader.WithCache(nameof(FunctionCallExpressionSyntaxNodeParser), static (r, _) =>
         {
             if (!TokenNodeParser.TryReadIdentifier(r, out var functionName))
                 return null;

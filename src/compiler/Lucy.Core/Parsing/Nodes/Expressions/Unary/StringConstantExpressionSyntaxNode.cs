@@ -2,7 +2,7 @@
 using System.Diagnostics.CodeAnalysis;
 using Lucy.Core.Model;
 using System.Collections.Immutable;
-using Lucy.Core.Parsing.Nodes.Token;
+using Lucy.Core.Parsing.Nodes.Stuff;
 
 namespace Lucy.Core.Parsing.Nodes.Expressions.Unary;
 
@@ -16,7 +16,7 @@ public static class StringConstantExpressionSyntaxNodeParser
 
     public static StringConstantExpressionSyntaxNode? TryRead(Reader reader)
     {
-        return reader.WithCache(nameof(StringConstantExpressionSyntaxNodeParser), static r =>
+        return reader.WithCache(nameof(StringConstantExpressionSyntaxNodeParser), static (r, _) =>
         {
             if (r.Peek() != '\"')
                 return null;

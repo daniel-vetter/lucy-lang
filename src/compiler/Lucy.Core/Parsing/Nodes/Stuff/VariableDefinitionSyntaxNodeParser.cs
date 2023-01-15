@@ -1,7 +1,6 @@
 ﻿using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using Lucy.Core.Model;
-using Lucy.Core.Parsing.Nodes.Token;
 
 namespace Lucy.Core.Parsing.Nodes.Stuff;
 
@@ -15,7 +14,7 @@ public static class VariableDefinitionSyntaxNodeParser
 
     public static VariableDefinitionSyntaxNode? Read(Reader reader)
     {
-        return reader.WithCache(nameof(VariableDefinitionSyntaxNodeParser), static r =>
+        return reader.WithCache(nameof(VariableDefinitionSyntaxNodeParser), static (r, _) =>
         {
             if (!TokenNodeParser.TryReadIdentifier(r, out var variableName))
                 return null;

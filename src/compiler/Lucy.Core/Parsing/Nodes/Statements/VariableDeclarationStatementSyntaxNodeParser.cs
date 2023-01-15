@@ -1,7 +1,6 @@
 ﻿using Lucy.Core.Model;
 using Lucy.Core.Parsing.Nodes.Expressions;
 using Lucy.Core.Parsing.Nodes.Stuff;
-using Lucy.Core.Parsing.Nodes.Token;
 
 namespace Lucy.Core.Parsing.Nodes.Statements
 {
@@ -9,7 +8,7 @@ namespace Lucy.Core.Parsing.Nodes.Statements
     {
         public static VariableDeclarationStatementSyntaxNode? Read(Reader reader)
         {
-            return reader.WithCache(nameof(VariableDeclarationStatementSyntaxNodeParser), static r =>
+            return reader.WithCache(nameof(VariableDeclarationStatementSyntaxNodeParser), static (r, _) =>
             {
                 if (!TokenNodeParser.TryReadKeyword(r, "var", out var varKeyword))
                     return null;

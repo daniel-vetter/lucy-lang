@@ -1,6 +1,6 @@
 ﻿using Lucy.Core.Model;
-using Lucy.Core.Parsing.Nodes.Token;
 using System.Diagnostics.CodeAnalysis;
+using Lucy.Core.Parsing.Nodes.Stuff;
 
 namespace Lucy.Core.Parsing.Nodes.Expressions.Nested;
 
@@ -14,7 +14,7 @@ internal static class AndExpressionSyntaxNodeParser
 
     public static ExpressionSyntaxNode? TryReadOrInner(Reader reader)
     {
-        return reader.WithCache(nameof(AndExpressionSyntaxNodeParser), static r =>
+        return reader.WithCache(nameof(AndExpressionSyntaxNodeParser), static (r, _) =>
         {
             if (!OrExpressionSyntaxNodeParser.TryReadOrInner(r, out var result))
                 return null;

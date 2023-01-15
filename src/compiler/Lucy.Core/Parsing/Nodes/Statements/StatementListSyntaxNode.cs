@@ -1,6 +1,6 @@
 ﻿using System.Collections.Immutable;
 using Lucy.Core.Model;
-using Lucy.Core.Parsing.Nodes.Token;
+using Lucy.Core.Parsing.Nodes.Stuff;
 
 namespace Lucy.Core.Parsing.Nodes.Statements;
 
@@ -11,7 +11,7 @@ public static class StatementListSyntaxNodeParser
 
     public static StatementListSyntaxNode ReadStatementsWithoutBlock(Reader reader)
     {
-        return reader.WithCache(_statementListWithoutBlockCacheKey, static r =>
+        return reader.WithCache(_statementListWithoutBlockCacheKey, static (r, _) =>
         {
             var result = ImmutableArray.CreateBuilder<StatementSyntaxNode>();
             while (StatementSyntaxNodeParser.TryRead(r, out var statement))
@@ -22,7 +22,7 @@ public static class StatementListSyntaxNodeParser
 
     public static StatementListSyntaxNode? TryReadStatementBlock(Reader reader)
     {
-        return reader.WithCache(_statementListWithBlockCacheKey, static r =>
+        return reader.WithCache(_statementListWithBlockCacheKey, static (r, _) =>
         {
             if (!TokenNodeParser.TryReadExact(r, "{", out var blockStart))
                 return null;

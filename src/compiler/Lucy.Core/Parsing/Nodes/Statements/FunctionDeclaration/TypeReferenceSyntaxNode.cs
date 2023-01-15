@@ -1,6 +1,6 @@
 ﻿using Lucy.Core.Model;
-using Lucy.Core.Parsing.Nodes.Token;
 using System.Diagnostics.CodeAnalysis;
+using Lucy.Core.Parsing.Nodes.Stuff;
 
 namespace Lucy.Core.Parsing.Nodes.Statements.FunctionDeclaration;
 
@@ -14,7 +14,7 @@ public static class TypeReferenceSyntaxNodeParser
 
     public static TypeReferenceSyntaxNode? TryRead(Reader reader)
     {
-        return reader.WithCache(nameof(TypeReferenceSyntaxNodeParser), static r =>
+        return reader.WithCache(nameof(TypeReferenceSyntaxNodeParser), static (r, _) =>
         {
             if (!TokenNodeParser.TryReadIdentifier(r, out var token))
                 return null;

@@ -15,34 +15,34 @@ public static class NumberConstantExpressionSyntaxNodeParser
 
     public static NumberConstantExpressionSyntaxNode? TryRead(Reader reader)
     {
-        return reader.WithCache(nameof(NumberConstantExpressionSyntaxNodeParser), static code =>
+        return reader.WithCache(nameof(NumberConstantExpressionSyntaxNodeParser), static (r, _) =>
         {
             var negative = false;
-            if (code.Peek() == '-')
+            if (r.Peek() == '-')
             {
-                code.Read(1);
+                r.Seek(1);
                 negative = true;
             }
 
-            if (!CountDigits(code, out var beforeDigitCount))
+            if (!CountDigits(r, out var beforeDigitCount))
                 return null;
 
-            if (code.Peek(beforeDigitCount) != '.')
-                return CreateNode(code, TriviaParser.Read(code), beforeDigitCount, negative);
+            if (r.Peek(beforeDigitCount) != '.')
+                return CreateNode(r, beforeDigitCount, negative);
 
-            if (!CountDigits(code, out var afterDigitCount))
-                return CreateNode(code, TriviaParser.Read(code), beforeDigitCount, negative);
+            if (!CountDigits(r, out var afterDigitCount))
+                return CreateNode(r, beforeDigitCount, negative);
 
-            return CreateNode(code, TriviaParser.Read(code), beforeDigitCount + 1 + afterDigitCount, negative);
+            return CreateNode(r, beforeDigitCount + 1 + afterDigitCount, negative);
         });
     }
 
-    private static NumberConstantExpressionSyntaxNode CreateNode(Reader reader, string? trailingTrivia, int count, bool negative)
+    private static NumberConstantExpressionSyntaxNode CreateNode(Reader reader, int count, bool negative)
     {
         var str = reader.Read(count);
         var num = double.Parse(str, CultureInfo.InvariantCulture);
         if (negative) num *= -1;
-        var token = TokenNode.Create((negative ? "-" : "") + str, trailingTrivia);
+        var token = TokenNode.Create((negative ? "-" : "") + str, TriviaParser.Read(reader));
         return NumberConstantExpressionSyntaxNode.Create(num, token);
     }
 

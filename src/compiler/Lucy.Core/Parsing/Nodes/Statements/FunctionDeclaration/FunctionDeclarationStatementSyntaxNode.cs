@@ -1,6 +1,5 @@
 ﻿using Lucy.Core.Parsing.Nodes.Expressions.Unary;
 using Lucy.Core.Model;
-using Lucy.Core.Parsing.Nodes.Token;
 using Lucy.Core.Parsing.Nodes.Stuff;
 
 namespace Lucy.Core.Parsing.Nodes.Statements.FunctionDeclaration;
@@ -9,7 +8,7 @@ public static class FunctionDeclarationStatementSyntaxNodeParser
 {
     public static FunctionDeclarationStatementSyntaxNode? Read(Reader reader)
     {
-        return reader.WithCache(nameof(FunctionDeclarationStatementSyntaxNodeParser), static r =>
+        return reader.WithCache(nameof(FunctionDeclarationStatementSyntaxNodeParser), static (r, _) =>
         {
             var modifier = FunctionDeclarationModifierList.Read(r);
 

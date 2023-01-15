@@ -1,6 +1,6 @@
 ﻿using Lucy.Core.Model;
-using Lucy.Core.Parsing.Nodes.Token;
 using System.Diagnostics.CodeAnalysis;
+using Lucy.Core.Parsing.Nodes.Stuff;
 
 namespace Lucy.Core.Parsing.Nodes.Expressions.Unary;
 
@@ -14,7 +14,7 @@ public static class VariableReferenceExpressionSyntaxNodeParser
 
     public static VariableReferenceExpressionSyntaxNode? TryRead(Reader reader)
     {
-        return reader.WithCache(nameof(VariableReferenceExpressionSyntaxNodeParser), static r =>
+        return reader.WithCache(nameof(VariableReferenceExpressionSyntaxNodeParser), static (r, _) =>
         {
             if (TokenNodeParser.TryReadIdentifier(r, out var token))
                 return VariableReferenceExpressionSyntaxNode.Create(token);

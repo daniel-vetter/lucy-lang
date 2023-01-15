@@ -1,9 +1,9 @@
-﻿using Lucy.Core.Model;
+﻿using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
+using Lucy.Core.Model;
 using Lucy.Core.Parsing.Nodes.Trivia;
-using System.Collections.Immutable;
 
-namespace Lucy.Core.Parsing.Nodes.Token;
+namespace Lucy.Core.Parsing.Nodes.Stuff;
 
 public static class TokenNodeParser
 {
@@ -54,9 +54,15 @@ public static class TokenNodeParser
                 : TokenNode.Create(r.Internalize(r.Read(length)), TriviaParser.Read(r));
         });
     }
-
-    // ReSharper disable once NotAccessedPositionalProperty.Local
-    private record TryReadKeywordCacheKey(string Keyword);
+    
+    private readonly struct TryReadKeywordCacheKey
+    {
+        public string Keyword { get; }
+        public TryReadKeywordCacheKey(string keyword) => Keyword = keyword;
+        public override int GetHashCode() => Keyword.GetHashCode();
+        public override bool Equals(object? obj) => obj is TryReadKeywordCacheKey other && other.Keyword == Keyword;
+    }
+    
     public static bool TryReadKeyword(Reader reader, string keyword, [NotNullWhen(true)] out TokenNode? result)
     {
         result = TryReadKeyword(reader, keyword);

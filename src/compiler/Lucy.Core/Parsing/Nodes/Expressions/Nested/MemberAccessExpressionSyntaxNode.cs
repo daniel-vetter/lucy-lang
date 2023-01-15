@@ -1,8 +1,8 @@
 ﻿using Lucy.Core.Model;
 using Lucy.Core.Parsing.Nodes.Expressions.Unary;
-using Lucy.Core.Parsing.Nodes.Token;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
+using Lucy.Core.Parsing.Nodes.Stuff;
 
 namespace Lucy.Core.Parsing.Nodes.Expressions.Nested;
 
@@ -16,7 +16,7 @@ public static class MemberAccessExpressionSyntaxNodeParser
 
     public static ExpressionSyntaxNode? TryReadOrInner(Reader reader)
     {
-        return reader.WithCache(nameof(MemberAccessExpressionSyntaxNodeParser), static r =>
+        return reader.WithCache(nameof(MemberAccessExpressionSyntaxNodeParser), static (r, _) =>
         {
             if (!UnaryExpression.TryRead(r, out var result))
                 return null;

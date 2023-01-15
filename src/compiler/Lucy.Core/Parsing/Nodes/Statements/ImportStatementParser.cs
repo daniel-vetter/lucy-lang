@@ -1,6 +1,6 @@
 ﻿using Lucy.Core.Model;
 using Lucy.Core.Parsing.Nodes.Expressions.Unary;
-using Lucy.Core.Parsing.Nodes.Token;
+using Lucy.Core.Parsing.Nodes.Stuff;
 
 namespace Lucy.Core.Parsing.Nodes.Statements;
 
@@ -8,7 +8,7 @@ internal static class ImportStatementParser
 {
     public static ImportStatementSyntaxNode? Read(Reader reader)
     {
-        return reader.WithCache(nameof(ImportStatementParser), static r =>
+        return reader.WithCache(nameof(ImportStatementParser), static (r, _) =>
         {
             if (!TokenNodeParser.TryReadKeyword(r, "import", out var importKeyword))
                 return null;

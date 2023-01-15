@@ -66,10 +66,7 @@ public class Reader
             if (key.StartPosition >= range.End.Position)
             {
                 // If the cache entry is after the change, we push it further back
-                var movedKey = key with
-                {
-                    StartPosition = key.StartPosition + lengthDifference
-                };
+                var movedKey = new CacheKey(key.Key, key.StartPosition + lengthDifference);
 
                 var movedEntry = entry with
                 {
@@ -105,13 +102,8 @@ public class Reader
         _position += length;
         return result;
     }
-
-    public TResult WithCache<TResult>(object cacheKey, Func<Reader, TResult> handler)
-    {
-        return WithCache(cacheKey, (r, _) => handler(r));
-    }
-
-    public TResult WithCache<TResult, TCacheKey>(TCacheKey cacheKey, Func<Reader, TCacheKey, TResult> handler) where TCacheKey : class
+    
+    public TResult WithCache<TResult, TCacheKey>(TCacheKey cacheKey, Func<Reader, TCacheKey, TResult> handler) where TCacheKey : notnull
     {
         var start = _position;
 
@@ -151,8 +143,27 @@ public class Reader
     }
 
     private string DebuggerDisplay => _code[_position..];
+    
+    private readonly struct CacheKey
+    {
+        public object Key { get; }
+        public int StartPosition { get; }
 
-    // ReSharper disable once NotAccessedPositionalProperty.Local
-    private record CacheKey(object Key, int StartPosition);
+        public CacheKey(object key, int startPosition)
+        {
+            Key = key;
+            StartPosition = startPosition;
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(Key, StartPosition);
+        }
+
+        public override bool Equals(object? obj)
+        {
+            return obj is CacheKey other && (Key.Equals(other.Key) && StartPosition == other.StartPosition);
+        }
+    }
     private record CacheEntry(int EndPosition, int MaxPeek, object Result);
 }

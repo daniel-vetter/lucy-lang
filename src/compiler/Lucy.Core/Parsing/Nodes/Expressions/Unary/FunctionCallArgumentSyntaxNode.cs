@@ -1,6 +1,6 @@
 ﻿using Lucy.Core.Model;
-using Lucy.Core.Parsing.Nodes.Token;
 using System.Collections.Immutable;
+using Lucy.Core.Parsing.Nodes.Stuff;
 
 namespace Lucy.Core.Parsing.Nodes.Expressions.Unary;
 
@@ -10,12 +10,12 @@ public static class FunctionCallArgumentSyntaxNodeParser
 
     public static ImmutableArray<FunctionCallArgumentSyntaxNode> Read(Reader reader)
     {
-        return reader.WithCache(_listCacheKey, static code =>
+        return reader.WithCache(_listCacheKey, static (r, _) =>
         {
             var result = ImmutableArray.CreateBuilder<FunctionCallArgumentSyntaxNode>();
             while (true)
             {
-                var next = code.WithCache(nameof(FunctionCallArgumentSyntaxNodeParser), static r =>
+                var next = r.WithCache(nameof(FunctionCallArgumentSyntaxNodeParser), static (r, _) =>
                 {
                     if (!ExpressionSyntaxNodeParser.TryRead(r, out var expression))
                         return null;
