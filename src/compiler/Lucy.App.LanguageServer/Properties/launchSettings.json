@@ -4,9 +4,9 @@
       "commandName": "Project",
       "environmentVariables": {
         "LUCY_LANGUAGE_SERVER_RUN_VSCODE_EXTENSION": "$(ProjectDir)..\\..\\vscode-extension",
-        //"LUCY_LANGUAGE_SERVER_RUN_VSCODE_EXTENSION_WORKSPACE": "$(ProjectDir)SampleApp"
-        "LUCY_LANGUAGE_SERVER_RUN_VSCODE_EXTENSION_WORKSPACE": "C:\\lucy-sample-project",
-        "LUCY_CORE_EXPORT_SEMANTIC_DB_LOG": "C:\\temp\\lucy-semantic-db-log"
+        //"LUCY_LANGUAGE_SERVER_RUN_VSCODE_EXTENSION_WORKSPACE": "$(ProjectDir)SampleApp",
+        "LUCY_LANGUAGE_SERVER_RUN_VSCODE_EXTENSION_WORKSPACE": "C:\\lucy-sample-project-big",
+        //"LUCY_CORE_EXPORT_SEMANTIC_DB_LOG": "C:\\language-server-output",
       }
     }
   }

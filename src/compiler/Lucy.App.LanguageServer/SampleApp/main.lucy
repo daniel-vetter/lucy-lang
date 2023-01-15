@@ -1,44 +1,17 @@
-﻿import "helper"
+﻿
+import "helper"
 import "newfile"
 
 
 extern cdecl "kernel32.dll" "printf_" fun printf(): void
 extern cdecl "kernel32.dll" "allocConsole" fun allocConsole(): void
 
-extern cdecl "kernel32.dll" "GetStdHandle" fun GetStdHandle(nStdHandle: int): int
+extern cdecl "kernel32.dll" "GetStdHandle" fun GetStdHandle(nStdHandle: int): string
 extern cdecl "kernel32.dll" "WriteConsoleA" fun WriteConsoleA(hConsoleOutput: int, buffer: string, nNumberOfCharsToWrite: int, lpNumberOfCharsWritten: int, lpReserved: int): int
-                   
+  
 fun main(num: int): int {
-
-
     var handle = GetStdHandle(-11)
-    WriteConsoleA(handle, "Hello World", 11, 0, 0)   
- 
-                                 
-       
-    fun testInInnerScope(): int { }
-    fun tes345t(): void { }
-             
-             void dawd    
-             void awdddd
-
-             fun test(): void
-             {
-
-             }
-
-             void main void 
-
-             fuz
-
-             fz
-
-    
-                         
-    test()
-    printf("dwad", 12)
-    
-    thisIsAFunction()
+    var result = WriteConsoleA(handle, "Hallo Welt", 11, 0, 0)
 }
 
 

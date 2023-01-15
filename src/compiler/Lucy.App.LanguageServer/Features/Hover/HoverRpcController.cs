@@ -3,6 +3,7 @@ using Lucy.App.LanguageServer.Models;
 using Lucy.Common.ServiceDiscovery;
 using Lucy.Core.Model;
 using Lucy.Core.SemanticAnalysis.Handler;
+using Lucy.Core.SemanticAnalysis.Infrastructure;
 using Lucy.Infrastructure.RpcServer;
 
 namespace Lucy.App.LanguageServer.Features.Hover;
@@ -26,32 +27,24 @@ internal class HoverRpcController
 
         if (nodeId == null)
             return new RpcHover();
-
-        var tooltip = "NodeId: " + nodeId + "\\\n";
-        tooltip += "Position: " + input.Position + ", " + position.Position + "\\\n";
-
-        while (true)
+        
+        TypeInfo? typeInfo = null;
+        while (nodeId != null)
         {
-            if (nodeId == null)
-                break;
-
-            if (nodeId is INodeId<TypeReferenceSyntaxNode> typeReferenceSyntaxNode)
+            if (nodeId is INodeId<TypeReferenceSyntaxNode>
+                or INodeId<VariableDeclarationStatementSyntaxNode>
+                or INodeId<ExpressionSyntaxNode>)
             {
-                var typeInfo = _currentWorkspace.Analysis.GetTypeInfoFromTypeReferenceId(typeReferenceSyntaxNode);
-                tooltip += typeInfo == null
-                    ? "Type: Unknown type\\\n"
-                    : "Type: " + typeInfo.Name + "\\\n";
+                typeInfo = _currentWorkspace.Analysis.GetTypeInfo(nodeId);
                 break;
             }
 
-            if (nodeId is INodeId<ExpressionSyntaxNode> expressionSyntaxNode)
-            {
-                tooltip += "Type: " + (_currentWorkspace.Analysis.GetExpressionType(expressionSyntaxNode)?.Name ?? "Unknown type") + "\\\n ";
-                break;
-            }
-            
             nodeId = _currentWorkspace.Analysis.GetParentNodeId(nodeId);
         }
+
+        var tooltip = typeInfo == null
+            ? "Type: Unknown type"
+            : "Type: " + typeInfo.Name + "";
 
         return new RpcHover
         {

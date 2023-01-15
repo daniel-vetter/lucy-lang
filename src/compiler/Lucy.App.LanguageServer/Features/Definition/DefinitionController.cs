@@ -1,9 +1,9 @@
 ﻿using System.Collections.Immutable;
-using System.Linq;
 using Lucy.App.LanguageServer.Infrastructure;
 using Lucy.App.LanguageServer.Models;
 using Lucy.Common.ServiceDiscovery;
 using Lucy.Core.Model;
+using Lucy.Core.Parsing.Nodes;
 using Lucy.Core.SemanticAnalysis.Handler;
 using Lucy.Infrastructure.RpcServer;
 
@@ -34,16 +34,31 @@ namespace Lucy.App.LanguageServer.Features.Definition
             {
                 if (node is INodeId<FunctionCallExpressionSyntaxNode> functionCall)
                 {
-                    var all = _currentWorkspace.Analysis.GetAllMatchingFunctionsFromFunctionCall(functionCall);
-                    if (all.Count == 0)
-                        all = _currentWorkspace.Analysis.GetFunctionCandidatesFromFunctionCall(functionCall);
+                    var bestMatch = _currentWorkspace.Analysis.GetBestFunctionCallTarget(functionCall);
+                    var targets = bestMatch == null
+                        ? _currentWorkspace.Analysis.GetAllPossibleFunctionCallTargets(functionCall)
+                        : new ComparableReadOnlyList<INodeId<SyntaxTreeNode>>(new[] { bestMatch });
+                    
+                    var result = ImmutableArray.CreateBuilder<RpcLocationLink>();
 
-                    return all.Select(x => new RpcLocationLink
+                    foreach (var target in targets)
                     {
-                        TargetUri = _currentWorkspace.ToSystemPath(x.NodeId.DocumentPath),
-                        TargetRange = _currentWorkspace.ToRange2D(x.NodeId.DocumentPath, _currentWorkspace.Analysis.GetRangeFromNodeId(x.NodeId)).ToRpcRange(),
-                        TargetSelectionRange = _currentWorkspace.ToRange2D(x.NodeId.DocumentPath, _currentWorkspace.Analysis.GetRangeFromNodeId(x.Name.NodeId)).ToRpcRange()
-                    }).ToImmutableArray();
+                        if (target is INodeId<FunctionDeclarationStatementSyntaxNode> fd)
+                        {
+                            var flat = _currentWorkspace.Analysis.GetFlatFunctionDeclaration(fd);
+                            var link = new RpcLocationLink
+                            {
+                                TargetUri = _currentWorkspace.ToSystemPath(flat.NodeId.DocumentPath),
+                                TargetRange = _currentWorkspace.ToRange2D(flat.NodeId.DocumentPath,
+                                    _currentWorkspace.Analysis.GetRangeFromNodeId(flat.NodeId)).ToRpcRange(),
+                                TargetSelectionRange = _currentWorkspace.ToRange2D(flat.NodeId.DocumentPath,
+                                    _currentWorkspace.Analysis.GetRangeFromNodeId(flat.Name.NodeId)).ToRpcRange()
+                            };
+                            result.Add(link);
+                        }
+                    }
+
+                    return result.ToImmutable();
                 }
 
                 node = _currentWorkspace.Analysis.GetParentNodeId(node);

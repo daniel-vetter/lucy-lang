@@ -3,6 +3,11 @@ using Lucy.Core.SemanticAnalysis;
 using Lucy.Core.SemanticAnalysis.Handler.ErrorCollectors;
 using System.Diagnostics;
 
+var hc = new HashCode();
+hc.Add(1);
+hc.Add(22);
+Console.WriteLine(hc.ToHashCode());
+
 
 //Profiler.Attach();
 var total = Stopwatch.StartNew();

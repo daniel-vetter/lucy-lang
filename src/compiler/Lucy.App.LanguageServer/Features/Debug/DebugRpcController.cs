@@ -33,7 +33,7 @@ public class DebugRpcController
     public async Task<string> GetScopeTree(RpcGetScopeTree input)
     {
         var path = _currentWorkspace.ToWorkspacePath(input.Uri);
-        var tree = _currentWorkspace.Analysis.CreateScopeTree(path);
+        var tree = _currentWorkspace.Analysis.GetScopeTree(path);
         return await _debugViewGenerator.Generate(tree);
     }
 

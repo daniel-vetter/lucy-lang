@@ -5,13 +5,14 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Lucy.Core.SemanticAnalysis.Infrastructure
 {
     internal class QueryMetricsExporter
     {
         private readonly string _path;
-        private int _index = 0;
+        private int _index;
 
         public QueryMetricsExporter(string path)
         {
@@ -24,11 +25,16 @@ namespace Lucy.Core.SemanticAnalysis.Infrastructure
             if (!Directory.Exists(_path))
                 Directory.CreateDirectory(_path);
 
-            foreach(var file in Directory.GetFiles(_path, "QME*.txt"))
+            foreach (var file in Directory.GetFiles(_path, "QME*.txt"))
                 File.Delete(file);
         }
 
-        public void Export(QueryMetrics queryMetrics)
+        public void Export(QueryMetrics queryMetrics, ImmutableArray<QueryTypeStatistic> queryTypeStatistics)
+        {
+            _ = Task.Run(async () => await ExportInternal(++_index, queryMetrics, queryTypeStatistics));
+        }
+
+        private async Task ExportInternal(int index, QueryMetrics queryMetrics, ImmutableArray<QueryTypeStatistic> queryTypeStatistics)
         {
             var summary = queryMetrics.Calculations
                 .GroupBy(x => x.Query.GetType().Name)
@@ -71,8 +77,19 @@ namespace Lucy.Core.SemanticAnalysis.Infrastructure
                     entry.AvgTime.ToString(CultureInfo.InvariantCulture)
                ));
             }
-            
-            File.WriteAllText(Path.Combine(_path, $"QME{(++_index):000}_{queryMetrics.RootQuery.GetType().Name}.txt"), ConvertToTable(rows.ToImmutableArray()));
+
+            var sb = new StringBuilder();
+            sb.AppendLine(ConvertToTable(rows.ToImmutableArray()));
+
+            rows.Clear();
+            rows.Add(ImmutableArray.Create("Query", "Count"));
+            rows.AddRange(queryTypeStatistics
+                .OrderByDescending(x => x.Count)
+                .Select(x => ImmutableArray.Create(x.QueryType.Name, x.Count.ToString()))
+            );
+            sb.AppendLine(ConvertToTable(rows.ToImmutableArray()));
+
+            await File.WriteAllTextAsync(Path.Combine(_path, $"QME{index:000}_{queryMetrics.RootQuery.GetType().Name}.txt"), sb.ToString());
         }
 
         private static string ConvertToTable(ImmutableArray<ImmutableArray<string>> rows, bool addDivider = true)

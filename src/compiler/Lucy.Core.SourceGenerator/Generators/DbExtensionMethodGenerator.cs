@@ -1,7 +1,6 @@
 ﻿using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
-using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using Microsoft.CodeAnalysis.Text;
 
@@ -23,8 +22,12 @@ public static class DbExtensionMethodGenerator
                     public class DbQuery : System.Attribute 
                     {
                         public DbQuery() {}
-                        public DbQuery(string name) {}
+                        public DbQuery(bool cached) {}
+                        public DbQuery(bool cached, string name) {}
                     }
+
+                    [System.AttributeUsage(System.AttributeTargets.Method)]
+                    public class DbExtension : System.Attribute {}
 
                     [System.AttributeUsage(System.AttributeTargets.Interface)]
                     public class DbInputs : System.Attribute {}
@@ -36,9 +39,9 @@ public static class DbExtensionMethodGenerator
             _logger.Write("Started...");
         }
 
-        var methodFilter = context.SyntaxProvider.CreateSyntaxProvider(
+        var dbQueryMethodFilter = context.SyntaxProvider.CreateSyntaxProvider(
                 predicate: static (node, _) => node is MethodDeclarationSyntax,
-                transform: static (ctx, _) => GetMethodDeclarationIfMatches(ctx))
+                transform: static (ctx, _) => GetDbQueryMethodDeclarationIfMatches(ctx))
             .Where(static m => m != null)
             .Select(static (x, _) => x!)
             .Collect();
@@ -51,7 +54,7 @@ public static class DbExtensionMethodGenerator
             .Collect();
 
         var compilationAndMethods
-            = context.CompilationProvider.Combine(methodFilter);
+            = context.CompilationProvider.Combine(dbQueryMethodFilter);
 
         var compilationAndInputInterfaces
             = context.CompilationProvider.Combine(inputInterfaceFilter);
@@ -60,7 +63,7 @@ public static class DbExtensionMethodGenerator
         context.RegisterSourceOutput(compilationAndInputInterfaces, BuildInputInterfaceSource);
     }
 
-    private static MethodDeclarationSyntax? GetMethodDeclarationIfMatches(GeneratorSyntaxContext context)
+    private static MethodDeclarationSyntax? GetDbQueryMethodDeclarationIfMatches(GeneratorSyntaxContext context)
     {
         try
         {
@@ -214,7 +217,7 @@ public static class DbExtensionMethodGenerator
                     sb.AppendLine("        }");
                     sb.AppendLine();
                 }
-                
+
                 sb.AppendLine("    }");
 
                 sb.AppendLine();
@@ -265,6 +268,17 @@ public static class DbExtensionMethodGenerator
                     if (_logger.IsEnabled)
                         _logger.Write("Skipped " + method.Identifier.Text + " because the declared symbol could not be resolved.");
                     continue;
+                }
+
+                var cachingDisabled = false;
+                foreach (var methodAttributeList in method.AttributeLists)
+                {
+                    foreach (var attributeSyntax in methodAttributeList.Attributes.Where(x => x.Name.ToString() == "DbQuery"))
+                    {
+                        if (attributeSyntax.ArgumentList?.Arguments.Count == 1)
+                            if (attributeSyntax.ArgumentList.Arguments[0].Expression.ToFullString() == "false")
+                                cachingDisabled = true;
+                    }
                 }
 
                 var methodReturnTypeInfo = sm.GetSymbolInfo(method.ReturnType).Symbol as INamedTypeSymbol;
@@ -330,7 +344,31 @@ public static class DbExtensionMethodGenerator
                 myMethodParameter.Insert(0, $"this {_ns}.IDb db");
 
                 var fullReturnType = methodReturnTypeInfo.ToDisplayString() + (method.ReturnType.ToFullString().TrimEnd().EndsWith("?") ? "?" : "");
-                sb.AppendLine($$"""
+
+                if (cachingDisabled)
+                {
+                    sb.AppendLine($$"""
+                    namespace {{methodInfo.ContainingNamespace}}
+                    {
+                        public record {{method.Identifier.Text}}Input({{string.Join(", ", myRecordParameter)}});
+                        
+                        public static class {{method.Identifier.Text}}Ex
+                        {
+                            ///<summary>
+                            ///Implementation: <see cref="{{@class.Identifier.Text}}.{{method.Identifier.Text}}" />
+                            ///</summary>
+                            public static {{fullReturnType}} {{method.Identifier.Text}}({{string.Join(", ", myMethodParameter)}})
+                            {
+                                return {{@class.Identifier.Text}}.{{method.Identifier.Text}}(db, {{string.Join(", ", myArguments)}});
+                            }
+                        }
+                    }
+
+                    """);
+                }
+                else
+                {
+                    sb.AppendLine($$"""
                     namespace {{methodInfo.ContainingNamespace}}
                     {
                         public record {{method.Identifier.Text}}Input({{string.Join(", ", myRecordParameter)}});
@@ -359,7 +397,8 @@ public static class DbExtensionMethodGenerator
                     }
 
                     """);
-
+                }
+                
                 sps.CancellationToken.ThrowIfCancellationRequested();
 
 

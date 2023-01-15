@@ -55,7 +55,15 @@ public class Db : IDb
 
         return new QueryMetrics(_lastRootQuery, _recordedCalculations.ToImmutableArray());
     }
-    
+
+    public ImmutableArray<QueryTypeStatistic> GetQueryTypeStatistics()
+    {
+        return _entries
+            .GroupBy(x => x.Key.GetType())
+            .Select(x => new QueryTypeStatistic(x.Key, x.Count()))
+            .ToImmutableArray();
+    }
+
     public void SetInput(object query, object result)
     {
         if (_entries.ContainsKey(query))
@@ -252,6 +260,18 @@ public class RecordedQuery
         ExecutionTime = executionTime;
         ResultType = resultType;
     }
+}
+
+public class QueryTypeStatistic
+{
+    public QueryTypeStatistic(Type queryType, int count)
+    {
+        QueryType = queryType;
+        Count = count;
+    }
+
+    public Type QueryType { get; }
+    public int Count { get; }
 }
 
 public enum ResultType

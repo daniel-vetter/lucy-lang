@@ -112,17 +112,38 @@ public static class BasicNodeAccess
             .ToComparableReadOnlyDictionary(x => x.Key, x => x.Select(y => y.NodeId).ToComparableReadOnlyList());
     }
 
-    [DbQuery(nameof(GetNodeIdsByTypeInStatementListEx.GetNodeIdsByTypeInStatementList))]
+    [DbQuery]
     public static ComparableReadOnlyList<INodeId<SyntaxTreeNode>> GetNodeIdsByTypeInStatementList(IDb db, INodeId<StatementListSyntaxNode> nodeId, Type type)
     {
         return db.GetNodeIdsByTypeInStatementListMap(nodeId).TryGetValue(type, out var list) 
             ? list 
             : new ComparableReadOnlyList<INodeId<SyntaxTreeNode>>();
     }
-    
-    public static ComparableReadOnlyList<INodeId<T>> GetNodeIdsByTypeInStatementList<T>(this IDb db, INodeId<StatementListSyntaxNode> nodeId) where T: SyntaxTreeNode
+
+    public static ComparableReadOnlyList<INodeId<T>> GetNodeIdsByTypeInStatementList<T>(this IDb db, INodeId<StatementListSyntaxNode> nodeId) where T : SyntaxTreeNode
     {
         return db.GetNodeIdsByTypeInStatementList(nodeId, typeof(T))
+            .Cast<INodeId<T>>()
+            .ToComparableReadOnlyList();
+    }
+
+    [DbQuery]
+    public static ComparableReadOnlyList<INodeId<SyntaxTreeNode>> GetNodeIdsByTypeInStatementListShallow(IDb db, INodeId<StatementListSyntaxNode> nodeId, Type type)
+    {
+        var result = new ComparableReadOnlyList<INodeId<SyntaxTreeNode>>.Builder();
+        foreach (var statement in db.GetNodeById(nodeId).Statements)
+        {
+            if (statement.GetType() != type)
+                continue;
+
+            result.Add(statement.NodeId);
+        }
+        return result.Build();
+    }
+    
+    public static ComparableReadOnlyList<INodeId<T>> GetNodeIdsByTypeInStatementListShallow<T>(this IDb db, INodeId<StatementListSyntaxNode> nodeId) where T : SyntaxTreeNode
+    {
+        return db.GetNodeIdsByTypeInStatementListShallow(nodeId, typeof(T))
             .Cast<INodeId<T>>()
             .ToComparableReadOnlyList();
     }

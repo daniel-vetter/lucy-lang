@@ -22,7 +22,7 @@ public static class GetEntryPointsHandler
     [DbQuery] ///<see cref="GetEntryPointsInDocumentEx.GetEntryPointsInDocument"/>
     public static ComparableReadOnlyList<FlatFunctionDeclaration> GetEntryPointsInDocument(IDb db, string documentPath)
     {
-        var infos = db.GetFunctionsInDocument(documentPath);
+        var infos = db.GetTopLevelFunctions(documentPath);
         var result = new ComparableReadOnlyList<FlatFunctionDeclaration>.Builder();
         foreach(var info in infos)
         {

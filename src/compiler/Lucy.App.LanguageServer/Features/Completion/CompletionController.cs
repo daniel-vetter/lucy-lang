@@ -26,9 +26,9 @@ namespace Lucy.App.LanguageServer.Features.Completion
 
             var node = _currentWorkspace.Analysis.GetNodeAtPosition(workspacePath, position);
             
-            if (node == null)
+            //if (node == null)
                 return new RpcCompletionList();
-
+            /*
             var functions = _currentWorkspace.Analysis.GetReachableFunctionsInScope(node);
             var variables = _currentWorkspace.Analysis.GetReachableVariablesInScope(node);
 
@@ -54,7 +54,7 @@ namespace Lucy.App.LanguageServer.Features.Completion
             return new RpcCompletionList
             {
                 Items = result.ToImmutableArray()
-            };
+            };*/
         }
     }
 }

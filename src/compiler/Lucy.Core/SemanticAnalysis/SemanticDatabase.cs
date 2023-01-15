@@ -68,7 +68,7 @@ public class SemanticDatabase : IDb, IDisposable
     public object? Query(object query)
     {
         var result = _db.Query(query);
-        _queryMetricsExporter?.Export(_db.GetLastQueryMetrics());
+        _queryMetricsExporter?.Export(_db.GetLastQueryMetrics(), _db.GetQueryTypeStatistics());
         return result;
     }
     
