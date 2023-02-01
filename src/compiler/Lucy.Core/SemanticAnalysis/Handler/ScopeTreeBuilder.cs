@@ -1,39 +1,46 @@
 ﻿using Lucy.Core.Model;
 using Lucy.Core.Parsing.Nodes;
-using Lucy.Core.SemanticAnalysis.Infrastructure;
-using Lucy.Core.SemanticAnalysis.Inputs;
+using Lucy.Core.SemanticAnalysis.Infrastructure.Salsa;
 
 namespace Lucy.Core.SemanticAnalysis.Handler
 {
-    public static class ScopeHandler
+    [QueryGroup]
+    public class ScopeTreeBuilder
     {
-        [DbQuery]
-        public static Scope GetScopeTree(IDb db, string documentPath)
+        private readonly Nodes _nodes;
+        private readonly Imports _imports;
+        [Inject] private readonly Functions _functions = null!;
+
+        public ScopeTreeBuilder(Nodes nodes, Imports imports)
         {
-            var rootNode = db.GetSyntaxTree(documentPath);
+            _nodes = nodes;
+            _imports = imports;
+        }
+        
+        public virtual Scope GetScopeTree(string documentPath)
+        {
+            var rootNode = _nodes.GetSyntaxTree(documentPath);
 
             var importScopeEntries = new ComparableReadOnlyList<ScopeEntry>.Builder();
-            foreach (var import in db.GetImports(documentPath).Valid)
-            foreach (var function in db.GetTopLevelFunctions(import.Path))
+            foreach (var import in _imports.GetImports(documentPath).Valid)
+            foreach (var function in _functions.GetTopLevelFunctions(import.Path))
                 importScopeEntries.Add(new SymbolDeclaration(function.Name.Text, function.Name.NodeId, function.NodeId));
             
-            importScopeEntries.Add(db.GetScopeFromStatementList(rootNode.StatementList.NodeId));
+            importScopeEntries.Add(GetScopeFromStatementList(rootNode.StatementList.NodeId));
             return new Scope(importScopeEntries.Build());
         }
 
-        [DbQuery]
-        public static Scope GetScopeFromStatementList(IDb db, INodeId<StatementListSyntaxNode> nodeId)
+        protected virtual Scope GetScopeFromStatementList(INodeId<StatementListSyntaxNode> nodeId)
         {
-            var sl = db.GetNodeById(nodeId);
+            var sl = _nodes.GetNodeById(nodeId);
             var result = new ComparableReadOnlyList<ScopeEntry>.Builder();
-            TraverseStatementList(db, sl, result);
+            TraverseStatementList(sl, result);
             return new Scope(result.Build());
         }
 
-        [DbQuery]
-        public static Scope GetScopeFromFunctionDeclaration(IDb db, INodeId<FunctionDeclarationStatementSyntaxNode> nodeId)
+        protected virtual Scope GetScopeFromFunctionDeclaration(INodeId<FunctionDeclarationStatementSyntaxNode> nodeId)
         {
-            var fd = db.GetNodeById(nodeId);
+            var fd = _nodes.GetNodeById(nodeId);
             var result = new ComparableReadOnlyList<ScopeEntry>.Builder();
 
             foreach (var parameter in fd.ParameterList)
@@ -41,19 +48,19 @@ namespace Lucy.Core.SemanticAnalysis.Handler
                     parameter.VariableDefinition.VariableName.NodeId, parameter.NodeId));
 
             if (fd.Body != null)
-                TraverseStatementList(db, fd.Body, result);
+                TraverseStatementList(fd.Body, result);
 
             return new Scope(result.Build());
         }
         
-        private static void TraverseStatementList(IDb db, StatementListSyntaxNode sl, ComparableReadOnlyList<ScopeEntry>.Builder result)
+        private void TraverseStatementList(StatementListSyntaxNode sl, ComparableReadOnlyList<ScopeEntry>.Builder result)
         {
-            static void Traverse(IDb db, SyntaxTreeNode node, ComparableReadOnlyList<ScopeEntry>.Builder result)
+            void Traverse(SyntaxTreeNode node, ComparableReadOnlyList<ScopeEntry>.Builder result)
             {
                 switch (node)
                 {
                     case FunctionDeclarationStatementSyntaxNode fd:
-                        result.Add(db.GetScopeFromFunctionDeclaration(fd.NodeId));
+                        result.Add(GetScopeFromFunctionDeclaration(fd.NodeId));
                         return;
                     case VariableDeclarationStatementSyntaxNode vd:
                         result.Add(new SymbolDeclaration(vd.VariableDefinition.VariableName.Text, vd.VariableDefinition.VariableName.NodeId, vd.NodeId));
@@ -67,7 +74,7 @@ namespace Lucy.Core.SemanticAnalysis.Handler
                 }
 
                 foreach (var child in node.GetChildNodes()) 
-                    Traverse(db, child, result);
+                    Traverse(child, result);
             }
 
             foreach (var statement in sl.Statements)
@@ -76,7 +83,7 @@ namespace Lucy.Core.SemanticAnalysis.Handler
                     result.Add(new SymbolDeclaration(fd.FunctionName.Text, fd.FunctionName.NodeId, fd.NodeId));
             }
 
-            Traverse(db, sl, result);
+            Traverse(sl, result);
         }
     }
 

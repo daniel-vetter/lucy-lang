@@ -34,8 +34,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Lucy.Core.Tests", "Lucy.Cor
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lucy.Emitter", "Lucy.Emitter\Lucy.Emitter.csproj", "{0545FC19-4CAB-4C65-AA00-230FEB8E419B}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Lucy.Core.SourceGenerator", "Lucy.Core.SourceGenerator\Lucy.Core.SourceGenerator.csproj", "{A1BCC02E-141F-4E9E-A0E3-7DB47E7B3225}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Lucy.Core.Model", "Lucy.Core.Model\Lucy.Core.Model.csproj", "{F1C85349-0DC7-47D9-A16D-00A1F4D0EFCA}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Lucy.Core.Model.SourceGenerator", "Lucy.Core.Model.SourceGenerator\Lucy.Core.Model.SourceGenerator.csproj", "{B74513AD-6DB4-4E1B-856C-299EA87B278A}"
@@ -102,10 +100,6 @@ Global
 		{0545FC19-4CAB-4C65-AA00-230FEB8E419B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0545FC19-4CAB-4C65-AA00-230FEB8E419B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0545FC19-4CAB-4C65-AA00-230FEB8E419B}.Release|Any CPU.Build.0 = Release|Any CPU
-		{A1BCC02E-141F-4E9E-A0E3-7DB47E7B3225}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A1BCC02E-141F-4E9E-A0E3-7DB47E7B3225}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A1BCC02E-141F-4E9E-A0E3-7DB47E7B3225}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A1BCC02E-141F-4E9E-A0E3-7DB47E7B3225}.Release|Any CPU.Build.0 = Release|Any CPU
 		{F1C85349-0DC7-47D9-A16D-00A1F4D0EFCA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{F1C85349-0DC7-47D9-A16D-00A1F4D0EFCA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F1C85349-0DC7-47D9-A16D-00A1F4D0EFCA}.Release|Any CPU.ActiveCfg = Release|Any CPU

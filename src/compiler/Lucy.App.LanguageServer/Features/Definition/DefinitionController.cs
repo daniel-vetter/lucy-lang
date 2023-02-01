@@ -1,4 +1,5 @@
-﻿using System.Collections.Immutable;
+﻿using System;
+using System.Collections.Immutable;
 using Lucy.App.LanguageServer.Infrastructure;
 using Lucy.App.LanguageServer.Models;
 using Lucy.Common.ServiceDiscovery;
@@ -25,7 +26,7 @@ namespace Lucy.App.LanguageServer.Features.Definition
             var workspacePath = _currentWorkspace.ToWorkspacePath(input.TextDocument.Uri);
             var position = _currentWorkspace.ToPosition1D(workspacePath, input.Position.ToPosition2D());
 
-            var node = _currentWorkspace.Analysis.GetNodeAtPosition(workspacePath, position);
+            var node = _currentWorkspace.Analysis.Get<Ranges>().GetNodeAtPosition(workspacePath, position);
             if (node == null)
                 return ImmutableArray<RpcLocationLink>.Empty;
 
@@ -34,9 +35,9 @@ namespace Lucy.App.LanguageServer.Features.Definition
             {
                 if (node is INodeId<FunctionCallExpressionSyntaxNode> functionCall)
                 {
-                    var bestMatch = _currentWorkspace.Analysis.GetBestFunctionCallTarget(functionCall);
+                    var bestMatch = _currentWorkspace.Analysis.Get<Functions>().GetBestFunctionCallTarget(functionCall);
                     var targets = bestMatch == null
-                        ? _currentWorkspace.Analysis.GetAllPossibleFunctionCallTargets(functionCall)
+                        ? _currentWorkspace.Analysis.Get<Functions>().GetAllPossibleFunctionCallTargets(functionCall)
                         : new ComparableReadOnlyList<INodeId<SyntaxTreeNode>>(new[] { bestMatch });
                     
                     var result = ImmutableArray.CreateBuilder<RpcLocationLink>();
@@ -45,14 +46,14 @@ namespace Lucy.App.LanguageServer.Features.Definition
                     {
                         if (target is INodeId<FunctionDeclarationStatementSyntaxNode> fd)
                         {
-                            var flat = _currentWorkspace.Analysis.GetFlatFunctionDeclaration(fd);
+                            var flat = _currentWorkspace.Analysis.Get<Flats>().GetFlatFunctionDeclaration(fd);
                             var link = new RpcLocationLink
                             {
                                 TargetUri = _currentWorkspace.ToSystemPath(flat.NodeId.DocumentPath),
                                 TargetRange = _currentWorkspace.ToRange2D(flat.NodeId.DocumentPath,
-                                    _currentWorkspace.Analysis.GetRangeFromNodeId(flat.NodeId)).ToRpcRange(),
+                                    _currentWorkspace.Analysis.Get<Ranges>().GetRangeFromNodeId(flat.NodeId)).ToRpcRange(),
                                 TargetSelectionRange = _currentWorkspace.ToRange2D(flat.NodeId.DocumentPath,
-                                    _currentWorkspace.Analysis.GetRangeFromNodeId(flat.Name.NodeId)).ToRpcRange()
+                                    _currentWorkspace.Analysis.Get<Ranges>().GetRangeFromNodeId(flat.Name.NodeId)).ToRpcRange()
                             };
                             result.Add(link);
                         }
@@ -61,7 +62,7 @@ namespace Lucy.App.LanguageServer.Features.Definition
                     return result.ToImmutable();
                 }
 
-                node = _currentWorkspace.Analysis.GetParentNodeId(node);
+                node = _currentWorkspace.Analysis.Get<Nodes>().GetParentNodeId(node);
                 if (node == null)
                     break;
             }

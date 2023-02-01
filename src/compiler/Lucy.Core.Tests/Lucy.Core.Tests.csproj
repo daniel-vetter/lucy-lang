@@ -20,7 +20,6 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\Lucy.Core\Lucy.Core.csproj" />
-		<ProjectReference Include="..\Lucy.Core.SourceGenerator\Lucy.Core.SourceGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
 	</ItemGroup>
 
 </Project>

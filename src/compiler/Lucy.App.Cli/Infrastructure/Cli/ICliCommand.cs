@@ -1,6 +1,6 @@
 ﻿using System.CommandLine.Builder;
 
-namespace Lucy.App.Infrastructure.Cli
+namespace Lucy.App.Cli.Infrastructure.Cli
 {
     internal interface ICliCommand
     {

@@ -1,6 +1,4 @@
-﻿using Lucy.Assembler.ContainerFormats.PE.RawStructs;
-
-namespace Lucy.Assembler.ContainerFormats.PE
+﻿namespace Lucy.Assembler.ContainerFormats.PE
 {
     public class CodeSection : ISection
     {

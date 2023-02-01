@@ -1,7 +1,6 @@
 ﻿using Lucy.Common.ServiceDiscovery;
 using Lucy.Core.ProjectManagement;
 using Lucy.Core.SemanticAnalysis;
-using Lucy.Core.SemanticAnalysis.Infrastructure;
 using System;
 using System.Threading.Tasks;
 
@@ -11,10 +10,10 @@ namespace Lucy.App.LanguageServer.Infrastructure;
 public class CurrentWorkspace
 {
     private Workspace? _workspace;
-    private SemanticDatabase? _semanticDatabase;
+    private SemanticAnalyzer? _semanticDatabase;
     private SystemPath? _rootPath;
     
-    public IDb Analysis => _semanticDatabase ?? throw new Exception("No workspace was loaded");
+    public SemanticAnalyzer Analysis => _semanticDatabase ?? throw new Exception("No workspace was loaded");
 
     public async Task Load(SystemPath path)
     {
@@ -23,7 +22,7 @@ public class CurrentWorkspace
 
         var ws = await Workspace.CreateFromPath(path.ToString());
         
-        _semanticDatabase = new SemanticDatabase(ws);
+        _semanticDatabase = new SemanticAnalyzer(ws);
         _workspace = ws;
         _rootPath = path;
     }

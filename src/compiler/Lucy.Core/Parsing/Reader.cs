@@ -11,7 +11,7 @@ namespace Lucy.Core.Parsing;
 public class Reader
 {
     private readonly string _code;
-    private readonly Dictionary<CacheKey, CacheEntry> _cache = new();
+    public readonly Dictionary<CacheKey, CacheEntry> _cache = new();
     private readonly HashSet<string> _internalizedStrings = new();
 
     private int _position;
@@ -68,11 +68,7 @@ public class Reader
                 // If the cache entry is after the change, we push it further back
                 var movedKey = new CacheKey(key.Key, key.StartPosition + lengthDifference);
 
-                var movedEntry = entry with
-                {
-                    EndPosition = entry.EndPosition + lengthDifference,
-                    MaxPeek = entry.MaxPeek + lengthDifference
-                };
+                var movedEntry = new CacheEntry(entry.EndPosition + lengthDifference, entry.MaxPeek + lengthDifference, entry.Result);
 
                 newCache[movedKey] = movedEntry;
             }
@@ -144,7 +140,7 @@ public class Reader
 
     private string DebuggerDisplay => _code[_position..];
     
-    private readonly struct CacheKey
+    public readonly struct CacheKey
     {
         public object Key { get; }
         public int StartPosition { get; }
@@ -165,5 +161,18 @@ public class Reader
             return obj is CacheKey other && (Key.Equals(other.Key) && StartPosition == other.StartPosition);
         }
     }
-    private record CacheEntry(int EndPosition, int MaxPeek, object Result);
+
+    public readonly struct CacheEntry
+    {
+        public int EndPosition { get; }
+        public int MaxPeek { get; }
+        public object Result { get; }
+
+        public CacheEntry(int endPosition, int maxPeek, object result)
+        {
+            EndPosition = endPosition;
+            MaxPeek = maxPeek;
+            Result = result;
+        }
+    }
 }

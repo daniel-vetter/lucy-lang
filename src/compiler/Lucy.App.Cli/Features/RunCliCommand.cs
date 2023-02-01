@@ -1,17 +1,17 @@
-﻿using Lucy.App.Infrastructure.Cli;
-using Lucy.Common.ServiceDiscovery;
-using Lucy.Core.ProjectManagement;
-using Lucy.Core.SemanticAnalysis;
-using Lucy.Core.SemanticAnalysis.Handler.ErrorCollectors;
-using Lucy.Interpreter;
-using System;
+﻿using System;
 using System.CommandLine;
 using System.CommandLine.Builder;
 using System.CommandLine.Invocation;
 using System.Linq;
 using System.Threading.Tasks;
+using Lucy.App.Cli.Infrastructure.Cli;
+using Lucy.Common.ServiceDiscovery;
+using Lucy.Core.ProjectManagement;
+using Lucy.Core.SemanticAnalysis;
+using Lucy.Core.SemanticAnalysis.Handler.ErrorCollectors;
+using Lucy.Interpreter;
 
-namespace Lucy.App.Features
+namespace Lucy.App.Cli.Features
 {
     [Service(Lifetime.Singleton)]
     class RunCliCommand : ICliCommand

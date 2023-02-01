@@ -1,15 +1,13 @@
-﻿using System;
-using System.CommandLine;
+﻿using System.CommandLine;
 using System.CommandLine.Builder;
 using System.CommandLine.Parsing;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
-using Lucy.App.Infrastructure.Cli;
+using Lucy.App.Cli.Infrastructure.Cli;
 using Lucy.Common.ServiceDiscovery;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Lucy.App
+namespace Lucy.App.Cli
 {
     class Program
     {

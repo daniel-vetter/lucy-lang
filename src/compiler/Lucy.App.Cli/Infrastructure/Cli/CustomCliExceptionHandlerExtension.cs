@@ -1,7 +1,7 @@
 ﻿using System.CommandLine.Builder;
 using Spectre.Console;
 
-namespace Lucy.App.Infrastructure.Cli
+namespace Lucy.App.Cli.Infrastructure.Cli
 {
     internal static class CustomCliExceptionHandlerExtension
     {

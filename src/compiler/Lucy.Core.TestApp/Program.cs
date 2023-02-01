@@ -1,16 +1,8 @@
 ﻿using Lucy.Core.ProjectManagement;
-using Lucy.Core.SemanticAnalysis;
-using Lucy.Core.SemanticAnalysis.Handler.ErrorCollectors;
 using System.Diagnostics;
 
-var hc = new HashCode();
-hc.Add(1);
-hc.Add(22);
-Console.WriteLine(hc.ToHashCode());
-
-
 //Profiler.Attach();
-var total = Stopwatch.StartNew();
+Stopwatch.StartNew();
 var sw = Stopwatch.StartNew();
 //Console.WriteLine(GC.GetTotalMemory(true) / 1024.0 / 1024.0);
 //Console.ReadLine();
@@ -20,6 +12,29 @@ var ws = await Workspace.CreateFromPath("C:\\lucy-sample-project-big");
 Console.WriteLine("Project loaded: " + sw.Elapsed.TotalMilliseconds);
 Console.WriteLine("Project loaded:  MEMORY: " + GC.GetTotalMemory(true) / 1024.0 / 1024.0);
 
+
+var totalLength = 0;
+var totalCount= 0;
+
+foreach (var doc in ws.Documents.Values.OfType<CodeWorkspaceDocument>())
+{
+    var codeLength = doc.ParserResult.Reader.Code.Length;
+    var count = doc.ParserResult.Reader._cache.Count;
+    
+    Console.WriteLine(codeLength + " - " + count);
+    totalLength += codeLength;
+    totalCount += count;
+}
+
+Console.WriteLine(totalLength / (double)totalCount);
+
+
+
+
+
+
+
+/*
 sw.Restart();
 var sa = new SemanticDatabase(ws);
 Console.WriteLine("Semantic buildup: " + sw.Elapsed.TotalMilliseconds);
@@ -49,7 +64,6 @@ foreach (var calcs in data.OrderByDescending(x => x.Time))
 {
     Console.WriteLine(calcs.QueryName + " - " + calcs.Count + " - " + calcs.Time);
 }
-*/
 
 Console.WriteLine(GC.GetTotalMemory(true) / 1024.0 / 1024.0);
 Console.ReadLine();

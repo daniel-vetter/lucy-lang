@@ -6,7 +6,6 @@ using Lucy.Infrastructure.RpcServer;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.Diagnostics.Tracing.Parsers.ClrPrivate;
 
 namespace Lucy.App.LanguageServer.Features;
 

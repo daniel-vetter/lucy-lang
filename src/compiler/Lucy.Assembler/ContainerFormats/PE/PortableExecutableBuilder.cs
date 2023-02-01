@@ -5,7 +5,6 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Lucy.Assembler.ContainerFormats.PE.RawStructs;
 
 namespace Lucy.Assembler.ContainerFormats.PE
 {

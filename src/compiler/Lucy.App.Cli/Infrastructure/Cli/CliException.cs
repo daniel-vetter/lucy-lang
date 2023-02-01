@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Lucy.App.Infrastructure.Cli
+namespace Lucy.App.Cli.Infrastructure.Cli
 {
     public class CliException : Exception
     {

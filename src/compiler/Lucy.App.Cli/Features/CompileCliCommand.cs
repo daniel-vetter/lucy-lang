@@ -1,13 +1,4 @@
-﻿using Lucy.App.Infrastructure.Cli;
-using Lucy.Common.ServiceDiscovery;
-using Lucy.Core.ProjectManagement;
-using System.CommandLine;
-using System.CommandLine.Builder;
-using System.CommandLine.Invocation;
-using System.IO;
-using System.Threading.Tasks;
-
-namespace Lucy.App.Features
+﻿namespace Lucy.App.Cli.Features
 {
     /*
     [Service(Lifetime.Singleton)]

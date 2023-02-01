@@ -1,26 +1,36 @@
 ﻿using Lucy.Core.Model;
 using Lucy.Core.Parsing.Nodes;
-using Lucy.Core.SemanticAnalysis.Infrastructure;
-using Lucy.Core.SemanticAnalysis.Inputs;
+using Lucy.Core.SemanticAnalysis.Infrastructure.Salsa;
 
 namespace Lucy.Core.SemanticAnalysis.Handler;
 
-public static class FunctionsHandler
+[QueryGroup]
+public class Functions
 {
+    private readonly Nodes _nodes;
+    private readonly Flats _flats;
+    private readonly Symbols _symbols;
+    private readonly Types _types;
+
+    public Functions(Nodes nodes, Flats flats, Symbols symbols, Types types)
+    {
+        _nodes = nodes;
+        _flats = flats;
+        _symbols = symbols;
+        _types = types;
+    }
+    
     /// <summary>
     /// Returns a list of all top level function declarations in a document.
     /// </summary>
-    /// <see cref="GetTopLevelFunctionsEx.GetTopLevelFunctions"/>
-    /// <returns></returns>
-    [DbQuery]
-    public static ComparableReadOnlyList<FlatFunctionDeclaration> GetTopLevelFunctions(IDb db, string documentPath)
+    public virtual ComparableReadOnlyList<FlatFunctionDeclaration> GetTopLevelFunctions(string documentPath)
     {
-        var root = db.GetSyntaxTree(documentPath);
-        var topLevelFunctions = db.GetNodeIdsByTypeInStatementListShallow<FunctionDeclarationStatementSyntaxNode>(root.StatementList.NodeId);
+        var root = _nodes.GetSyntaxTree(documentPath);
+        var topLevelFunctions = _nodes.GetNodeIdsByTypeInStatementListShallow<FunctionDeclarationStatementSyntaxNode>(root.StatementList.NodeId);
         var result = new ComparableReadOnlyList<FlatFunctionDeclaration>.Builder();
         foreach (var topLevelFunction in topLevelFunctions)
         {
-            result.Add(db.GetFlatFunctionDeclaration(topLevelFunction));
+            result.Add(_flats.GetFlatFunctionDeclaration(topLevelFunction));
         }
         return result.Build();
     }
@@ -30,12 +40,10 @@ public static class FunctionsHandler
     ///  1) Name must match
     ///  2) Function declaration needs to be in scope of the function call
     /// </summary>
-    /// <see cref="GetAllPossibleFunctionCallTargetsEx.GetAllPossibleFunctionCallTargets"/>
-    [DbQuery]
-    public static ComparableReadOnlyList<INodeId<SyntaxTreeNode>> GetAllPossibleFunctionCallTargets(IDb db, INodeId<FunctionCallExpressionSyntaxNode> nodeId)
+    public virtual ComparableReadOnlyList<INodeId<SyntaxTreeNode>> GetAllPossibleFunctionCallTargets(INodeId<FunctionCallExpressionSyntaxNode> nodeId)
     {
-        var flatFunctionCall = db.GetFlatFunctionCall(nodeId);
-        var symbolDeclarations = db.GetSymbolDeclarations(flatFunctionCall.Name.NodeId);
+        var flatFunctionCall = _flats.GetFlatFunctionCall(nodeId);
+        var symbolDeclarations = _symbols.GetSymbolDeclarations(flatFunctionCall.Name.NodeId);
         var result = new ComparableReadOnlyList<INodeId<SyntaxTreeNode>>.Builder();
 
         foreach (var symbolDeclaration in symbolDeclarations)
@@ -54,17 +62,15 @@ public static class FunctionsHandler
     ///  3) Function argument count needs to match the function parameter count
     ///  4) Argument types need to match
     /// </summary>
-    /// <see cref="GetBestFunctionCallTargetEx.GetBestFunctionCallTarget"/>
-    [DbQuery]
-    public static INodeId<SyntaxTreeNode>? GetBestFunctionCallTarget(IDb db, INodeId<FunctionCallExpressionSyntaxNode> nodeId)
+    public virtual INodeId<SyntaxTreeNode>? GetBestFunctionCallTarget(INodeId<FunctionCallExpressionSyntaxNode> nodeId)
     {
-        var flatCall = db.GetFlatFunctionCall(nodeId);
-        var all = db.GetAllPossibleFunctionCallTargets(nodeId);
+        var flatCall = _flats.GetFlatFunctionCall(nodeId);
+        var all = GetAllPossibleFunctionCallTargets(nodeId);
         foreach (var functionCallTarget in all)
         {
             if (functionCallTarget is INodeId<FunctionDeclarationStatementSyntaxNode> fd)
             {
-                var flatDeclaration = db.GetFlatFunctionDeclaration(fd);
+                var flatDeclaration = _flats.GetFlatFunctionDeclaration(fd);
                 if (flatDeclaration.Parameters.Count != flatCall.Arguments.Count)
                     continue;
                 
@@ -75,8 +81,8 @@ public static class FunctionsHandler
                         break;
 
                     var argument = flatCall.Arguments[i];
-                    var parameterType = db.GetTypeInfoFromTypeReferenceId(parameterTypeReference);
-                    var argumentType = db.GetTypeInfoFromExpression(argument);
+                    var parameterType = _types.GetTypeInfoFromTypeReferenceId(parameterTypeReference);
+                    var argumentType = _types.GetTypeInfoFromExpression(argument);
 
                     if (parameterType == null || argumentType == null)
                         break;

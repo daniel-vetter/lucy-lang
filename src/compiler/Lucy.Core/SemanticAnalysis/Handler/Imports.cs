@@ -1,23 +1,41 @@
 ﻿using Lucy.Core.Model;
 using Lucy.Core.Parsing.Nodes;
-using Lucy.Core.SemanticAnalysis.Infrastructure;
-using Lucy.Core.SemanticAnalysis.Inputs;
 using System;
 using System.Linq;
+using Lucy.Core.SemanticAnalysis.Infrastructure.Salsa;
 
 namespace Lucy.Core.SemanticAnalysis.Handler;
 
-public record DocumentImports(ComparableReadOnlyList<Import> Valid, ComparableReadOnlyList<Import> Invalid);
-public record Import(INodeId<SyntaxTreeNode> ImportStatementNodeId, INodeId<TokenNode> ImportPathTokenNodeId, string Path);
+public record DocumentImports(
+    ComparableReadOnlyList<Import> Valid, 
+    ComparableReadOnlyList<Import> Invalid
+);
 
-public static class GetImportsHandler
+public record Import(
+    INodeId<ImportStatementSyntaxNode> ImportStatementNodeId,
+    INodeId<TokenNode> ImportPathTokenNodeId,
+    string Path
+);
+
+[QueryGroup]
+public class Imports
 {
-    [DbQuery] ///<see cref="GetImportsEx.GetImports"/>
-    public static DocumentImports GetImports(IDb db, string documentPath)
+    private readonly Nodes _nodes;
+
+    public Imports(Nodes nodes)
     {
-        var importStatementsIds = db.GetNodeIdsByType<ImportStatementSyntaxNode>(documentPath);
-        var importStatements = importStatementsIds.Select(db.GetNodeById).ToList();
-        var documentList = db.GetDocumentList().ToHashSet();
+        _nodes = nodes;
+    }
+
+    /// <summary>
+    /// Returns a list of all file imports of a specific document.
+    /// </summary>
+    /// <param name="documentPath">The document to analyze</param>
+    public virtual DocumentImports GetImports(string documentPath)
+    {
+        var importStatementsIds = _nodes.GetNodeIdsByType<ImportStatementSyntaxNode>(documentPath);
+        var importStatements = importStatementsIds.Select(_nodes.GetNodeById).ToList();
+        var documentList = _nodes.GetDocumentList();
         var currentDir = GetDirectoryFrom(documentPath);
 
         var validList = new ComparableReadOnlyList<Import>.Builder();
@@ -47,11 +65,11 @@ public static class GetImportsHandler
         if (basePath.Length == 0)
             throw new Exception("Invalid base path");
 
-        if (toAdd.Length > 0 && toAdd[0] == '/') 
+        if (toAdd.Length > 0 && toAdd[0] == '/')
             return toAdd;
 
-        return basePath[^1] == '/' 
-            ? $"{basePath}{toAdd}" 
+        return basePath[^1] == '/'
+            ? $"{basePath}{toAdd}"
             : $"{basePath}/{toAdd}";
     }
 
@@ -64,13 +82,13 @@ public static class GetImportsHandler
 
         entries.RemoveAll(x => x == ".");
 
-        for (var i=1;i<entries.Count;i++)
+        for (var i = 1; i < entries.Count; i++)
         {
-            if (entries[i - 1] == ".." || entries[i] != "..") 
+            if (entries[i - 1] == ".." || entries[i] != "..")
                 continue;
 
-            entries.RemoveAt(i-1);
-            entries.RemoveAt(i-1);
+            entries.RemoveAt(i - 1);
+            entries.RemoveAt(i - 1);
         }
 
         return string.Join("/", entries);

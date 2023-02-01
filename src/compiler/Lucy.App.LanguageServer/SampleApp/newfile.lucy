@@ -6,4 +6,3 @@ fun thisIsAFunction(): string {
     thisIsAFunction()
 
 }
-

@@ -1,56 +1,62 @@
 ﻿using Lucy.Core.Model;
 using Lucy.Core.Parsing.Nodes;
-using Lucy.Core.SemanticAnalysis.Infrastructure;
-using Lucy.Core.SemanticAnalysis.Inputs;
 using System.Linq;
+using Lucy.Core.SemanticAnalysis.Infrastructure.Salsa;
 
 namespace Lucy.Core.SemanticAnalysis.Handler.ErrorCollectors;
 
-public static class GetSyntaxErrors
+[QueryGroup]
+public class GetSyntaxErrors
 {
-    [DbQuery] ///<see cref="GetAllSyntaxErrorsEx.GetAllSyntaxErrors"/>
-    public static ComparableReadOnlyList<Error> GetAllSyntaxErrors(IDb db)
+    private readonly Nodes _nodes;
+    private readonly Ranges _ranges;
+
+    public GetSyntaxErrors(Nodes nodes, Ranges ranges)
+    {
+        _nodes = nodes;
+        _ranges = ranges;
+    }
+
+    public virtual ComparableReadOnlyList<Error> GetAllSyntaxErrors()
     {
         var result = new ComparableReadOnlyList<Error>.Builder();
-        foreach(var documentPath in db.GetDocumentList())
+        foreach(var documentPath in _nodes.GetDocumentList())
         {
-            result.AddRange(db.GetSyntaxErrorsInDocument(documentPath));
+            result.AddRange(GetSyntaxErrorsInDocument(documentPath));
         }
         return result.Build();
     }
 
-    [DbQuery] ///<see cref="GetSyntaxErrorsInDocumentEx.GetSyntaxErrorsInDocument"/>
-    public static ComparableReadOnlyList<Error> GetSyntaxErrorsInDocument(IDb db, string documentPath)
+    public virtual ComparableReadOnlyList<Error> GetSyntaxErrorsInDocument(string documentPath)
     {
-        var root = db.GetSyntaxTree(documentPath);
+        var root = _nodes.GetSyntaxTree(documentPath);
         var list = new ComparableReadOnlyList<Error>.Builder();
-        Traverse(db, root, list);
+        Traverse(root, list);
         return list.Build();
     }
 
-    [DbQuery] ///<see cref="GetSyntaxErrorsInStatementListEx.GetSyntaxErrorsInStatementList"/>
-    public static ComparableReadOnlyList<Error> GetSyntaxErrorsInStatementList(IDb db, INodeId<StatementListSyntaxNode> statementListSyntaxNodeId)
+    public virtual ComparableReadOnlyList<Error> GetSyntaxErrorsInStatementList(INodeId<StatementListSyntaxNode> statementListSyntaxNodeId)
     {
         var list = new ComparableReadOnlyList<Error>.Builder();
-        var statementListSyntaxNode = db.GetNodeById(statementListSyntaxNodeId);
-        Traverse(db, statementListSyntaxNode, list);
+        var statementListSyntaxNode = _nodes.GetNodeById(statementListSyntaxNodeId);
+        Traverse(statementListSyntaxNode, list);
         return list.Build();
     }
 
-    private static void Traverse(IDb db, SyntaxTreeNode node, ComparableReadOnlyList<Error>.Builder list)
+    private void Traverse(SyntaxTreeNode node, ComparableReadOnlyList<Error>.Builder list)
     {
         if (!node.SyntaxErrors.IsDefaultOrEmpty)
-            list.AddRange(node.SyntaxErrors.Select(x => new ErrorWithRange(node.NodeId.DocumentPath, db.GetRangeFromNodeId(node.NodeId), x)));
+            list.AddRange(node.SyntaxErrors.Select(x => new ErrorWithRange(node.NodeId.DocumentPath, _ranges.GetRangeFromNodeId(node.NodeId), x)));
 
         foreach(var child in node.GetChildNodes())
         {
             if (child is StatementListSyntaxNode statementList)
             {
-                list.AddRange(db.GetSyntaxErrorsInStatementList(statementList.NodeId));
+                list.AddRange(GetSyntaxErrorsInStatementList(statementList.NodeId));
             }
             else
             {
-                Traverse(db, child, list);
+                Traverse(child, list);
             }
         }
     }

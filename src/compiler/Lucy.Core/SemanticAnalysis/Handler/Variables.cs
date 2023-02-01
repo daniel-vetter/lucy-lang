@@ -1,22 +1,28 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using Lucy.Core.Model;
-using Lucy.Core.Parsing.Nodes;
-using Lucy.Core.SemanticAnalysis.Infrastructure;
+using Lucy.Core.SemanticAnalysis.Infrastructure.Salsa;
 
 namespace Lucy.Core.SemanticAnalysis.Handler
 {
-    internal static class VariablesHandler
+    [QueryGroup]
+    public class Variables
     {
+        private readonly Nodes _nodes;
+        private readonly Symbols _symbols;
+
+        public Variables(Nodes nodes, Symbols symbols)
+        {
+            _nodes = nodes;
+            _symbols = symbols;
+        }
+        
         /// <summary>
         /// Returns the best matching variable reference target
         /// </summary>
-        /// <see cref="GetBestFunctionCallTargetEx.GetBestFunctionCallTarget"/>
-        [DbQuery]
-        public static INodeId<SyntaxTreeNode>? GetBestVariableReferenceTarget(IDb db, INodeId<VariableReferenceExpressionSyntaxNode> nodeId)
+        public virtual INodeId<SyntaxTreeNode>? GetBestVariableReferenceTarget(INodeId<VariableReferenceExpressionSyntaxNode> nodeId)
         {
-            var node = db.GetNodeById(nodeId);
-            var symbolDeclarations = db.GetSymbolDeclarations(node.Token.NodeId);
+            var node = _nodes.GetNodeById(nodeId);
+            var symbolDeclarations = _symbols.GetSymbolDeclarations(node.Token.NodeId);
             return symbolDeclarations.FirstOrDefault()?.DeclaringNodeId;
         }
     }

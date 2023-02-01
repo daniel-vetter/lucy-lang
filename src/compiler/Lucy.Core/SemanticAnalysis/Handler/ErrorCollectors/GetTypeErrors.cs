@@ -1,33 +1,40 @@
 ﻿using Lucy.Core.Model;
 using Lucy.Core.Parsing.Nodes;
-using Lucy.Core.SemanticAnalysis.Infrastructure;
-using Lucy.Core.SemanticAnalysis.Inputs;
+using Lucy.Core.SemanticAnalysis.Infrastructure.Salsa;
 
 namespace Lucy.Core.SemanticAnalysis.Handler.ErrorCollectors
 {
-    public static class GetTypeErrors
+    [QueryGroup]
+    public class GetTypeErrors
     {
-        [DbQuery] ///<see cref="GetAllTypeErrorsEx.GetAllTypeErrors" />
-        public static ComparableReadOnlyList<Error> GetAllTypeErrors(IDb db)
+        private readonly Nodes _nodes;
+        private readonly Types _types;
+
+        public GetTypeErrors(Nodes nodes, Types types)
+        {
+            _nodes = nodes;
+            _types = types;
+        }
+        
+        public virtual ComparableReadOnlyList<Error> GetAllTypeErrors()
         {
             var result = new ComparableReadOnlyList<Error>.Builder();
-            foreach (var document in db.GetDocumentList())
-                result.AddRange(db.GetAllTypeErrorsInDocument(document));
+            foreach (var document in _nodes.GetDocumentList())
+                result.AddRange(GetAllTypeErrorsInDocument(document));
             return result.Build();
         }
 
-        [DbQuery] ///<see cref="GetAllTypeErrorsInDocumentEx.GetAllTypeErrorsInDocument" />
-        public static ComparableReadOnlyList<Error> GetAllTypeErrorsInDocument(IDb db, string documentPath)
+        public virtual ComparableReadOnlyList<Error> GetAllTypeErrorsInDocument(string documentPath)
         {
             var result = new ComparableReadOnlyList<Error>.Builder();
 
-            foreach (var nodeId in db.GetNodeIdsByType<TypeReferenceSyntaxNode>(documentPath))
+            foreach (var nodeId in _nodes.GetNodeIdsByType<TypeReferenceSyntaxNode>(documentPath))
             {
-                var info = db.GetTypeInfoFromTypeReferenceId(nodeId);
+                var info = _types.GetTypeInfoFromTypeReferenceId(nodeId);
                 if (info != null)
                     continue;
 
-                var node = db.GetNodeById(nodeId);
+                var node = _nodes.GetNodeById(nodeId);
 
                 result.Add(new ErrorWithNodeId(node.TypeName.NodeId, $"The type '{node.TypeName.Text}' could not be found."));
             }

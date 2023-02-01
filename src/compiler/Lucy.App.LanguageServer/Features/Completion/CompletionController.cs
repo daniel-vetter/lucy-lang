@@ -24,7 +24,7 @@ namespace Lucy.App.LanguageServer.Features.Completion
             var workspacePath = _currentWorkspace.ToWorkspacePath(input.TextDocument.Uri);
             var position = _currentWorkspace.ToPosition1D(workspacePath, input.Position.ToPosition2D());
 
-            var node = _currentWorkspace.Analysis.GetNodeAtPosition(workspacePath, position);
+            var node = _currentWorkspace.Analysis.Get<Ranges>().GetNodeAtPosition(workspacePath, position);
             
             //if (node == null)
                 return new RpcCompletionList();

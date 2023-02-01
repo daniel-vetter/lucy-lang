@@ -2,25 +2,31 @@
 using Lucy.Core.Model;
 using Lucy.Core.Parsing.Nodes;
 using Lucy.Core.SemanticAnalysis.Infrastructure;
+using Lucy.Core.SemanticAnalysis.Infrastructure.Salsa;
 
 namespace Lucy.Core.SemanticAnalysis.Handler
 {
     public record FlatIdentifier(string Text, INodeId<TokenNode> NodeId);
     public record FlatFunctionDeclaration(INodeId<FunctionDeclarationStatementSyntaxNode> NodeId, FlatIdentifier Name, ComparableReadOnlyList<FlatFunctionDeclarationParameter> Parameters, INodeId<TypeReferenceSyntaxNode> ReturnType);
     public record FlatFunctionDeclarationParameter(INodeId<FunctionDeclarationParameterSyntaxNode> NodeId, FlatIdentifier Name, INodeId<TypeReferenceSyntaxNode>? TypeReference);
-
     public record FlatFunctionCall(INodeId<FunctionCallExpressionSyntaxNode> NodeId, FlatIdentifier Name, ComparableReadOnlyList<INodeId<ExpressionSyntaxNode>> Arguments);
     public record FlatFunctionParameterDeclaration(INodeId<FunctionDeclarationParameterSyntaxNode> NodeId, INodeId<TypeReferenceSyntaxNode> TypeReferenceNodeId, FlatIdentifier Name);
-
     public record FlatVariableDeclaration(INodeId<VariableDeclarationStatementSyntaxNode> NodeId, FlatVariableDefinition VariableDefinition, INodeId<ExpressionSyntaxNode> ExpressionNodeId);
     public record FlatVariableDefinition(INodeId<VariableDefinitionSyntaxNode> NodeId, FlatIdentifier Name, INodeId<TypeReferenceSyntaxNode>? Type);
 
-    public static class FlatNodeAccess
+    [QueryGroup]
+    public class Flats
     {
-        [DbQuery] ///<see cref="GetFlatFunctionCallEx.GetFlatFunctionCall("/>
-        public static FlatFunctionCall GetFlatFunctionCall(IDb db, INodeId<FunctionCallExpressionSyntaxNode> functionCallNodeId)
+        private readonly Nodes _nodes;
+
+        public Flats(Nodes nodes)
         {
-            var node = db.GetNodeById(functionCallNodeId);
+            _nodes = nodes;
+        }
+
+        public virtual FlatFunctionCall GetFlatFunctionCall(INodeId<FunctionCallExpressionSyntaxNode> functionCallNodeId)
+        {
+            var node = _nodes.GetNodeById(functionCallNodeId);
 
             return new FlatFunctionCall(
                 functionCallNodeId,
@@ -29,10 +35,9 @@ namespace Lucy.Core.SemanticAnalysis.Handler
             );
         }
 
-        [DbQuery] ///<see cref="GetFlatFunctionDeclarationEx.GetFlatFunctionDeclaration"/>
-        public static FlatFunctionDeclaration GetFlatFunctionDeclaration(IDb db, INodeId<FunctionDeclarationStatementSyntaxNode> functionDeclarationNodeId)
+        public virtual FlatFunctionDeclaration GetFlatFunctionDeclaration(INodeId<FunctionDeclarationStatementSyntaxNode> functionDeclarationNodeId)
         {
-            var node = db.GetNodeById(functionDeclarationNodeId);
+            var node = _nodes.GetNodeById(functionDeclarationNodeId);
 
             var parameters = node.ParameterList
                 .Select(x => new FlatFunctionDeclarationParameter(
@@ -55,10 +60,9 @@ namespace Lucy.Core.SemanticAnalysis.Handler
             );
         }
 
-        [DbQuery] ///<see cref="GetFlatVariableDefinitionEx.GetFlatVariableDefinition" />
-        public static FlatVariableDefinition GetFlatVariableDefinition(IDb db, INodeId<VariableDefinitionSyntaxNode> nodeId)
+        public virtual FlatVariableDefinition GetFlatVariableDefinition(INodeId<VariableDefinitionSyntaxNode> nodeId)
         {
-            var node = db.GetNodeById(nodeId);
+            var node = _nodes.GetNodeById(nodeId);
 
             return new FlatVariableDefinition(
                 node.NodeId,
@@ -67,14 +71,13 @@ namespace Lucy.Core.SemanticAnalysis.Handler
             );
         }
 
-        [DbQuery] ///<see cref="GetFlatVariableDeclarationEx.GetFlatVariableDeclaration" />
-        public static FlatVariableDeclaration GetFlatVariableDeclaration(IDb db, INodeId<VariableDeclarationStatementSyntaxNode> nodeId)
+        public virtual FlatVariableDeclaration GetFlatVariableDeclaration(INodeId<VariableDeclarationStatementSyntaxNode> nodeId)
         {
-            var node = db.GetNodeById(nodeId);
+            var node = _nodes.GetNodeById(nodeId);
 
             return new FlatVariableDeclaration(
-                nodeId, 
-                db.GetFlatVariableDefinition(node.VariableDefinition.NodeId),
+                nodeId,
+                GetFlatVariableDefinition(node.VariableDefinition.NodeId),
                 node.Expression.NodeId
             );
         }

@@ -6,10 +6,11 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Lucy.Core.SemanticAnalysis.Infrastructure.Salsa;
 
 namespace Lucy.Core.SemanticAnalysis.Infrastructure
 {
-    internal class QueryMetricsExporter
+    public class QueryMetricsExporter : IQueryListener
     {
         private readonly string _path;
         private int _index;
@@ -29,14 +30,46 @@ namespace Lucy.Core.SemanticAnalysis.Infrastructure
                 File.Delete(file);
         }
 
-        public void Export(QueryMetrics queryMetrics, ImmutableArray<QueryTypeStatistic> queryTypeStatistics)
+        public void OnQueryExecuted(CacheEngineSnapshot snapshot)
         {
-            _ = Task.Run(async () => await ExportInternal(++_index, queryMetrics, queryTypeStatistics));
+            _ = Task.Run(async () => await Export(++_index, snapshot));
         }
 
-        private async Task ExportInternal(int index, QueryMetrics queryMetrics, ImmutableArray<QueryTypeStatistic> queryTypeStatistics)
+        private async Task Export(int index, CacheEngineSnapshot snapshot)
         {
-            var summary = queryMetrics.Calculations
+            var sb = new StringBuilder();
+            
+            if (snapshot.LastQueryMetrics != null) 
+                WriteCalculationsToStringBuilder(snapshot.LastQueryMetrics.Calculations, sb);
+
+            WriteCachedQueriesByTypeToStringBuilder(snapshot.CachedQueriesByType, sb);
+
+            await File.WriteAllTextAsync(GetFileNameFromSnapshot(index, snapshot), sb.ToString());
+        }
+
+        private string GetFileNameFromSnapshot(int index, CacheEngineSnapshot snapshot)
+        {
+            var fileName = $"QME{index:000}";
+            if (snapshot.LastQueryMetrics != null)
+                fileName += snapshot.LastQueryMetrics.RootQuery.GetType().Name;
+            fileName += ".txt";
+            fileName = Path.Combine(_path, fileName);
+            return fileName;
+        }
+
+        private void WriteCachedQueriesByTypeToStringBuilder(ImmutableDictionary<Type,int> cachedQueriesByType, StringBuilder sb)
+        {
+            var rows = new List<ImmutableArray<string>> {ImmutableArray.Create("Query", "Count")};
+            rows.AddRange(cachedQueriesByType
+                .OrderByDescending(x => x.Value)
+                .Select(x => ImmutableArray.Create(x.Key.Name, x.Value.ToString()))
+            );
+            sb.AppendLine(ConvertToTable(rows.ToImmutableArray()));
+        }
+
+        private static void WriteCalculationsToStringBuilder(ImmutableArray<RecordedCalculation> recordedCalculations, StringBuilder sb)
+        {
+            var summary = recordedCalculations
                 .GroupBy(x => x.Query.GetType().Name)
                 .Select(x =>
                 {
@@ -64,7 +97,7 @@ namespace Lucy.Core.SemanticAnalysis.Infrastructure
                 .OrderByDescending(x => x.TotalTime)
                 .ToArray();
 
-            var rows = new List<ImmutableArray<string>> { ImmutableArray.Create("Query", "Count", "I", "C", "S", "Total Time", "Avg. Time") };
+            var rows = new List<ImmutableArray<string>> {ImmutableArray.Create("Query", "Count", "I", "C", "S", "Total Time", "Avg. Time")};
             foreach (var entry in summary)
             {
                 rows.Add(ImmutableArray.Create(
@@ -75,21 +108,11 @@ namespace Lucy.Core.SemanticAnalysis.Infrastructure
                     entry.SameCount.ToString(CultureInfo.InvariantCulture),
                     entry.TotalTime.ToString(CultureInfo.InvariantCulture),
                     entry.AvgTime.ToString(CultureInfo.InvariantCulture)
-               ));
+                ));
             }
 
-            var sb = new StringBuilder();
             sb.AppendLine(ConvertToTable(rows.ToImmutableArray()));
-
-            rows.Clear();
-            rows.Add(ImmutableArray.Create("Query", "Count"));
-            rows.AddRange(queryTypeStatistics
-                .OrderByDescending(x => x.Count)
-                .Select(x => ImmutableArray.Create(x.QueryType.Name, x.Count.ToString()))
-            );
-            sb.AppendLine(ConvertToTable(rows.ToImmutableArray()));
-
-            await File.WriteAllTextAsync(Path.Combine(_path, $"QME{index:000}_{queryMetrics.RootQuery.GetType().Name}.txt"), sb.ToString());
+            sb.AppendLine();
         }
 
         private static string ConvertToTable(ImmutableArray<ImmutableArray<string>> rows, bool addDivider = true)
@@ -125,6 +148,7 @@ namespace Lucy.Core.SemanticAnalysis.Infrastructure
                     if (colIndex < row.Length - 1)
                         sb.Append(addDivider ? " | " : " ");
                 }
+
                 sb.AppendLine();
             }
 

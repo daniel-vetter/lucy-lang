@@ -1,21 +1,31 @@
 ﻿using Lucy.Core.Parsing.Nodes;
-using Lucy.Core.SemanticAnalysis.Infrastructure;
-using Lucy.Core.SemanticAnalysis.Inputs;
 using System.Linq;
+using Lucy.Core.SemanticAnalysis.Infrastructure.Salsa;
 
 namespace Lucy.Core.SemanticAnalysis.Handler.ErrorCollectors;
 
-public static class GetEntryPointErrorsHandler
+[QueryGroup]
+public class GetEntryPointErrorsHandler
 {
-    [DbQuery] ///<see cref="GetEntryPointErrorsEx.GetEntryPointErrors"/>
-    public static ComparableReadOnlyList<Error> GetEntryPointErrors(IDb db)
+    private readonly EntryPointFinder _entryPointFinder;
+    private readonly SemanticAnalysisInput _input;
+    private readonly Nodes _nodes;
+
+    public GetEntryPointErrorsHandler(EntryPointFinder entryPointFinder, SemanticAnalysisInput input, Nodes nodes)
     {
-        var entryPoints = db.GetEntryPoints();
+        _entryPointFinder = entryPointFinder;
+        _input = input;
+        _nodes = nodes;
+    }
+    
+    public virtual ComparableReadOnlyList<Error> GetEntryPointErrors()
+    {
+        var entryPoints = _entryPointFinder.GetEntryPoints();
         var result = new ComparableReadOnlyList<Error>.Builder();
 
         if (entryPoints.Count == 0)
         {
-            var documents = db.GetDocumentList();
+            var documents = _nodes.GetDocumentList();
 
             var bestDocumentPath = documents.Select(x => new
                 {
@@ -38,7 +48,7 @@ public static class GetEntryPointErrorsHandler
         {
             foreach (var entryPoint in entryPoints)
             {
-                var node = db.GetNodeById(entryPoint.NodeId);
+                var node = _nodes.GetNodeById(entryPoint.NodeId);
                 var nameNode = node.FunctionName;
 
                 result.Add(new ErrorWithNodeId(nameNode.NodeId, "More than one entry point was found. Please ensure the solution has only one 'main' function."));

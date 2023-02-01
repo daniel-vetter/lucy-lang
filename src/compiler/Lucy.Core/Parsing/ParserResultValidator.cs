@@ -42,20 +42,20 @@ public static class ParserResultValidator
             if (allNodes.GroupBy(x => x.Node.NodeId).Any(x => x.Count() > 1))
                 throw new Exception("Syntax tree contains Id duplicates");
 
-            if (allNodes.Select(x => x.Node.NodeId).Except(result.NodesById.Keys).Any())
+            if (allNodes.Select(x => x.Node.NodeId).Except(result.NodesByNodeId.Keys).Any())
                 throw new Exception("NodeByIdMap is missing node ids");
 
-            var nodeIdToNodeMismatches = allNodes.Where(x => !ReferenceEquals(x.Node, result.NodesById[x.Node.NodeId])).ToArray();
+            var nodeIdToNodeMismatches = allNodes.Where(x => !ReferenceEquals(x.Node, result.NodesByNodeId[x.Node.NodeId])).ToArray();
             if (nodeIdToNodeMismatches.Length > 0)
                 throw new Exception($"NodeByIdMap: {nodeIdToNodeMismatches.Length} Nodes do not match to node id");
 
-            if (result.NodesById.Keys.Except(allNodes.Select(x => x.Node.NodeId)).Any())
+            if (result.NodesByNodeId.Keys.Except(allNodes.Select(x => x.Node.NodeId)).Any())
                 throw new Exception("NodeByIdMap has node ids which are not part of the tree");
 
-            if (result.ParentNodeIdsByNodeId.Keys.Any(x => !result.NodesById.ContainsKey(x)))
+            if (result.ParentNodeIdsByNodeId.Keys.Any(x => !result.NodesByNodeId.ContainsKey(x)))
                 throw new Exception("ParentNodeIdByNodeIdMap contains node ids as key that are not part of the syntax tree.");
 
-            if (result.NodesById.Keys.Any(x => !result.ParentNodeIdsByNodeId.ContainsKey(x)))
+            if (result.NodesByNodeId.Keys.Any(x => !result.ParentNodeIdsByNodeId.ContainsKey(x)))
                 throw new Exception("ParentNodeIdByNodeIdMap is missing entries for specific nodes.");
 
             if (allNodes.Any(x => !ReferenceEquals(result.ParentNodeIdsByNodeId[x.Node.NodeId], x.Parent?.NodeId)))

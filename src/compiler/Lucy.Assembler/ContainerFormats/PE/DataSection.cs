@@ -1,5 +1,4 @@
-﻿using Lucy.Assembler.ContainerFormats.PE.RawStructs;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace Lucy.Assembler.ContainerFormats.PE
 {

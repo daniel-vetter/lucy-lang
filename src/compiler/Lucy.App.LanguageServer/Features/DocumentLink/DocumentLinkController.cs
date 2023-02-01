@@ -22,12 +22,12 @@ namespace Lucy.App.LanguageServer.Features.DocumentLink
         public ImmutableArray<RpcDocumentLink> TextDocumentDocumentLink(RpcDocumentLinkParams input)
         {
             var documentPath = _currentWorkspace.ToWorkspacePath(input.TextDocument.Uri);
-            var imports = _currentWorkspace.Analysis.GetImports(documentPath);
+            var imports = _currentWorkspace.Analysis.Get<Imports>().GetImports(documentPath);
 
             return imports.Valid
                 .Select(x =>
                 {
-                    var range1D = _currentWorkspace.Analysis.GetRangeFromNodeId(x.ImportPathTokenNodeId);
+                    var range1D = _currentWorkspace.Analysis.Get<Ranges>().GetRangeFromNodeId(x.ImportPathTokenNodeId);
                     var range2D = _currentWorkspace.ToRange2D(documentPath, range1D);
 
                     return new RpcDocumentLink

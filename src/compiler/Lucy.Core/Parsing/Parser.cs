@@ -53,7 +53,7 @@ public static class Parser
         var result = new ParserResult(
             Reader: reader,
             RootNode: rootNode,
-            NodesById: nodesById.ToImmutable(),
+            NodesByNodeId: nodesById.ToImmutable(),
             ParentNodeIdsByNodeId: parentNodeIdsByNodeId.ToImmutable(),
             NodeIdsByType: nodeIdsByType.ToImmutableDictionary(x => x.Key, x => x.Value.ToImmutable())
         );
@@ -85,7 +85,7 @@ public static class Parser
         Profiler.Start("Updating id maps");
         var diffs = TreeDiffer.Diff(lastResult.RootNode, newRootNode);
 
-        var nodesById = lastResult.NodesById;
+        var nodesById = lastResult.NodesByNodeId;
         var parentNodeIdsByNodeId = lastResult.ParentNodeIdsByNodeId;
         var nodeIdsByType = lastResult.NodeIdsByType;
 
@@ -144,7 +144,7 @@ public static class Parser
         var result = new ParserResult(
             Reader: newReader,
             RootNode: newRootNode,
-            NodesById: nodesById,
+            NodesByNodeId: nodesById,
             ParentNodeIdsByNodeId: parentNodeIdsByNodeId,
             NodeIdsByType: nodeIdsByType
         );
@@ -161,7 +161,7 @@ public static class Parser
 public record ParserResult(
     Reader Reader,
     DocumentRootSyntaxNode RootNode,
-    ImmutableDictionary<INodeId<SyntaxTreeNode>, SyntaxTreeNode> NodesById,
+    ImmutableDictionary<INodeId<SyntaxTreeNode>, SyntaxTreeNode> NodesByNodeId,
     ImmutableDictionary<INodeId<SyntaxTreeNode>, INodeId<SyntaxTreeNode>?> ParentNodeIdsByNodeId,
     ImmutableDictionary<Type, ImmutableHashSet<INodeId<SyntaxTreeNode>>> NodeIdsByType
 );
