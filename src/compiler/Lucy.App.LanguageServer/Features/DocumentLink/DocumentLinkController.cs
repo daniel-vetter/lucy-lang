@@ -27,7 +27,7 @@ namespace Lucy.App.LanguageServer.Features.DocumentLink
             return imports.Valid
                 .Select(x =>
                 {
-                    var range1D = _currentWorkspace.Analysis.Get<Ranges>().GetRangeFromNodeId(x.ImportPathTokenNodeId);
+                    var range1D = _currentWorkspace.Analysis.Get<RangeResolver>().GetTrimmedRangeFromNodeId(x.ImportPathTokenNodeId);
                     var range2D = _currentWorkspace.ToRange2D(documentPath, range1D);
 
                     return new RpcDocumentLink

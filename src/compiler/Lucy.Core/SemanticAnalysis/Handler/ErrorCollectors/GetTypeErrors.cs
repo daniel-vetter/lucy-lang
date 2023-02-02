@@ -8,12 +8,12 @@ namespace Lucy.Core.SemanticAnalysis.Handler.ErrorCollectors
     public class GetTypeErrors
     {
         private readonly Nodes _nodes;
-        private readonly Types _types;
+        private readonly TypeResolver _typeResolver;
 
-        public GetTypeErrors(Nodes nodes, Types types)
+        public GetTypeErrors(Nodes nodes, TypeResolver typeResolver)
         {
             _nodes = nodes;
-            _types = types;
+            _typeResolver = typeResolver;
         }
         
         public virtual ComparableReadOnlyList<Error> GetAllTypeErrors()
@@ -30,7 +30,7 @@ namespace Lucy.Core.SemanticAnalysis.Handler.ErrorCollectors
 
             foreach (var nodeId in _nodes.GetNodeIdsByType<TypeReferenceSyntaxNode>(documentPath))
             {
-                var info = _types.GetTypeInfoFromTypeReferenceId(nodeId);
+                var info = _typeResolver.GetTypeInfo(nodeId);
                 if (info != null)
                     continue;
 

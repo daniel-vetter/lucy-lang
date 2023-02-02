@@ -8,12 +8,12 @@ namespace Lucy.Core.SemanticAnalysis.Handler
     public class Variables
     {
         private readonly Nodes _nodes;
-        private readonly Symbols _symbols;
+        private readonly SymbolResolver _symbolResolver;
 
-        public Variables(Nodes nodes, Symbols symbols)
+        public Variables(Nodes nodes, SymbolResolver symbolResolver)
         {
             _nodes = nodes;
-            _symbols = symbols;
+            _symbolResolver = symbolResolver;
         }
         
         /// <summary>
@@ -22,7 +22,7 @@ namespace Lucy.Core.SemanticAnalysis.Handler
         public virtual INodeId<SyntaxTreeNode>? GetBestVariableReferenceTarget(INodeId<VariableReferenceExpressionSyntaxNode> nodeId)
         {
             var node = _nodes.GetNodeById(nodeId);
-            var symbolDeclarations = _symbols.GetSymbolDeclarations(node.Token.NodeId);
+            var symbolDeclarations = _symbolResolver.GetSymbolDeclarations(node.Token.NodeId);
             return symbolDeclarations.FirstOrDefault()?.DeclaringNodeId;
         }
     }

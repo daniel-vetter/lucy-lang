@@ -8,12 +8,12 @@ namespace Lucy.Core.SemanticAnalysis.Handler.ErrorCollectors;
 [QueryGroup]
 public class GetScopeErrorsHandler
 {
-    private readonly Symbols _symbols;
+    private readonly SymbolResolver _symbolResolver;
     private readonly Nodes _nodes;
 
-    public GetScopeErrorsHandler(Symbols symbols, Nodes nodes)
+    public GetScopeErrorsHandler(SymbolResolver symbolResolver, Nodes nodes)
     {
-        _symbols = symbols;
+        _symbolResolver = symbolResolver;
         _nodes = nodes;
     }
     
@@ -21,7 +21,7 @@ public class GetScopeErrorsHandler
     {
         var result = new List<Error>();
 
-        foreach (var (usage, declarations) in _symbols.GetSymbolMap(documentPath))
+        foreach (var (usage, declarations) in _symbolResolver.GetSymbolMap(documentPath))
         {
             if (declarations.Count > 0)
                 continue;

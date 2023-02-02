@@ -33,11 +33,6 @@ public class ValueProvider
     {
         return _testInputs.StringValuesByKey[key];
     }
-
-    public virtual string GetStringValueByType<T>()
-    {
-        return _testInputs.StringValuesByKey[typeof(T).Name];
-    }
 }
 
 [QueryGroup]
@@ -353,18 +348,5 @@ public class CacheEngineTests
         var r2 = ce.Get<Calculator>().GetConcatenation("A", "B");
 
         ReferenceEquals(r1, r2).ShouldBeTrue();
-    }
-
-    [Test]
-    public void Should_be_able_to_handle_generic_methods()
-    {
-        var ce = CreateCacheEngine();
-
-        ce.Get<TestInputs>().StringValuesByKey = ImmutableDictionary<string, string>.Empty
-            .Add("string", "1")
-            .Add("int", "2");
-
-        ce.Get<ValueProvider>().GetStringValueByType<string>().ShouldBe("1");
-        ce.Get<ValueProvider>().GetStringValueByType<int>().ShouldBe("2");
     }
 }

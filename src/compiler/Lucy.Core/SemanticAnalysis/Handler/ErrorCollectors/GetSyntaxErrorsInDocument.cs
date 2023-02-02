@@ -9,12 +9,12 @@ namespace Lucy.Core.SemanticAnalysis.Handler.ErrorCollectors;
 public class GetSyntaxErrors
 {
     private readonly Nodes _nodes;
-    private readonly Ranges _ranges;
+    private readonly RangeResolver _rangeResolver;
 
-    public GetSyntaxErrors(Nodes nodes, Ranges ranges)
+    public GetSyntaxErrors(Nodes nodes, RangeResolver rangeResolver)
     {
         _nodes = nodes;
-        _ranges = ranges;
+        _rangeResolver = rangeResolver;
     }
 
     public virtual ComparableReadOnlyList<Error> GetAllSyntaxErrors()
@@ -46,7 +46,7 @@ public class GetSyntaxErrors
     private void Traverse(SyntaxTreeNode node, ComparableReadOnlyList<Error>.Builder list)
     {
         if (!node.SyntaxErrors.IsDefaultOrEmpty)
-            list.AddRange(node.SyntaxErrors.Select(x => new ErrorWithRange(node.NodeId.DocumentPath, _ranges.GetRangeFromNodeId(node.NodeId), x)));
+            list.AddRange(node.SyntaxErrors.Select(x => new ErrorWithRange(node.NodeId.DocumentPath, _rangeResolver.GetTrimmedRangeFromNodeId(node.NodeId), x)));
 
         foreach(var child in node.GetChildNodes())
         {

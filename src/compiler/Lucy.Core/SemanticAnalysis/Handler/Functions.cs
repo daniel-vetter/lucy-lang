@@ -9,15 +9,15 @@ public class Functions
 {
     private readonly Nodes _nodes;
     private readonly Flats _flats;
-    private readonly Symbols _symbols;
-    private readonly Types _types;
+    private readonly SymbolResolver _symbolResolver;
+    private readonly TypeResolver _typeResolver;
 
-    public Functions(Nodes nodes, Flats flats, Symbols symbols, Types types)
+    public Functions(Nodes nodes, Flats flats, SymbolResolver symbolResolver, TypeResolver typeResolver)
     {
         _nodes = nodes;
         _flats = flats;
-        _symbols = symbols;
-        _types = types;
+        _symbolResolver = symbolResolver;
+        _typeResolver = typeResolver;
     }
     
     /// <summary>
@@ -43,7 +43,7 @@ public class Functions
     public virtual ComparableReadOnlyList<INodeId<SyntaxTreeNode>> GetAllPossibleFunctionCallTargets(INodeId<FunctionCallExpressionSyntaxNode> nodeId)
     {
         var flatFunctionCall = _flats.GetFlatFunctionCall(nodeId);
-        var symbolDeclarations = _symbols.GetSymbolDeclarations(flatFunctionCall.Name.NodeId);
+        var symbolDeclarations = _symbolResolver.GetSymbolDeclarations(flatFunctionCall.Name.NodeId);
         var result = new ComparableReadOnlyList<INodeId<SyntaxTreeNode>>.Builder();
 
         foreach (var symbolDeclaration in symbolDeclarations)
@@ -71,29 +71,35 @@ public class Functions
             if (functionCallTarget is INodeId<FunctionDeclarationStatementSyntaxNode> fd)
             {
                 var flatDeclaration = _flats.GetFlatFunctionDeclaration(fd);
-                if (flatDeclaration.Parameters.Count != flatCall.Arguments.Count)
-                    continue;
-                
-                for (var i = 0; i < flatCall.Arguments.Count; i++)
-                {
-                    var parameterTypeReference = flatDeclaration.Parameters[i].TypeReference;
-                    if (parameterTypeReference == null)
-                        break;
-
-                    var argument = flatCall.Arguments[i];
-                    var parameterType = _types.GetTypeInfoFromTypeReferenceId(parameterTypeReference);
-                    var argumentType = _types.GetTypeInfoFromExpression(argument);
-
-                    if (parameterType == null || argumentType == null)
-                        break;
-
-                    if (parameterType != argumentType)
-                        break;
-
+                if (TypesMatch(flatCall.Arguments, flatDeclaration.Parameters))
                     return fd;
-                }
             }
         }
         return null;
+    }
+
+    private bool TypesMatch(ComparableReadOnlyList<INodeId<ExpressionSyntaxNode>> arguments, ComparableReadOnlyList<FlatFunctionDeclarationParameter> types)
+    {
+        if (arguments.Count != types.Count)
+            return false;
+        
+        for (var i = 0; i < arguments.Count; i++)
+        {
+            var parameterTypeReference = types[i].TypeReference;
+            if (parameterTypeReference == null)
+                return false;
+
+            var argument = arguments[i];
+            var parameterType = _typeResolver.GetTypeInfo(parameterTypeReference);
+            var argumentType = _typeResolver.GetTypeInfo(argument);
+
+            if (parameterType == null || argumentType == null)
+                return false;
+
+            if (parameterType != argumentType)
+                return false;
+        }
+
+        return true;
     }
 }

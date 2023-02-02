@@ -26,7 +26,7 @@ namespace Lucy.App.LanguageServer.Features.Definition
             var workspacePath = _currentWorkspace.ToWorkspacePath(input.TextDocument.Uri);
             var position = _currentWorkspace.ToPosition1D(workspacePath, input.Position.ToPosition2D());
 
-            var node = _currentWorkspace.Analysis.Get<Ranges>().GetNodeAtPosition(workspacePath, position);
+            var node = _currentWorkspace.Analysis.Get<RangeResolver>().GetNodeIdAtPosition(workspacePath, position);
             if (node == null)
                 return ImmutableArray<RpcLocationLink>.Empty;
 
@@ -51,9 +51,9 @@ namespace Lucy.App.LanguageServer.Features.Definition
                             {
                                 TargetUri = _currentWorkspace.ToSystemPath(flat.NodeId.DocumentPath),
                                 TargetRange = _currentWorkspace.ToRange2D(flat.NodeId.DocumentPath,
-                                    _currentWorkspace.Analysis.Get<Ranges>().GetRangeFromNodeId(flat.NodeId)).ToRpcRange(),
+                                    _currentWorkspace.Analysis.Get<RangeResolver>().GetTrimmedRangeFromNodeId(flat.NodeId)).ToRpcRange(),
                                 TargetSelectionRange = _currentWorkspace.ToRange2D(flat.NodeId.DocumentPath,
-                                    _currentWorkspace.Analysis.Get<Ranges>().GetRangeFromNodeId(flat.Name.NodeId)).ToRpcRange()
+                                    _currentWorkspace.Analysis.Get<RangeResolver>().GetTrimmedRangeFromNodeId(flat.Name.NodeId)).ToRpcRange()
                             };
                             result.Add(link);
                         }

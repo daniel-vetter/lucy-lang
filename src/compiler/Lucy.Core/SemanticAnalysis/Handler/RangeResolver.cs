@@ -6,27 +6,33 @@ using Lucy.Core.SemanticAnalysis.Infrastructure.Salsa;
 namespace Lucy.Core.SemanticAnalysis.Handler;
 
 [QueryGroup]
-public class Ranges
+public class RangeResolver
 {
     private readonly Nodes _nodes;
 
-    public Ranges(Nodes nodes)
+    public RangeResolver(Nodes nodes)
     {
         _nodes = nodes;
     }
     
-    public virtual INodeId<SyntaxTreeNode>? GetNodeAtPosition(string documentPath, Position1D position)
+    /// <summary>
+    /// Returns the deepest node id at the provided position.
+    /// </summary>
+    /// <param name="documentPath">The document to search</param>
+    /// <param name="position">The position to look up</param>
+    /// <returns>The matching node id</returns>
+    public virtual INodeId<SyntaxTreeNode>? GetNodeIdAtPosition(string documentPath, Position1D position)
     {
-        SearchResult? Find(Position1D position, SyntaxTreeNode startNode, int offset)
+        static SearchResult? Find(RangeResolver rr, Position1D position, SyntaxTreeNode startNode, int offset)
         {
             if (!startNode.GetChildNodes().Any())
                 return new SearchResult(startNode);
 
             foreach (var child in startNode.GetChildNodes())
             {
-                var nodeLength = GetNodeRangeLength(child.NodeId);
+                var nodeLength = rr.GetNodeRangeLength(child.NodeId);
                 if (position.Position >= offset && position.Position < +offset + nodeLength.WithTrailingTrivia)
-                    return Find(position, child, offset);
+                    return Find(rr, position, child, offset);
                 offset += nodeLength.WithTrailingTrivia;
             }
 
@@ -34,11 +40,16 @@ public class Ranges
         }
 
         var root = _nodes.GetSyntaxTree(documentPath);
-        var result = Find(position, root, 0);
+        var result = Find(this, position, root, 0);
         return result?.Node.NodeId;
     }
     
-    public virtual Range1D GetRangeFromNodeId(INodeId<SyntaxTreeNode> nodeId)
+    /// <summary>
+    /// Returns the trimmed (without trailing trivia) range from a node id. 
+    /// </summary>
+    /// <param name="nodeId">The node id where the range should be calculated for.</param>
+    /// <returns>The range for the requested node id.</returns>
+    public virtual Range1D GetTrimmedRangeFromNodeId(INodeId<SyntaxTreeNode> nodeId)
     {
         var start = GetDistanceFromDocumentStart(nodeId);
         var len = GetNodeRangeLength(nodeId);

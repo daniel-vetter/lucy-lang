@@ -8,15 +8,22 @@ using Lucy.Core.SemanticAnalysis.Infrastructure.Salsa;
 namespace Lucy.Core.SemanticAnalysis.Handler
 {
     [QueryGroup]
-    public class Symbols
+    public class SymbolResolver
     {
         private readonly ScopeTreeBuilder _scopeTreeBuilder;
 
-        public Symbols(ScopeTreeBuilder scopeTreeBuilder)
+        public SymbolResolver(ScopeTreeBuilder scopeTreeBuilder)
         {
             _scopeTreeBuilder = scopeTreeBuilder;
         }
 
+        /// <summary>
+        /// Returns a list of declarations based on a <see cref="TokenNode"/> id.
+        /// Only declarations visible on the nodes locations are returned.
+        /// </summary>
+        /// <param name="nodeId">The <see cref="TokenNode"/> id which contains the symbol to look for</param>
+        /// <returns>A list of matching <see cref="SymbolDeclaration"/></returns>
+        /// <exception cref="Exception">if the provided token node id is not a valid symbol</exception>
         public virtual ComparableReadOnlyList<SymbolDeclaration> GetSymbolDeclarations(INodeId<TokenNode> nodeId)
         {
             var tree = GetSymbolMap(nodeId.DocumentPath);
@@ -25,6 +32,12 @@ namespace Lucy.Core.SemanticAnalysis.Handler
             throw new Exception("No symbol resolution done for this node.");
         }
 
+        /// <summary>
+        /// Returns a list of all resolved symbol and there declarations of a document.
+        /// Only declarations visible on the nodes locations are returned.
+        /// </summary>
+        /// <param name="documentPath">The document to analyze</param>
+        /// <returns>a list of all resolved symbol and there declarations</returns>
         public virtual ComparableReadOnlyDictionary<INodeId<TokenNode>, ComparableReadOnlyList<SymbolDeclaration>> GetSymbolMap(string documentPath)
         {
             var scopeTree = _scopeTreeBuilder.GetScopeTree(documentPath);

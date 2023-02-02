@@ -23,7 +23,7 @@ internal class HoverRpcController
     {
         var documentPath = _currentWorkspace.ToWorkspacePath(input.TextDocument.Uri);
         var position = _currentWorkspace.ToPosition1D(documentPath, input.Position.ToPosition2D());
-        var nodeId = _currentWorkspace.Analysis.Get<Ranges>().GetNodeAtPosition(documentPath, position);
+        var nodeId = _currentWorkspace.Analysis.Get<RangeResolver>().GetNodeIdAtPosition(documentPath, position);
 
         if (nodeId == null)
             return new RpcHover();
@@ -35,7 +35,7 @@ internal class HoverRpcController
                 or INodeId<VariableDeclarationStatementSyntaxNode>
                 or INodeId<ExpressionSyntaxNode>)
             {
-                typeInfo = _currentWorkspace.Analysis.Get<Types>().GetTypeInfo(nodeId);
+                typeInfo = _currentWorkspace.Analysis.Get<TypeResolver>().GetTypeInfo(nodeId);
                 break;
             }
 

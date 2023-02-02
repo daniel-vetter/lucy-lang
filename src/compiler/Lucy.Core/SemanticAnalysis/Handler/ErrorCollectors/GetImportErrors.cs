@@ -7,13 +7,13 @@ namespace Lucy.Core.SemanticAnalysis.Handler.ErrorCollectors;
 public class GetImportErrorsHandler
 {
     private readonly Imports _imports;
-    private readonly Ranges _ranges;
+    private readonly RangeResolver _rangeResolver;
     private readonly Nodes _nodes;
 
-    public GetImportErrorsHandler(Imports imports, Ranges ranges, Nodes nodes)
+    public GetImportErrorsHandler(Imports imports, RangeResolver rangeResolver, Nodes nodes)
     {
         _imports = imports;
-        _ranges = ranges;
+        _rangeResolver = rangeResolver;
         _nodes = nodes;
     }
     
@@ -25,7 +25,7 @@ public class GetImportErrorsHandler
             var imports = _imports.GetImports(documentPath);
             foreach (var import in imports.Invalid)
             {
-                var range = _ranges.GetRangeFromNodeId(import.ImportPathTokenNodeId);
+                var range = _rangeResolver.GetTrimmedRangeFromNodeId(import.ImportPathTokenNodeId);
                 result.Add(new ErrorWithRange(documentPath, range, $"Could not resolve import: '{import.Path}'."));
             }
         }

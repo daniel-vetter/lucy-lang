@@ -1,5 +1,4 @@
 ﻿using System;
-using JetBrains.Annotations;
 using Lucy.Core.Model;
 using Lucy.Core.SemanticAnalysis.Infrastructure.Salsa;
 
@@ -15,14 +14,14 @@ namespace Lucy.Core.SemanticAnalysis.Handler
     }
 
     [QueryGroup]
-    public class Types
+    public class TypeResolver
     {
         private readonly Nodes _nodes;
         private readonly Flats _flats;
         [Inject] private readonly Functions _functions = null!;
         private readonly Variables _variables;
 
-        public Types(Nodes nodes, Flats flats, Variables variables)
+        public TypeResolver(Nodes nodes, Flats flats, Variables variables)
         {
             _nodes = nodes;
             _flats = flats;
@@ -33,7 +32,7 @@ namespace Lucy.Core.SemanticAnalysis.Handler
         {
             return nodeId switch
             {
-                INodeId<TypeReferenceSyntaxNode> tr => GetTypeInfoFromTypeReferenceId(tr),
+                INodeId<TypeReferenceSyntaxNode> tr => GetTypeInfoFromTypeReference(tr),
                 INodeId<VariableReferenceExpressionSyntaxNode> vr => GetTypeInfoFromVariableReference(vr),
                 INodeId<VariableDeclarationStatementSyntaxNode> vd => GetTypeInfoFromVariableDeclaration(vd),
                 INodeId<ExpressionSyntaxNode> e => GetTypeInfoFromExpression(e),
@@ -41,7 +40,7 @@ namespace Lucy.Core.SemanticAnalysis.Handler
             };
         }
 
-        public virtual TypeInfo? GetTypeInfoFromTypeReferenceId(INodeId<TypeReferenceSyntaxNode> nodeId)
+        private TypeInfo? GetTypeInfoFromTypeReference(INodeId<TypeReferenceSyntaxNode> nodeId)
         {
             var node = _nodes.GetNodeById(nodeId);
 
@@ -54,7 +53,7 @@ namespace Lucy.Core.SemanticAnalysis.Handler
             };
         }
 
-        public virtual TypeInfo? GetTypeInfoFromVariableReference(INodeId<VariableReferenceExpressionSyntaxNode> nodeId)
+        private TypeInfo? GetTypeInfoFromVariableReference(INodeId<VariableReferenceExpressionSyntaxNode> nodeId)
         {
             var declaration = _variables.GetBestVariableReferenceTarget(nodeId);
             if (declaration == null)
@@ -68,16 +67,16 @@ namespace Lucy.Core.SemanticAnalysis.Handler
             throw new Exception("Could not resolve type of: " + declaration.GetType().Name);
         }
 
-        public virtual TypeInfo? GetTypeInfoFromVariableDeclaration(INodeId<VariableDeclarationStatementSyntaxNode> nodeId)
+        private TypeInfo? GetTypeInfoFromVariableDeclaration(INodeId<VariableDeclarationStatementSyntaxNode> nodeId)
         {
             var flat = _flats.GetFlatVariableDeclaration(nodeId);
 
             return flat.VariableDefinition.Type != null
-                ? GetTypeInfoFromTypeReferenceId(flat.VariableDefinition.Type)
+                ? GetTypeInfoFromTypeReference(flat.VariableDefinition.Type)
                 : GetTypeInfoFromExpression(flat.ExpressionNodeId);
         }
 
-        public virtual TypeInfo? GetTypeInfoFromExpression(INodeId<ExpressionSyntaxNode> nodeId)
+        private TypeInfo? GetTypeInfoFromExpression(INodeId<ExpressionSyntaxNode> nodeId)
         {
             var node = _nodes.GetNodeById(nodeId);
 
@@ -96,7 +95,7 @@ namespace Lucy.Core.SemanticAnalysis.Handler
                     if (bestTarget is INodeId<FunctionDeclarationStatementSyntaxNode> fd)
                     {
                         var flatFunctionDeclaration = _flats.GetFlatFunctionDeclaration(fd);
-                        return GetTypeInfoFromTypeReferenceId(flatFunctionDeclaration.ReturnType);
+                        return GetTypeInfoFromTypeReference(flatFunctionDeclaration.ReturnType);
                     }
 
                     throw new ArgumentOutOfRangeException(nameof(node),

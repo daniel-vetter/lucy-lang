@@ -20,17 +20,17 @@ public class GetErrors
     private readonly GetTypeErrors _getTypeErrors;
     private readonly GetSyntaxErrors _getSyntaxErrors;
     private readonly GetScopeErrorsHandler _getScopeErrorsHandler;
-    private readonly Ranges _ranges;
+    private readonly RangeResolver _rangeResolver;
     private readonly Nodes _nodes;
 
-    public GetErrors(GetImportErrorsHandler getImportErrorsHandler, GetEntryPointErrorsHandler getEntryPointErrorsHandler, GetTypeErrors getTypeErrors, GetSyntaxErrors getSyntaxErrors, GetScopeErrorsHandler getScopeErrorsHandler, Ranges ranges, Nodes nodes)
+    public GetErrors(GetImportErrorsHandler getImportErrorsHandler, GetEntryPointErrorsHandler getEntryPointErrorsHandler, GetTypeErrors getTypeErrors, GetSyntaxErrors getSyntaxErrors, GetScopeErrorsHandler getScopeErrorsHandler, RangeResolver rangeResolver, Nodes nodes)
     {
         _getImportErrorsHandler = getImportErrorsHandler;
         _getEntryPointErrorsHandler = getEntryPointErrorsHandler;
         _getTypeErrors = getTypeErrors;
         _getSyntaxErrors = getSyntaxErrors;
         _getScopeErrorsHandler = getScopeErrorsHandler;
-        _ranges = ranges;
+        _rangeResolver = rangeResolver;
         _nodes = nodes;
     }
 
@@ -58,7 +58,7 @@ public class GetErrors
             result.Add(error switch
             {
                 ErrorWithRange ewr => ewr,
-                ErrorWithNodeId ewni => new ErrorWithRange(ewni.NodeId.DocumentPath, _ranges.GetRangeFromNodeId(ewni.NodeId), ewni.Message),
+                ErrorWithNodeId ewni => new ErrorWithRange(ewni.NodeId.DocumentPath, _rangeResolver.GetTrimmedRangeFromNodeId(ewni.NodeId), ewni.Message),
                 _ => throw new NotSupportedException()
             });
         }
