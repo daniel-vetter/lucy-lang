@@ -29,7 +29,7 @@ public class DiagnosticsReporter
     {
         Profiler.Start("Reporting errors");
 
-        var errors = _currentWorkspace.Analysis.Get<GetErrors>().GetAllErrors();
+        var errors = _currentWorkspace.Analysis.Get<AllErrorsCollector>().GetAllErrors();
 
         var documentsToReport = errors
             .GroupBy(x => x.DocumentPath)

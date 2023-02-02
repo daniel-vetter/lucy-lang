@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Collections.Immutable;
-using Lucy.App.LanguageServer.Infrastructure;
+﻿using Lucy.App.LanguageServer.Infrastructure;
 using Lucy.App.LanguageServer.Models;
 using Lucy.Common.ServiceDiscovery;
 using Lucy.Core.SemanticAnalysis.Handler;

@@ -6,18 +6,28 @@ using Lucy.Core.SemanticAnalysis.Infrastructure.Salsa;
 namespace Lucy.Core.SemanticAnalysis.Handler.ErrorCollectors;
 
 [QueryGroup]
-public class GetScopeErrorsHandler
+public class ScopeErrorsCollector
 {
     private readonly SymbolResolver _symbolResolver;
     private readonly Nodes _nodes;
 
-    public GetScopeErrorsHandler(SymbolResolver symbolResolver, Nodes nodes)
+    public ScopeErrorsCollector(SymbolResolver symbolResolver, Nodes nodes)
     {
         _symbolResolver = symbolResolver;
         _nodes = nodes;
     }
-    
-    public virtual ComparableReadOnlyList<Error> GetScopeErrors(string documentPath)
+
+    public virtual ComparableReadOnlyList<Error> GetAllScopeErrors()
+    {
+        var result = new ComparableReadOnlyList<Error>.Builder();
+        foreach(var documentPath in _nodes.GetDocumentList())
+        {
+            result.AddRange(GetScopeErrors(documentPath));
+        }
+        return result.Build();
+    }
+
+    protected virtual ComparableReadOnlyList<Error> GetScopeErrors(string documentPath)
     {
         var result = new List<Error>();
 

@@ -29,8 +29,7 @@ namespace Lucy.App.LanguageServer.Features.Definition
             var node = _currentWorkspace.Analysis.Get<RangeResolver>().GetNodeIdAtPosition(workspacePath, position);
             if (node == null)
                 return ImmutableArray<RpcLocationLink>.Empty;
-
-
+            
             while (true)
             {
                 if (node is INodeId<FunctionCallExpressionSyntaxNode> functionCall)

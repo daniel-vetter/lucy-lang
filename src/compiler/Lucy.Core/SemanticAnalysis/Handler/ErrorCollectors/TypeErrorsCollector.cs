@@ -5,12 +5,12 @@ using Lucy.Core.SemanticAnalysis.Infrastructure.Salsa;
 namespace Lucy.Core.SemanticAnalysis.Handler.ErrorCollectors
 {
     [QueryGroup]
-    public class GetTypeErrors
+    public class TypeErrorsCollector
     {
         private readonly Nodes _nodes;
         private readonly TypeResolver _typeResolver;
 
-        public GetTypeErrors(Nodes nodes, TypeResolver typeResolver)
+        public TypeErrorsCollector(Nodes nodes, TypeResolver typeResolver)
         {
             _nodes = nodes;
             _typeResolver = typeResolver;

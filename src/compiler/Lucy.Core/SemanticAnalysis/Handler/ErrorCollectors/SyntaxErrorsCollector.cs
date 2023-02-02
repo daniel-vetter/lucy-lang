@@ -6,12 +6,12 @@ using Lucy.Core.SemanticAnalysis.Infrastructure.Salsa;
 namespace Lucy.Core.SemanticAnalysis.Handler.ErrorCollectors;
 
 [QueryGroup]
-public class GetSyntaxErrors
+public class SyntaxErrorsCollector
 {
     private readonly Nodes _nodes;
     private readonly RangeResolver _rangeResolver;
 
-    public GetSyntaxErrors(Nodes nodes, RangeResolver rangeResolver)
+    public SyntaxErrorsCollector(Nodes nodes, RangeResolver rangeResolver)
     {
         _nodes = nodes;
         _rangeResolver = rangeResolver;
@@ -27,7 +27,7 @@ public class GetSyntaxErrors
         return result.Build();
     }
 
-    public virtual ComparableReadOnlyList<Error> GetSyntaxErrorsInDocument(string documentPath)
+    protected virtual ComparableReadOnlyList<Error> GetSyntaxErrorsInDocument(string documentPath)
     {
         var root = _nodes.GetSyntaxTree(documentPath);
         var list = new ComparableReadOnlyList<Error>.Builder();

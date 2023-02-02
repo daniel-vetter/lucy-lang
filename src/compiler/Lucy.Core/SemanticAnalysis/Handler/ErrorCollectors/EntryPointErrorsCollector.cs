@@ -5,16 +5,14 @@ using Lucy.Core.SemanticAnalysis.Infrastructure.Salsa;
 namespace Lucy.Core.SemanticAnalysis.Handler.ErrorCollectors;
 
 [QueryGroup]
-public class GetEntryPointErrorsHandler
+public class EntryPointErrorsCollector
 {
     private readonly EntryPointFinder _entryPointFinder;
-    private readonly SemanticAnalysisInput _input;
     private readonly Nodes _nodes;
 
-    public GetEntryPointErrorsHandler(EntryPointFinder entryPointFinder, SemanticAnalysisInput input, Nodes nodes)
+    public EntryPointErrorsCollector(EntryPointFinder entryPointFinder, Nodes nodes)
     {
         _entryPointFinder = entryPointFinder;
-        _input = input;
         _nodes = nodes;
     }
     

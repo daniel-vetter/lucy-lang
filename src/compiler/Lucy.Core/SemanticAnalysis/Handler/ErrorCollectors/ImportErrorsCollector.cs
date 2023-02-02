@@ -4,13 +4,13 @@ using Lucy.Core.SemanticAnalysis.Infrastructure.Salsa;
 namespace Lucy.Core.SemanticAnalysis.Handler.ErrorCollectors;
 
 [QueryGroup]
-public class GetImportErrorsHandler
+public class ImportErrorsCollector
 {
     private readonly Imports _imports;
     private readonly RangeResolver _rangeResolver;
     private readonly Nodes _nodes;
 
-    public GetImportErrorsHandler(Imports imports, RangeResolver rangeResolver, Nodes nodes)
+    public ImportErrorsCollector(Imports imports, RangeResolver rangeResolver, Nodes nodes)
     {
         _imports = imports;
         _rangeResolver = rangeResolver;
