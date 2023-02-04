@@ -3,12 +3,13 @@ using Lucy.Assembler.ContainerFormats.PE;
 using Lucy.Core.Parsing.Nodes.Statements.FunctionDeclaration;
 using Lucy.Core.SemanticAnalysis;
 using System;
+using Lucy.Core.Model;
 
 namespace Lucy.Emitter.TreeToAssemblerConverting
 {
     internal class FunctionDeclarationToAssemblerConverter
     {
-        internal static void Run(FunctionDeclarationStatementSyntaxNode fd, SemanticDatabase semanticModel, WinExecutableEmitterContext ctx)
+        internal static void Run(FunctionDeclarationStatementSyntaxNode fd, SemanticAnalyzer semanticModel, WinExecutableEmitterContext ctx)
         {
             /*
             var info = semanticModel.GetFunctionInfo(fd);

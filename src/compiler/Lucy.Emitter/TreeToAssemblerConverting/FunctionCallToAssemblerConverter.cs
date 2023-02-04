@@ -4,12 +4,13 @@ using Lucy.Assembler.Operations;
 using Lucy.Core.Parsing.Nodes.Expressions.Unary;
 using Lucy.Core.SemanticAnalysis;
 using System;
+using Lucy.Core.Model;
 
 namespace Lucy.Emitter.TreeToAssemblerConverting
 {
     internal class FunctionCallToAssemblerConverter
     {
-        internal static void Run(FunctionCallExpressionSyntaxNode fc, SemanticDatabase semanticModel, WinExecutableEmitterContext ctx)
+        internal static void Run(FunctionCallExpressionSyntaxNode fc, SemanticAnalyzer semanticAnalyzer, WinExecutableEmitterContext ctx)
         {
             /*
             var functionInfo = semanticModel.GetFunctionInfo(fc);

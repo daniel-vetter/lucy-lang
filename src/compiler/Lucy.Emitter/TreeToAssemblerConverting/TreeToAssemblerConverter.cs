@@ -1,6 +1,6 @@
 ﻿using Lucy.Assembler;
 using Lucy.Assembler.ContainerFormats.PE;
-using Lucy.Core.Helper;
+using Lucy.Core.Model;
 using Lucy.Core.Parsing.Nodes.Expressions.Unary;
 using Lucy.Core.Parsing.Nodes.Statements.FunctionDeclaration;
 using Lucy.Core.Parsing;
@@ -10,15 +10,15 @@ namespace Lucy.Emitter.TreeToAssemblerConverting
 {
     public static class TreeToAssemblerConverter
     {
-        public static void Run(SyntaxTreeNode node, SemanticDatabase semanticModel, WinExecutableEmitterContext ctx)
+        public static void Run(SyntaxTreeNode node, SemanticAnalyzer semanticAnalyzer, WinExecutableEmitterContext ctx)
         {
             switch (node)
             {
                 case FunctionDeclarationStatementSyntaxNode fd:
-                    FunctionDeclarationToAssemblerConverter.Run(fd, semanticModel, ctx);
+                    FunctionDeclarationToAssemblerConverter.Run(fd, semanticAnalyzer, ctx);
                     break;
                 case FunctionCallExpressionSyntaxNode fc:
-                    FunctionCallToAssemblerConverter.Run(fc, semanticModel, ctx);
+                    FunctionCallToAssemblerConverter.Run(fc, semanticAnalyzer, ctx);
                     break;
                 case StringConstantExpressionSyntaxNode sc:
                     StringConstantToAssemblerConverter.Run(sc, ctx);
@@ -28,7 +28,7 @@ namespace Lucy.Emitter.TreeToAssemblerConverting
                     break;
                 default:
                     foreach (var child in node.GetChildNodes())
-                        Run(child, semanticModel, ctx);
+                        Run(child, semanticAnalyzer, ctx);
                     break;
             }
         }
