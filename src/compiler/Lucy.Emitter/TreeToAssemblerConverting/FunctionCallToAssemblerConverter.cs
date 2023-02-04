@@ -1,9 +1,4 @@
-﻿using Lucy.Assembler;
-using Lucy.Assembler.ContainerFormats.PE;
-using Lucy.Assembler.Operations;
-using Lucy.Core.Parsing.Nodes.Expressions.Unary;
-using Lucy.Core.SemanticAnalysis;
-using System;
+﻿using Lucy.Core.SemanticAnalysis;
 using Lucy.Core.Model;
 
 namespace Lucy.Emitter.TreeToAssemblerConverting

@@ -1,7 +1,12 @@
 {
   "profiles": {
-    "Lucy.App.LanguageServer": {
+    "Cli": {
       "commandName": "Project",
+      "commandLineArgs": "run --use-interpreter"
+    },
+    "LanguageServer": {
+      "commandName": "Project",
+      "commandLineArgs": "--language-server",
       "environmentVariables": {
         "LUCY_LANGUAGE_SERVER_RUN_VSCODE_EXTENSION": "$(ProjectDir)..\\..\\vscode-extension",
         "LUCY_LANGUAGE_SERVER_RUN_VSCODE_EXTENSION_WORKSPACE": "$(ProjectDir)SampleApp",

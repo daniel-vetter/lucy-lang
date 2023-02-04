@@ -98,15 +98,5 @@ namespace Lucy.Assembler.ContainerFormats.PE
         private record ImportLookupTableOffset(int Index);
     }
 
-    public record ImportTableEntry
-    {
-        public ImportTableEntry(string directory, string lookup)
-        {
-            Directory = directory;
-            Lookup = lookup;
-        }
-
-        public string Directory { get; }
-        public string Lookup { get; }
-    }
+    public record ImportTableEntry(string Directory, string Lookup);
 }

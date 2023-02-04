@@ -1,7 +1,6 @@
 ﻿using Lucy.Assembler;
 using Lucy.Assembler.Operations;
 using Lucy.Core.Model;
-using Lucy.Core.Parsing.Nodes.Expressions.Unary;
 
 namespace Lucy.Emitter.TreeToAssemblerConverting
 {

@@ -4,7 +4,6 @@ using System.Collections.Immutable;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -78,7 +77,7 @@ namespace Lucy.Assembler.TestCaseGenerator.Services
             var errorLines = await ReadAllLines(errorFilePath);
             for (int i = 0; i < errorLines.Length; i++)
             {
-                string? line = errorLines[i];
+                string line = errorLines[i];
 
                 if (!line.StartsWith(asmFilePath))
                     throw new Exception("Unexpected file format");
@@ -112,11 +111,7 @@ namespace Lucy.Assembler.TestCaseGenerator.Services
                 var msg = line.Length >= 40 ? line.Substring(40) : "";
 
 
-                if (string.IsNullOrWhiteSpace(data))
-                {
-                    continue;
-                }
-                else if (data == "******************")
+                if (data == "******************")
                 {
                     if (msg.StartsWith(" error: "))
                     {
@@ -128,7 +123,7 @@ namespace Lucy.Assembler.TestCaseGenerator.Services
                     }
                     else throw new Exception("Did not expect: " + msg);
                 }
-                else
+                else if (!string.IsNullOrWhiteSpace(data))
                 {
                     data = data.Replace("[", "");
                     data = data.Replace("]", "");

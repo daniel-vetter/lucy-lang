@@ -1,6 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
-
-namespace Lucy.Assembler.Parsing.Reader
+﻿namespace Lucy.Assembler.Parsing.Reader
 {
     public static class NumberReader
     {

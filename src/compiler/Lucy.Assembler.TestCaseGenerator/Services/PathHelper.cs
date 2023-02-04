@@ -6,7 +6,7 @@ namespace Lucy.Assembler.TestCaseGenerator.Services
 {
     public static class PathHelper
     {
-        public static string? FindUpwards(string path)
+        public static string FindUpwards(string path)
         {
             var dir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? throw new Exception("Could not find application path");
             while (true)

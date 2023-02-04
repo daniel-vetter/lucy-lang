@@ -1,7 +1,0 @@
-﻿extern cdecl "msvcrt.dll" "printf" fun printf(message: string, nocheiner: number): void
-extern cdecl "kernel32.dll" "ExitProcess" fun exitProcess(code: number): void
-
-fun main(): number {
-	printf("This is the %s %d", "number", 2)
-	exitProcess(0)
-}

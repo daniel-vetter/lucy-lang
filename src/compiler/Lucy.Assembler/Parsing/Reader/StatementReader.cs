@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
-using System.Text;
 
 namespace Lucy.Assembler.Parsing.Reader
 {

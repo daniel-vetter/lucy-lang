@@ -6,7 +6,7 @@ namespace Lucy.Assembler.ContainerFormats.PE
     {
         private readonly List<byte[]> _bytes = new();
         private readonly List<Annotation> _annotations = new();
-        private uint _address = 0;
+        private uint _address;
 
         public SectionData CreateData(bool is64Bit)
         {

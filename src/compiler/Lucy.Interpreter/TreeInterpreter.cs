@@ -143,7 +143,7 @@ namespace Lucy.Interpreter
         }
 
         public SemanticAnalyzer SemanticAnalyzer { get; }
-        public Dictionary<string, Value> Variables = new Dictionary<string, Value>();
+        public Dictionary<string, Value> Variables { get; } = new();
     }
 
     public abstract record Value;

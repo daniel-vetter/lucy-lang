@@ -30,7 +30,7 @@ namespace Lucy.App.Cli.Features
 
             return useInterpreter 
                 ? Interpret(workspace) 
-                : await CompileAndRun(workspace);
+                : await CompileAndRun();
         }
 
         private int Interpret(Workspace workspace)
@@ -71,19 +71,9 @@ namespace Lucy.App.Cli.Features
             return errors.Count > 0;
         }
 
-        private static Task<int> CompileAndRun(Workspace workspace)
+        private static Task<int> CompileAndRun()
         {
             throw new NotImplementedException();
-
-            /*
-            var tempFileName = "C:\\temp\\out.exe";
-            await WinExecutableEmitter.Emit(workspace, tempFileName);
-            var p = new System.Diagnostics.Process();
-            p.StartInfo.FileName = tempFileName;
-            p.Start();
-            await p.WaitForExitAsync();
-            return p.ExitCode;
-            */
         }
     }
 }

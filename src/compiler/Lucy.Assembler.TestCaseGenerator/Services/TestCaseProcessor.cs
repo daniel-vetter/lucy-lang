@@ -49,7 +49,7 @@ namespace Lucy.Assembler.TestCaseGenerator.Services
             foreach(var item in currentBatch)
                 if (item.Errors.Count > 0 || item.Binary != null)
                     await writer.WriteAsync(item);
-            var count = currentBatch.RemoveAll(x => x.Errors.Count > 0 || x.Binary != null);
+            currentBatch.RemoveAll(x => x.Errors.Count > 0 || x.Binary != null);
         }
 
         private static async Task<bool> FillBatch(ChannelReader<StatementTest> reader, List<StatementTest> currentBatch)

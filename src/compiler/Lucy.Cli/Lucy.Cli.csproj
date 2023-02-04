@@ -4,6 +4,11 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>net7.0</TargetFramework>
     <Nullable>enable</Nullable>
+    <RootNamespace>Lucy.App.Cli</RootNamespace>
+  </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <DebugType>none</DebugType>
   </PropertyGroup>
 
   <ItemGroup>
@@ -16,16 +21,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Lucy.LanguageServer\Lucy.LanguageServer.csproj" />
     <ProjectReference Include="..\Lucy.Core\Lucy.Core.csproj" />
-    <ProjectReference Include="..\Lucy.Infrastructure.RpcServer\Lucy.Infrastructure.RpcServer.csproj" />
     <ProjectReference Include="..\Lucy.Common\Lucy.Common.csproj" />
     <ProjectReference Include="..\Lucy.Interpreter\Lucy.Interpreter.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Update="SampleApp\main.lucy">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
   </ItemGroup>
 
 </Project>

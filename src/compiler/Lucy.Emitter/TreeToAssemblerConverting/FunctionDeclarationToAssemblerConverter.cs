@@ -1,8 +1,4 @@
-﻿using Lucy.Assembler;
-using Lucy.Assembler.ContainerFormats.PE;
-using Lucy.Core.Parsing.Nodes.Statements.FunctionDeclaration;
-using Lucy.Core.SemanticAnalysis;
-using System;
+﻿using Lucy.Core.SemanticAnalysis;
 using Lucy.Core.Model;
 
 namespace Lucy.Emitter.TreeToAssemblerConverting
@@ -32,8 +28,8 @@ namespace Lucy.Emitter.TreeToAssemblerConverting
         }
     }
 
-    public record EmitterFunctionId(string guid)
+    public record EmitterFunctionId(string Guid)
     {
-        public override string ToString() => $"FunctionId({guid})";
+        public override string ToString() => $"FunctionId({Guid})";
     }
 }

@@ -4,15 +4,16 @@ import * as net from "net";
 
 const _clients: Map<string, LanguageClient> = new Map();
 
-export function getLanguageClientFor(workespaceFolder: WorkspaceFolder): LanguageClient {
+export function getLanguageClientFor(workspaceFolder: WorkspaceFolder): LanguageClient {
 
-    const existing = _clients.get(workespaceFolder.uri.toString());
+    const existing = _clients.get(workspaceFolder.uri.toString());
     if (existing) {
         return existing;
     }
     
     let serverOptions: ServerOptions = {
         command: "C:\\OneDrive\\coding\\csharp\\lucy-lang\\src\\compiler\\Lucy.App.LanguageServer\\bin\\Debug\\net7.0\\Lucy.App.LanguageServer.exe",
+        args: ["--language-server"],
         transport: TransportKind.stdio
     }
 
@@ -34,14 +35,14 @@ export function getLanguageClientFor(workespaceFolder: WorkspaceFolder): Languag
             { scheme: "file", language: "lucy" }
         ],
         diagnosticCollectionName: 'lucy-language-extension',
-        workspaceFolder: workespaceFolder,
+        workspaceFolder: workspaceFolder,
         synchronize: {
             fileEvents: workspace.createFileSystemWatcher("**/*.lucy")
         }
     };
     const client = new LanguageClient("lucy-language-extension", "Lucy Language Server", serverOptions, clientOptions);
     client.start();
-    _clients.set(workespaceFolder.uri.toString(), client);
+    _clients.set(workspaceFolder.uri.toString(), client);
     return client;
 }
 

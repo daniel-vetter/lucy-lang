@@ -55,12 +55,11 @@ namespace Lucy.Assembler.ContainerFormats.PE
                 if (list.Length > 1)
                 {
                     errors.AppendLine($"    Multiple address for annotation {import.Content} where found.");
-                    continue;
                 }
             }
 
             if (errors.Length > 0)
-                throw new AssemblerException("Errors while resolving address imports:" + Environment.NewLine + errors.ToString());
+                throw new AssemblerException("Errors while resolving address imports:" + Environment.NewLine + errors);
 
             foreach (var import in imports)
             {
@@ -133,7 +132,7 @@ namespace Lucy.Assembler.ContainerFormats.PE
         {
             for (int i = 0; i < _sections.Count; i++)
             {
-                ISection? section = _sections[i];
+                ISection section = _sections[i];
                 var name = section.CreateData(Is64Bit).Name;
                 if (name.Length > 8) throw new Exception("Name is too long. Only 8 characters supported.");
                 var nameBytes = Encoding.UTF8.GetBytes(name);
@@ -257,11 +256,11 @@ namespace Lucy.Assembler.ContainerFormats.PE
             _sections.Add(section);
         }
 
-        private record ChecksumAnnotation();
-        private record SizeOfHeadersAnnotation();
-        private record SizeOfImageAnnotation();
-        private record ImportTableAddressAnnotation();
-        private record ImportTableSizeAnnotation();
+        private record ChecksumAnnotation;
+        private record SizeOfHeadersAnnotation;
+        private record SizeOfImageAnnotation;
+        private record ImportTableAddressAnnotation;
+        private record ImportTableSizeAnnotation;
         private record SectionAnnotation(int Index, SectionAnnotationType Type);
         private enum SectionAnnotationType
         {

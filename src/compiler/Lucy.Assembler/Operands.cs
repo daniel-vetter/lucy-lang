@@ -9,7 +9,9 @@ namespace Lucy.Assembler
         OperandSize Size { get; }
     };
 
-    public interface IRegisterOrMemory : IOperand { };
+    public interface IRegisterOrMemory : IOperand
+    {
+    };
 
     public enum Scale
     {
@@ -21,10 +23,10 @@ namespace Lucy.Assembler
 
     public record OperandSize(ushort Bits, string Name)
     {
-        public static readonly OperandSize S8 = new OperandSize(8, "byte");
-        public static readonly OperandSize S16 = new OperandSize(16, "word");
-        public static readonly OperandSize S32 = new OperandSize(32, "dword");
-        public static readonly OperandSize S64 = new OperandSize(64, "qword");
+        public static OperandSize S8 { get; } = new OperandSize(8, "byte");
+        public static OperandSize S16 { get; } = new OperandSize(16, "word");
+        public static OperandSize S32 { get; } = new OperandSize(32, "dword");
+        public static OperandSize S64 { get; } = new OperandSize(64, "qword");
 
         public static OperandSize FromBits(ushort bits)
         {
@@ -43,7 +45,7 @@ namespace Lucy.Assembler
 
     public record Immediate(OperandSize Size, uint Value) : IOperand
     {
-        public Immediate(OperandSize Size, int Value, object? annotation) : this(Size, (uint)Value)
+        public Immediate(OperandSize size, int value, object? annotation) : this(size, (uint) value)
         {
             Annotation = annotation;
         }
@@ -62,7 +64,7 @@ namespace Lucy.Assembler
             {
                 if (outputType)
                 {
-                    sb.Append(Size.ToString());
+                    sb.Append(Size);
                     sb.Append(" ");
                 }
 
@@ -71,17 +73,20 @@ namespace Lucy.Assembler
                     if (outputSign) sb.Append(signed ? Value >= 128 ? "-" : "+" : "+");
                     sb.Append(signed && Value >= 128 ? $"0x{256 - Value:x}" : $"0x{Value:x}");
                 }
+
                 if (Size == OperandSize.S16)
                 {
                     if (outputSign) sb.Append(signed ? Value >= 32768 ? "-" : "+" : "+");
                     sb.Append(signed && Value >= 32768 ? $"0x{65536 - Value:x}" : $"0x{Value:x}");
                 }
+
                 if (Size == OperandSize.S32)
                 {
                     if (outputSign) sb.Append(signed ? Value >= 2147483648 ? "-" : "+" : "+");
                     sb.Append(signed && Value >= 2147483648 ? $"0x{4294967296 - Value:x}" : $"0x{Value:x}");
                 }
             }
+
             return sb.ToString();
         }
 
@@ -102,7 +107,7 @@ namespace Lucy.Assembler
         {
             Size = size;
             Annotation = annotation;
-            Displacement = (int)address;
+            Displacement = (int) address;
         }
 
         public Memory(OperandSize size, Register baseRegister)
@@ -179,6 +184,7 @@ namespace Lucy.Assembler
                     sb.Append(" ");
                     sb.Append(Annotation);
                 }
+
                 sb.Append("]");
             }
             else
@@ -188,28 +194,37 @@ namespace Lucy.Assembler
                 {
                     sb.Append(Base);
                 }
+
                 if (Index != null)
                 {
                     if (Base != null)
                     {
                         sb.Append(" + ");
                     }
+
                     sb.Append(Index);
                     sb.Append(" * ");
-                    sb.Append(Scale switch { Scale.S1 => 1, Scale.S2 => 2, Scale.S4 => 4, Scale.S8 => 8, _ => throw new NotSupportedException(Scale.ToString()) });
+                    sb.Append(Scale switch
+                    {
+                        Scale.S1 => 1, Scale.S2 => 2, Scale.S4 => 4, Scale.S8 => 8, _ => throw new NotSupportedException(Scale.ToString())
+                    });
                 }
+
                 if (Displacement > 0)
                 {
                     sb.Append(" + ");
                     sb.Append(Displacement);
                 }
+
                 if (Displacement < 0)
                 {
                     sb.Append(" - ");
                     sb.Append(-Displacement);
                 }
+
                 sb.Append("]");
             }
+
             return sb.ToString();
         }
     }
@@ -223,6 +238,7 @@ namespace Lucy.Assembler
                 imm8 = casted;
                 return true;
             }
+
             imm8 = default;
             return false;
         }
@@ -234,6 +250,7 @@ namespace Lucy.Assembler
                 imm16 = casted;
                 return true;
             }
+
             imm16 = default;
             return false;
         }
@@ -245,6 +262,7 @@ namespace Lucy.Assembler
                 imm32 = casted;
                 return true;
             }
+
             imm32 = default;
             return false;
         }
@@ -256,6 +274,7 @@ namespace Lucy.Assembler
                 imm64 = casted;
                 return true;
             }
+
             imm64 = default;
             return false;
         }
@@ -267,6 +286,7 @@ namespace Lucy.Assembler
                 rm8 = casted;
                 return true;
             }
+
             rm8 = default;
             return false;
         }
@@ -278,6 +298,7 @@ namespace Lucy.Assembler
                 rm16 = casted;
                 return true;
             }
+
             rm16 = default;
             return false;
         }
@@ -289,6 +310,7 @@ namespace Lucy.Assembler
                 rm32 = casted;
                 return true;
             }
+
             rm32 = default;
             return false;
         }
@@ -300,6 +322,7 @@ namespace Lucy.Assembler
                 rm64 = casted;
                 return true;
             }
+
             rm64 = default;
             return false;
         }
@@ -311,6 +334,7 @@ namespace Lucy.Assembler
                 m8 = casted;
                 return true;
             }
+
             m8 = default;
             return false;
         }
@@ -322,6 +346,7 @@ namespace Lucy.Assembler
                 m16 = casted;
                 return true;
             }
+
             m16 = default;
             return false;
         }
@@ -333,6 +358,7 @@ namespace Lucy.Assembler
                 m32 = casted;
                 return true;
             }
+
             m32 = default;
             return false;
         }
@@ -344,6 +370,7 @@ namespace Lucy.Assembler
                 m64 = casted;
                 return true;
             }
+
             m64 = default;
             return false;
         }
@@ -355,6 +382,7 @@ namespace Lucy.Assembler
                 r8 = casted;
                 return true;
             }
+
             r8 = default;
             return false;
         }
@@ -366,6 +394,7 @@ namespace Lucy.Assembler
                 r16 = casted;
                 return true;
             }
+
             r16 = default;
             return false;
         }
@@ -377,6 +406,7 @@ namespace Lucy.Assembler
                 r32 = casted;
                 return true;
             }
+
             r32 = default;
             return false;
         }
@@ -388,6 +418,7 @@ namespace Lucy.Assembler
                 r64 = casted;
                 return true;
             }
+
             r64 = default;
             return false;
         }

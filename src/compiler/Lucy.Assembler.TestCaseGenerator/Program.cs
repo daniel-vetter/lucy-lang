@@ -5,7 +5,7 @@ namespace Lucy.Assembler.TestCaseGenerator
 {
     class Program
     {
-        static async Task Main(string[] args)
+        static async Task Main()
         {
             var operation = "push";
             var operandCount = 2;

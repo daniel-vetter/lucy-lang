@@ -1,5 +1,4 @@
 ﻿using Lucy.Assembler.Infrastructure;
-using System;
 
 namespace Lucy.Assembler.Operations
 {

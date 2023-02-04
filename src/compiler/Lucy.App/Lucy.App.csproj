@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net7.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <AssemblyName>lucy</AssemblyName>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\Lucy.LanguageServer\Lucy.LanguageServer.csproj" />
+        <ProjectReference Include="..\Lucy.Cli\Lucy.Cli.csproj" />
+    </ItemGroup>
+
+</Project>
+

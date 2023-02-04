@@ -2,7 +2,7 @@
 
 namespace Lucy.Assembler.Operations
 {
-    public record Nop() : Operation
+    public record Nop : Operation
     {
         public override void Write(AssemblyWriter w)
         {

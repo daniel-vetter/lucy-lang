@@ -32,13 +32,9 @@ namespace Lucy.Assembler
         }
     }
 
-    public record AsmLabelAnnotation(object Key)
-    {
-    }
+    public record AsmLabelAnnotation(object Key);
 
-    public record AsmLabelRequestAnnotation(object Key)
-    {
-    }
+    public record AsmLabelRequestAnnotation(object Key);
 
     public abstract record Operation(string? Comment = null) : AssemblerStatement(Comment)
     {

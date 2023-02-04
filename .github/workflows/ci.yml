@@ -23,7 +23,7 @@ jobs:
       working-directory: src/compiler
 
     - name: Build
-      run: dotnet publish --configuration Release --no-restore --framework net7.0 -o ./output
+      run: dotnet publish Lucy.App/Lucy.App.csproj --configuration Release --no-restore --framework net7.0 -o ./output
       working-directory: src/compiler
 
     - name: Archive build result

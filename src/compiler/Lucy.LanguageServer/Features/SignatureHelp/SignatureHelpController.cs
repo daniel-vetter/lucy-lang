@@ -1,5 +1,5 @@
 ﻿/*
-using Lucy.App.LanguageServer.Infrastructure;
+using Lucy.LanguageServer.Infrastructure;
 using Lucy.Common.ServiceDiscovery;
 using Lucy.Core.Parsing;
 using Lucy.Core.Parsing.Nodes.Expressions.Unary;
@@ -12,7 +12,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using Lucy.Core.Model;
 
-namespace Lucy.App.LanguageServer.Features.SignatureHelp;
+namespace Lucy.LanguageServer.Features.SignatureHelp;
 
 [Service]
 public class SignatureHelpController

@@ -55,20 +55,20 @@ namespace Lucy.Assembler.Operations
                 return true;
             }
 
-            if (Target.IsRegisterOrDereference32(out var rm32) && Source.IsImmediate32(out var imm32_1))
+            if (Target.IsRegisterOrDereference32(out var rm32) && Source.IsImmediate32(out var imm32A))
             {
                 w.WriteByte(0xC7);
                 w.Encode(rm32, 0);
-                w.WriteUInt32(imm32_1.Value);
+                w.WriteUInt32(imm32A.Value);
                 return true;
             }
 
-            if (Target.IsRegisterOrDereference64(out var rm64) && Source.IsImmediate32(out var imm32_2))
+            if (Target.IsRegisterOrDereference64(out var rm64) && Source.IsImmediate32(out var imm32B))
             {
                 w.WriteByte(0b01001000);
                 w.WriteByte(0xC7);
                 w.Encode(rm64, 0);
-                w.WriteUInt32(imm32_2.Value);
+                w.WriteUInt32(imm32B.Value);
                 return true;
             }
             return false;

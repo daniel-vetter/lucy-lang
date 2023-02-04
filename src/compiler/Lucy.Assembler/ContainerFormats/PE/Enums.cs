@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
+// ReSharper disable InconsistentNaming
 
 namespace Lucy.Assembler.ContainerFormats.PE
 {

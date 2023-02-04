@@ -88,11 +88,6 @@ namespace Lucy.Assembler.TestCaseGenerator.Services
             )";
             await cmd.ExecuteNonQueryAsync();
         }
-
-        private string GetTargetDirectory()
-        {
-            return "";
-        }
     }
 
     internal class Tracker

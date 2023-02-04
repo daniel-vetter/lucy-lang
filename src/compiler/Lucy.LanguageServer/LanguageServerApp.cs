@@ -44,7 +44,7 @@ public class LanguageServerApp
             })
             .AddLogging(x =>
             {
-                x.AddConsole(y => y.FormatterName = "Custom");
+                //x.AddConsole(y => y.FormatterName = "Custom");
                 x.AddConsoleFormatter<CustomConsoleFormatter, ConsoleFormatterOptions>();
             });
     }

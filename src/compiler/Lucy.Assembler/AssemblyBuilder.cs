@@ -116,5 +116,5 @@ namespace Lucy.Assembler
         }
     }
 
-    public record EntryPointAnnotation();
+    public record EntryPointAnnotation;
 }
