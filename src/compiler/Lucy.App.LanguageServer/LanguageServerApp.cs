@@ -30,7 +30,7 @@ public class LanguageServerApp
             .Run();
     }
 
-    private static IServiceCollection CreateServiceCollection()
+    public static IServiceCollection CreateServiceCollection()
     {
         return new ServiceCollection()
             .AddServicesFromCurrentAssembly()

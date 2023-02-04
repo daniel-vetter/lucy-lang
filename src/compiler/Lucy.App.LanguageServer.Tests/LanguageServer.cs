@@ -11,7 +11,6 @@ namespace Lucy.App.LanguageServer.Tests
         {
             _sp = LanguageServerApp
                 .CreateServiceCollection()
-                .AddSingleton<IFileSystem, InMemoryFileSystem>()
                 .BuildServiceProvider();
         }
 

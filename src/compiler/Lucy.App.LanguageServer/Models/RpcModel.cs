@@ -456,7 +456,7 @@ public class RpcInitializeParams
     /// <summary>
     /// The capabilities provided by the client (editor or tool)
     /// </summary>
-    public RpcClientCapabilities Capabilities { get; } = new();
+    public RpcClientCapabilities Capabilities { get; set; } = new();
 
     /// <summary>
     /// The initial trace setting. If omitted trace is disabled ('off').

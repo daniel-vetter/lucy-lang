@@ -1,8 +1,8 @@
 ﻿using Lucy.App.LanguageServer.Infrastructure;
-using Lucy.Feature.LanguageServer.Models;
-using Lucy.Feature.LanguageServer.RpcController;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
+using Lucy.App.LanguageServer.Features;
+using Lucy.App.LanguageServer.Models;
 
 namespace Lucy.App.LanguageServer.Tests
 {
@@ -10,8 +10,6 @@ namespace Lucy.App.LanguageServer.Tests
     {
         public static async Task<RpcInitializeResult> Initialze(this LanguageServer server)
         {
-            server.Get<IFileSystem>().CreateDirectory(server.GetWorkspacePath());
-
             var input = new RpcInitializeParams
             {
                 Capabilities = new RpcClientCapabilities
@@ -28,7 +26,7 @@ namespace Lucy.App.LanguageServer.Tests
             };
 
             var result = await server.Get<ServerLifecycleRpcController>().Initialize(input);
-            server.Get<ServerLifecycleRpcController>().Initialized();
+            await server.Get<ServerLifecycleRpcController>().Initialized();
 
             return result;
         }
