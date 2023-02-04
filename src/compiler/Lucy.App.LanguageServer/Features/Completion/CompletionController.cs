@@ -24,10 +24,12 @@ namespace Lucy.App.LanguageServer.Features.Completion
 
             var node = _currentWorkspace.Analysis.Get<RangeResolver>().GetNodeIdAtPosition(workspacePath, position);
             
-            //if (node == null)
+            if (node == null)
                 return new RpcCompletionList();
+            
+            return new RpcCompletionList();
             /*
-            var functions = _currentWorkspace.Analysis.GetReachableFunctionsInScope(node);
+            var functions = _currentWorkspace.Analysis.Get<Functions>().GetReachableFunctionsInScope(node);
             var variables = _currentWorkspace.Analysis.GetReachableVariablesInScope(node);
 
             var result = new List<RpcCompletionItem>();
