@@ -58,7 +58,7 @@ jobs:
     - name: Archive build result
       uses: actions/upload-artifact@v3
       with:
-        name: binaries-linux
+        name: binaries-windows
         path: src/compiler/output
 
   test-compiler-linux:
