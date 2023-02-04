@@ -15,4 +15,9 @@
   <ItemGroup>
     <ProjectReference Include="..\Lucy.Common\Lucy.Common.csproj" />
   </ItemGroup>
+
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <DebugType>none</DebugType>
+  </PropertyGroup>
+  
 </Project>

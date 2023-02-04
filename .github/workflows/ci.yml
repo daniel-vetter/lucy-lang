@@ -26,7 +26,7 @@ jobs:
       working-directory: src/compiler
 
     - name: Publish
-      run: dotnet publish Lucy.App/Lucy.App.csproj --configuration Release --no-restore --framework net7.0 -o ./output
+      run: dotnet publish Lucy.App/Lucy.App.csproj -c Release --no-restore -o ./output
       working-directory: src/compiler
 
     - name:  Upload artefact
@@ -58,7 +58,7 @@ jobs:
       working-directory: src/compiler
 
     - name: Publish
-      run: dotnet publish Lucy.App/Lucy.App.csproj --configuration Release --no-restore --framework net7.0 -o ./output
+      run: dotnet publish Lucy.App/Lucy.App.csproj -c Release --no-restore -o ./output
       working-directory: src/compiler
 
     - name: Upload artefact

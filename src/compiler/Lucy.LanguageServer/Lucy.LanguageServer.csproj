@@ -22,4 +22,8 @@
 		<ProjectReference Include="..\Lucy.Infrastructure.RpcServer\Lucy.Infrastructure.RpcServer.csproj" />
 	</ItemGroup>
 
+	<PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+		<DebugType>none</DebugType>
+	</PropertyGroup>
+
 </Project>

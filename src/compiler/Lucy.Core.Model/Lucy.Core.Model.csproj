@@ -16,4 +16,8 @@
 		<AdditionalFiles Include="model.xml" />
 	</ItemGroup>
 
+	<PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+		<DebugType>none</DebugType>
+	</PropertyGroup>
+	
 </Project>
