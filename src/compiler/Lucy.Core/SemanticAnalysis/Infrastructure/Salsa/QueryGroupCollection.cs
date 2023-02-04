@@ -80,7 +80,7 @@ namespace Lucy.Core.SemanticAnalysis.Infrastructure.Salsa
 
             return paths
                 .DistinctBy(x => string.Join(">", x.OrderBy(y => y.Name)))
-                .Select(x => "Cycle detected: " + string.Join(" -> ", x.Append(x.First()).Select(x => x.Name)));
+                .Select(x => "Cycle detected: " + string.Join(" -> ", x.Append(x.First()).Select(y => y.Name)));
         }
 
         private IEnumerable<string> ValidateConstructorParameters()

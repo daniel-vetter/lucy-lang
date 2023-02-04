@@ -57,7 +57,7 @@ public class AnalyzerTestBase
     {
         if (nodeId == null)
             throw new Exception("NodeId was null");
-        return Get<Nodes>().GetNodeById<T>(nodeId);
+        return Get<Nodes>().GetNodeById(nodeId);
     }
 
     protected T Find<T>(Func<T, bool> condition) where T : SyntaxTreeNode

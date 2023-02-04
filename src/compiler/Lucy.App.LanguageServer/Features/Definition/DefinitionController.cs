@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Immutable;
+﻿using System.Collections.Immutable;
 using Lucy.App.LanguageServer.Infrastructure;
 using Lucy.App.LanguageServer.Models;
 using Lucy.Common.ServiceDiscovery;

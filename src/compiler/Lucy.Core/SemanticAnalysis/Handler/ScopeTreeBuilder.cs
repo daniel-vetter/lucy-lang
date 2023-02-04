@@ -55,12 +55,12 @@ namespace Lucy.Core.SemanticAnalysis.Handler
         
         private void TraverseStatementList(StatementListSyntaxNode sl, ComparableReadOnlyList<ScopeEntry>.Builder result)
         {
-            void Traverse(SyntaxTreeNode node, ComparableReadOnlyList<ScopeEntry>.Builder result)
+            static void Traverse(ScopeTreeBuilder stb, SyntaxTreeNode node, ComparableReadOnlyList<ScopeEntry>.Builder result)
             {
                 switch (node)
                 {
                     case FunctionDeclarationStatementSyntaxNode fd:
-                        result.Add(GetScopeFromFunctionDeclaration(fd.NodeId));
+                        result.Add(stb.GetScopeFromFunctionDeclaration(fd.NodeId));
                         return;
                     case VariableDeclarationStatementSyntaxNode vd:
                         result.Add(new SymbolDeclaration(vd.VariableDefinition.VariableName.Text, vd.VariableDefinition.VariableName.NodeId, vd.NodeId));
@@ -74,7 +74,7 @@ namespace Lucy.Core.SemanticAnalysis.Handler
                 }
 
                 foreach (var child in node.GetChildNodes()) 
-                    Traverse(child, result);
+                    Traverse(stb, child, result);
             }
 
             foreach (var statement in sl.Statements)
@@ -83,7 +83,7 @@ namespace Lucy.Core.SemanticAnalysis.Handler
                     result.Add(new SymbolDeclaration(fd.FunctionName.Text, fd.FunctionName.NodeId, fd.NodeId));
             }
 
-            Traverse(sl, result);
+            Traverse(this, sl, result);
         }
     }
 

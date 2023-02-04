@@ -1,7 +1,6 @@
 ﻿using System.Collections.Immutable;
 using Lucy.Core.Model;
 using Lucy.Core.Parsing.Nodes.Stuff;
-using Lucy.Core.ProjectManagement;
 
 namespace Lucy.Core.Parsing.Nodes.Statements.FunctionDeclaration;
 

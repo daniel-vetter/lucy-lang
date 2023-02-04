@@ -1,5 +1,4 @@
 ﻿using Lucy.Core.Parsing.Nodes;
-using Lucy.Core.SemanticAnalysis.Infrastructure;
 using System.Collections.Generic;
 using Lucy.Core.SemanticAnalysis.Infrastructure.Salsa;
 

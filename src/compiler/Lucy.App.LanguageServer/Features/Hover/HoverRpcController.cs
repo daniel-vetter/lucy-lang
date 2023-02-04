@@ -3,7 +3,6 @@ using Lucy.App.LanguageServer.Models;
 using Lucy.Common.ServiceDiscovery;
 using Lucy.Core.Model;
 using Lucy.Core.SemanticAnalysis.Handler;
-using Lucy.Core.SemanticAnalysis.Infrastructure;
 using Lucy.Infrastructure.RpcServer;
 
 namespace Lucy.App.LanguageServer.Features.Hover;

@@ -1,6 +1,5 @@
 ﻿using Lucy.Core.Model;
 using Lucy.Core.Parsing.Nodes.Expressions.Unary;
-using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using Lucy.Core.Parsing.Nodes.Stuff;
 

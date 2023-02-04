@@ -7,9 +7,7 @@ using Lucy.Core.SemanticAnalysis.Infrastructure.Salsa;
 namespace Lucy.Core.SemanticAnalysis.Handler.ErrorCollectors;
 
 public abstract record Error(string Message);
-
 public record ErrorWithNodeId(INodeId<SyntaxTreeNode> NodeId, string Message) : Error(Message);
-
 public record ErrorWithRange(string DocumentPath, Range1D Range, string Message) : Error(Message);
 
 [QueryGroup]
@@ -65,7 +63,6 @@ public class AllErrorsCollector
                 _ => throw new NotSupportedException()
             });
         }
-
         return result.Build();
     }
 }

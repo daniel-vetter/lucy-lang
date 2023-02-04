@@ -1,24 +1,9 @@
-﻿using Lucy.Common.ServiceDiscovery;
-using System;
-using System.IO;
+﻿using System;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Lucy.App.LanguageServer.Infrastructure;
-
-// TODO: Should this class be removed?
-
-public interface IFileSystem
-{
-    Task<byte[]> ReadAllBytes(SystemPath path);
-    Task WriteAllBytes(SystemPath path, byte[] data);
-    void CreateDirectory(SystemPath path);
-    Task<SystemPath[]> GetFilesInDirectory(SystemPath path);
-    Task<string> ReadAllText(SystemPath file);
-    Task WriteAllText(SystemPath file, string content);
-}
 
 public sealed class SystemPath : IEquatable<SystemPath?>
 {
@@ -48,7 +33,7 @@ public sealed class SystemPath : IEquatable<SystemPath?>
         {
             var parts = path.Substring(7).Split('/', '\\');
             _host = parts[0] == "" ? null : parts[0];
-            _elements = parts.Skip(1).Select(x => Uri.UnescapeDataString(x)).ToArray();
+            _elements = parts.Skip(1).Select(Uri.UnescapeDataString).ToArray();
         }
         else
         {
@@ -130,40 +115,5 @@ public sealed class SystemPath : IEquatable<SystemPath?>
     public static bool operator !=(SystemPath? left, SystemPath? right)
     {
         return !(left == right);
-    }
-}
-
-[Service(Lifetime.Singleton)]
-public class FileSystem : IFileSystem
-{
-    public async Task<byte[]> ReadAllBytes(SystemPath path)
-    {
-        return await File.ReadAllBytesAsync(path.ToString());
-    }
-
-    public async Task WriteAllBytes(SystemPath path, byte[] data)
-    {
-        await File.WriteAllBytesAsync(path.ToString(), data);
-    }
-
-    public Task<SystemPath[]> GetFilesInDirectory(SystemPath path)
-    {
-        return Task.FromResult(Directory.GetFiles(path.ToString(), "*.*", SearchOption.AllDirectories).Select(x => new SystemPath(x)).ToArray());
-    }
-
-    public async Task<string> ReadAllText(SystemPath file)
-    {
-        return await File.ReadAllTextAsync(file.ToString());
-    }
-
-    public async Task WriteAllText(SystemPath file, string content)
-    {
-        await File.WriteAllTextAsync(file.ToString(), content);
-    }
-
-    public void CreateDirectory(SystemPath path)
-    {
-        if (!Directory.Exists(path.ToString()))
-            Directory.CreateDirectory(path.ToString());
     }
 }
