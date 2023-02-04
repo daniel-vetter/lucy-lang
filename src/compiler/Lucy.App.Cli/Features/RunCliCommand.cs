@@ -41,12 +41,12 @@ namespace Lucy.App.Cli.Features
             if (workspace.Documents.Count() == 0)
                 throw new Exception("Could not find a code file in the workspace.");
 
-            using var semanticDatabase = new SemanticDatabase(workspace);
+            using var semanticAnalyzer = new SemanticAnalyzer(workspace);
 
-            if (CheckForErrors(workspace, semanticDatabase))
+            if (CheckForErrors(workspace, semanticAnalyzer))
                 return -1;
 
-            var result = CodeInterpreter.Run(semanticDatabase);
+            var result = CodeInterpreter.Run(semanticAnalyzer);
 
             return result switch
             {
@@ -56,14 +56,14 @@ namespace Lucy.App.Cli.Features
             };
         }
 
-        private static bool CheckForErrors(Workspace workspace, SemanticDatabase semanticDatabase)
+        private static bool CheckForErrors(Workspace workspace, SemanticAnalyzer semanticAnalyzer)
         {
-            var errors = semanticDatabase.GetAllErrors();
+            var errors = semanticAnalyzer.Get<AllErrorsCollector>().GetAllErrors();
 
             foreach (var error in errors)
             {
                 var file = workspace.GetFile(error.DocumentPath);
-                var range = file.ConvertTo2D(error.Range);
+                var range = file.LineBreakMap.To2D(error.Range);
 
                 Console.WriteLine($"{error.DocumentPath} {range.Start}: {error.Message}");
             }
