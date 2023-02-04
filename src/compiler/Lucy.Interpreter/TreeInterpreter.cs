@@ -6,15 +6,15 @@ namespace Lucy.Interpreter
 {
     public static class CodeInterpreter
     {
-        public static Value Run(SemanticDatabase semanticDatabase)
+        public static Value Run(SemanticAnalyzer semanticAnalyzer)
         {
-            var entryPoint = semanticDatabase.GetEntryPoints();
+            var entryPoint = semanticAnalyzer.Get<EntryPointFinder>().GetEntryPoints();
             if (entryPoint.Count != 1)
                 throw new Exception("No entry point found.");
 
-            var entryPointNode = semanticDatabase.GetNodeById(entryPoint[0].Declaration);
+            var entryPointNode = semanticAnalyzer.Get<Nodes>().GetNodeById(entryPoint[0].NodeId);
 
-            return Run(entryPointNode, new InterpreterContext(semanticDatabase));
+            return Run(entryPointNode, new InterpreterContext(semanticAnalyzer));
         }
 
         private static Value Run(SyntaxTreeNode node, InterpreterContext ctx)
@@ -43,8 +43,12 @@ namespace Lucy.Interpreter
 
         private static Value Handle(FunctionCallExpressionSyntaxNode functionCallExpressionSyntaxNode, InterpreterContext ctx)
         {
-            var info = ctx.SemanticDatabase.GetFunctionInfo(functionCallExpressionSyntaxNode);
-            if (info.Extern == null)
+            var target = ctx.SemanticAnalyzer.Get<Functions>().GetBestFunctionCallTarget(functionCallExpressionSyntaxNode.NodeId);
+            if (target is not INodeId<FunctionDeclarationStatementSyntaxNode> funcDecId)
+                throw new Exception("Invalid function call target");
+
+            var funDec = ctx.SemanticAnalyzer.Get<Nodes>().GetNodeById(funcDecId);
+            if (funDec.ExternFunctionName == null || funDec.ExternLibraryName == null)
                 throw new NotImplementedException("Only external functions are currently supported.");
 
             var arguments = new List<object>();
@@ -56,7 +60,7 @@ namespace Lucy.Interpreter
                 else throw new Exception("Could not unwrap value of type " + value.GetType().Name);
             }
 
-            NativeLib.Call(info.Extern.LibraryName, info.Extern.FunctionName, null, arguments.ToArray());
+            NativeLib.Call(funDec.ExternLibraryName.Str.Text, funDec.ExternFunctionName.Str.Text, null, arguments.ToArray());
 
             return new VoidValue();
         }
@@ -133,12 +137,12 @@ namespace Lucy.Interpreter
 
     public class InterpreterContext
     {
-        public InterpreterContext(SemanticDatabase semanticDatabase)
+        public InterpreterContext(SemanticAnalyzer semanticAnalyzer)
         {
-            SemanticDatabase = semanticDatabase;
+            SemanticAnalyzer = semanticAnalyzer;
         }
 
-        public SemanticDatabase SemanticDatabase { get; }
+        public SemanticAnalyzer SemanticAnalyzer { get; }
         public Dictionary<string, Value> Variables = new Dictionary<string, Value>();
     }
 
