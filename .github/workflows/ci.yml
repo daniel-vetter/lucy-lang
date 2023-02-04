@@ -5,9 +5,8 @@ on: [push]
 jobs:
   build-compiler-linux:
 
-    name: Build linux binaries
+    name: Build and test linux binaries
     runs-on: ubuntu-latest
-    needs: [test-compiler-linux, test-compiler-windows]
 
     steps:
     - name: Checkout repository
@@ -22,11 +21,15 @@ jobs:
       run: dotnet restore
       working-directory: src/compiler
 
-    - name: Build
+    - name: Test
+      run: dotnet test --no-restore
+      working-directory: src/compiler
+
+    - name: Publish
       run: dotnet publish Lucy.App/Lucy.App.csproj --configuration Release --no-restore --framework net7.0 -o ./output
       working-directory: src/compiler
 
-    - name: Archive build result
+    - name:  Upload artefact
       uses: actions/upload-artifact@v3
       with:
         name: binaries-linux
@@ -34,9 +37,8 @@ jobs:
 
   build-compiler-windows:
 
-    name: Build windows binaries
+    name: Build and test windows binaries
     runs-on: windows-latest
-    needs: [test-compiler-linux, test-compiler-windows]
 
     steps:
     - name: Checkout repository
@@ -51,58 +53,19 @@ jobs:
       run: dotnet restore
       working-directory: src/compiler
 
-    - name: Build
+    - name: Test
+      run: dotnet test --no-restore
+      working-directory: src/compiler
+
+    - name: Publish
       run: dotnet publish Lucy.App/Lucy.App.csproj --configuration Release --no-restore --framework net7.0 -o ./output
       working-directory: src/compiler
 
-    - name: Archive build result
+    - name: Upload artefact
       uses: actions/upload-artifact@v3
       with:
         name: binaries-windows
         path: src/compiler/output
-
-  test-compiler-linux:
-
-    name: Test compiler on linux
-    runs-on: ubuntu-latest
-
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
-
-    - name: Setup .NET Core SDK
-      uses: actions/setup-dotnet@v3
-      with:
-        dotnet-version: '7.0'
-
-    - name: Install dependencies
-      run: dotnet restore
-      working-directory: src/compiler
-
-    - name: Test
-      run: dotnet test --no-restore
-      working-directory: src/compiler
-
-  test-compiler-windows:
-    name: Test compiler on windows
-    runs-on: windows-latest
-
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
-
-    - name: Setup .NET Core SDK
-      uses: actions/setup-dotnet@v3
-      with:
-        dotnet-version: '7.0'
-
-    - name: Install dependencies
-      run: dotnet restore
-      working-directory: src/compiler
-
-    - name: Test
-      run: dotnet test --no-restore
-      working-directory: src/compiler
 
   build-vscode-extension:
 
