@@ -11,12 +11,12 @@ jobs:
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
 
     - name: Setup .NET Core SDK
-      uses: actions/setup-dotnet@v1.7.2
+      uses: actions/setup-dotnet@v3
       with:
-        dotnet-version: '5.0'
+        dotnet-version: '7.0'
 
     - name: Install dependencies
       run: dotnet restore
@@ -27,7 +27,7 @@ jobs:
       working-directory: src/compiler
 
     - name: Archive build result
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: compiler
         path: src/compiler/output
@@ -39,12 +39,12 @@ jobs:
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
 
     - name: Setup .NET Core SDK
-      uses: actions/setup-dotnet@v1.7.2
+      uses: actions/setup-dotnet@v3
       with:
-        dotnet-version: '5.0'
+        dotnet-version: '7.0'
 
     - name: Install dependencies
       run: dotnet restore
@@ -60,12 +60,12 @@ jobs:
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
 
     - name: Setup .NET Core SDK
-      uses: actions/setup-dotnet@v1.7.2
+      uses: actions/setup-dotnet@v3
       with:
-        dotnet-version: '5.0'
+        dotnet-version: '7.0'
 
     - name: Install dependencies
       run: dotnet restore
@@ -82,12 +82,12 @@ jobs:
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
 
     - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v1
+      uses: actions/setup-node@v3
       with:
-        node-version: '15.0'
+        node-version: '18.14.0'
 
     - name: Install dependencies
       run: npm ci
