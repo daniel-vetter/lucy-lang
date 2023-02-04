@@ -1,6 +1,9 @@
 {
   "profiles": {
     "Cli": {
+      "commandName": "Project"
+    },
+    "Run SampleApp": {
       "commandName": "Project",
       "commandLineArgs": "run --use-interpreter"
     },

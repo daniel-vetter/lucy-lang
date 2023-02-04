@@ -18,10 +18,13 @@ namespace Lucy.App.Cli.Features
     {
         public void Register(CommandLineBuilder builder)
         {
+            var useInterpreter = new Option<bool>("--use-interpreter",
+                "The application will be executed by the interpreter instead of being build into a binary.");
+            
             var cmd = new Command("run", "Runs a lucy script");
-            cmd.AddOption(new("--use-interpreter", "The application will be executed by the interpreter instead of being build into a binary."));
-            cmd.Handler = CommandHandler.Create((bool useInterpreter) => Run(useInterpreter));
-            builder.AddCommand(cmd);
+            cmd.Add(useInterpreter);
+            cmd.SetHandler(Run, useInterpreter);
+            builder.Command.AddCommand(cmd);
         }
 
         private async Task<int> Run(bool useInterpreter)

@@ -8,7 +8,12 @@
         <AssemblyName>lucy</AssemblyName>
     </PropertyGroup>
 
+    <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+        <DebugType>none</DebugType>
+    </PropertyGroup>
+
     <ItemGroup>
+        <ProjectReference Include="..\Lucy.LanguageServer\Lucy.LanguageServer.csproj" />
         <ProjectReference Include="..\Lucy.LanguageServer\Lucy.LanguageServer.csproj" />
         <ProjectReference Include="..\Lucy.Cli\Lucy.Cli.csproj" />
     </ItemGroup>

@@ -22,7 +22,6 @@ public static class CliApp
             .UseHelp()
             .UseEnvironmentVariableDirective()
             .UseParseDirective()
-            .UseDebugDirective()
             .UseSuggestDirective()
             .RegisterWithDotnetSuggest()
             .UseTypoCorrections()
