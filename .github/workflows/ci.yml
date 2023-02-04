@@ -3,9 +3,9 @@ name: CI
 on: [push]
 
 jobs:
-  build-compiler:
+  build-compiler-linux:
 
-    name: Build compiler release
+    name: Build linux binaries
     runs-on: ubuntu-latest
     needs: [test-compiler-linux, test-compiler-windows]
 
@@ -29,7 +29,36 @@ jobs:
     - name: Archive build result
       uses: actions/upload-artifact@v3
       with:
-        name: compiler
+        name: binaries-linux
+        path: src/compiler/output
+
+  build-compiler-windows:
+
+    name: Build windows binaries
+    runs-on: windows-latest
+    needs: [test-compiler-linux, test-compiler-windows]
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Setup .NET Core SDK
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: '7.0'
+
+    - name: Install dependencies
+      run: dotnet restore
+      working-directory: src/compiler
+
+    - name: Build
+      run: dotnet publish Lucy.App/Lucy.App.csproj --configuration Release --no-restore --framework net7.0 -o ./output
+      working-directory: src/compiler
+
+    - name: Archive build result
+      uses: actions/upload-artifact@v3
+      with:
+        name: binaries-linux
         path: src/compiler/output
 
   test-compiler-linux:
